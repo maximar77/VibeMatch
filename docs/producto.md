@@ -13,14 +13,18 @@ interacción inicial mediante tecnología de proximidad.
 
 | Método | Descripción |
 | --- | --- |
-| Tarjeta NFC | El estudiante acerca su tarjeta al teléfono de otro compañero o a un punto fijo. |
-| QR / ID único | Código impreso en la tarjeta y el empaque para equipos sin NFC activo. |
-| Web App | Acceso directo mediante URL impresa en el pack. |
+| Tarjeta NFC | Se acerca a un Punto Vibe o a un lector del equipo institucional. No se usa el teléfono personal de otro compañero. |
+| QR / ID único | Código impreso en la tarjeta y el empaque; se escanea desde un equipo del colegio. |
+| Web App | URL única `/a/<token>`; no requiere instalar una app ni usar el celular personal. |
 
-Flujo UX: **aproximación → autenticación segura → despliegue de perfil → interacción por zonas**.
+Flujo UX: **aproximación en un punto institucional → canje de token → bienvenida →
+perfil y zonas de interés**.
 
-La autenticación valida el ID único de la tarjeta mediante tokens cifrados y comprueba que
-ambos usuarios pertenezcan a la comunidad escolar registrada.
+La autenticación valida el token único de la tarjeta contra un registro de hashes SHA-256.
+Si es válido, se cambia por una cookie de sesión firmada con HMAC (8 horas) y se muestra la
+bienvenida. El token no contiene nombre, curso ni RUT. El acceso está diseñado para no
+depender de dispositivos personales durante la jornada escolar (Ley 21.801); ver
+[`arquitectura/acceso-y-dispositivos.md`](arquitectura/acceso-y-dispositivos.md).
 
 ## 3. Perfil de usuario
 
@@ -84,9 +88,14 @@ ambos usuarios pertenezcan a la comunidad escolar registrada.
 
 ## 9. Decisiones abiertas
 
-1. Stack de la plataforma (web app, PWA o app nativa).
-2. Alcance del MVP: ¿solo perfiles y QR, o también chat y moderación?
-3. Modelo de datos y autenticación (cuentas escolares, tokens de tarjeta).
+1. Stack: **decidido** Next.js + React + TypeScript para la web; APK (Capacitor) y EXE
+   (Tauri) quedan planificadas en [`plan-apps.md`](plan-apps.md).
+2. Alcance del MVP: acceso por tarjeta, bienvenida y dashboard base ya implementados;
+   chat, matching y moderación siguen abiertos.
+3. Modelo de datos y autenticación: registro JSON con hashes y cookie HMAC en el MVP;
+   falta migrar a base de datos y panel de administración.
 4. Infraestructura y privacidad de menores (Ley 21.719 de protección de datos en Chile).
-5. Lectura NFC en navegador (Web NFC solo en Android/Chrome) frente a app nativa.
+5. Lectura NFC: se priorizan lectores institucionales (USB/tablet); Web NFC en navegador
+   queda como opción secundaria.
 6. Identidad gráfica definitiva: colores, tipografías y archivos vectoriales.
+7. Definición del piloto: cursos, cantidad de tarjetas, puntos de acceso y responsables.

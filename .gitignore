@@ -27,6 +27,11 @@ coverage/
 *.pem
 *.key
 
+# Enlaces y tokens de tarjetas (los hashes viven en data/cards.json)
+data/tarjetas-demo.csv
+data/tarjetas/
+data/*.local.json
+
 # Sistema operativo
 Thumbs.db
 desktop.ini

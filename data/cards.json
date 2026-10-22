@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "school": "Colegio Superior del Maipo",
+  "updatedAt": "2026-10-22T22:05:24.952Z",
+  "cards": [
+    {
+      "id": "VM-0001",
+      "tokenHash": "3c465b6ee057d3d9ca54c1e22cdbb2a01e5f3430f3c018d9f442863410459ecf",
+      "holder": "Maximo",
+      "level": "1° Medio",
+      "status": "active",
+      "createdAt": "2026-10-22T22:05:24.950Z"
+    },
+    {
+      "id": "VM-0002",
+      "tokenHash": "bb3ca8a223726336806f3ad59597dd9acbf5dec3ccc542fdad8e09fd23829816",
+      "holder": "Martina",
+      "level": "2° Medio",
+      "status": "active",
+      "createdAt": "2026-10-22T22:05:24.951Z"
+    },
+    {
+      "id": "VM-0003",
+      "tokenHash": "3a323fd82be884d2c0511324eb4d18686f4ff096dd25f00e4ea130f0465e4c89",
+      "holder": "Benjamín",
+      "level": "1° Medio",
+      "status": "active",
+      "createdAt": "2026-10-22T22:05:24.952Z"
+    }
+  ]
+}

@@ -57,3 +57,12 @@ Trabajo de diseño industrial.
 ## Resumen funcional
 
 Ver [`producto.md`](producto.md) para la especificación funcional que guiará la plataforma.
+
+## Documentación técnica
+
+- [`arquitectura/acceso-y-dispositivos.md`](arquitectura/acceso-y-dispositivos.md): Ley
+  21.801, canales de acceso, flujo de token, sesión y operación escolar.
+- [`plan-apps.md`](plan-apps.md): plan de la APK (Capacitor) y del ejecutable de Windows
+  (Tauri), API necesaria y fases.
+- [`marca/analisis-visual.md`](marca/analisis-visual.md): paleta y recortes de marca
+  derivados de las referencias originales.

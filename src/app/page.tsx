@@ -1,24 +1,6 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
-
-function Logo() {
-  return (
-    <a href="#inicio" className="flex items-center gap-2.5">
-      {/* Isotipo real recortado de la hoja de identidad (fondo transparente). */}
-      <Image
-        src="/marca/isotipo.png"
-        alt=""
-        width={615}
-        height={375}
-        className="block h-9 w-auto"
-        priority
-      />
-      <span className="text-lg font-bold tracking-[0.18em]">
-        VIBE<span className="text-brand-strong">•</span>MATCH
-      </span>
-    </a>
-  );
-}
+import { BrandLogo } from "@/components/brand-logo";
 
 const iconClass = "h-6 w-6";
 
@@ -72,7 +54,7 @@ const zones: { name: string; text: string; tone: string; icon: ReactNode }[] = [
 ];
 
 const steps = [
-  { n: "01", title: "Acerca tu tarjeta", text: "NFC al teléfono de un compañero o escanea el QR del pack. Sin apps que instalar." },
+  { n: "01", title: "Acerca tu tarjeta", text: "En un Punto Vibe o en el lector del laboratorio. Sin instalar apps ni usar tu celular." },
   { n: "02", title: "Muestra tu vibe", text: "Tu perfil aparece al instante: nombre preferido, pronombres y estado de ánimo." },
   { n: "03", title: "Encuentra tu zona", text: "Coincide en intereses reales y únete a la canchita de chat de tu comunidad." },
 ];
@@ -90,9 +72,10 @@ export default function Home() {
     <div className="flex flex-1 flex-col overflow-hidden">
       <header className="sticky top-0 z-50 border-b border-white/5 bg-ink/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5">
-          <Logo />
-          <nav className="hidden items-center gap-7 text-sm text-zinc-400 md:flex">
+          <BrandLogo href="#inicio" />
+          <nav className="hidden items-center gap-6 text-sm text-zinc-400 lg:flex">
             <a className="transition hover:text-white" href="#como-funciona">Cómo funciona</a>
+            <a className="transition hover:text-white" href="#sin-celular">Sin celular</a>
             <a className="transition hover:text-white" href="#identidad">Identidad</a>
             <a className="transition hover:text-white" href="#zonas">Zonas</a>
             <a className="transition hover:text-white" href="#pack">El pack</a>
@@ -213,7 +196,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="mt-5 text-center text-xs text-zinc-500">
-                Acerca tu tarjeta NFC o escanea el QR de respaldo.
+                Acércala a un Punto Vibe o escanea el QR de respaldo. Sin celular.
               </p>
             </div>
           </div>
@@ -236,6 +219,71 @@ export default function Home() {
                   <h3 className="mt-5 text-xl font-semibold">{step.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-zinc-400">{step.text}</p>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Sin celular / Ley 21.801 */}
+        <section id="sin-celular" className="relative overflow-hidden border-b border-white/5 bg-surface">
+          <div
+            className="pointer-events-none absolute -left-24 top-10 h-80 w-80 rounded-full bg-brand/15 blur-[100px]"
+            aria-hidden="true"
+          />
+          <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
+                Ley 21.801 · sin celulares en la jornada
+              </p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+                La comunidad no depende de un celular.
+              </h2>
+              <p className="mt-5 max-w-xl text-zinc-400">
+                La ley prohíbe el uso de dispositivos personales durante la jornada
+                escolar. VibeMatch se diseñó al revés: la llave es una tarjeta única y los
+                puntos de acceso son del establecimiento.
+              </p>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-500">
+                La excepción de uso pedagógico y los espacios autorizados en enseñanza
+                media dependen del reglamento interno de cada colegio. Nada de esto exige
+                que un estudiante use su teléfono.
+              </p>
+              <a
+                href="#pack"
+                className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/35 hover:bg-white/5"
+              >
+                Ver el pack
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <div className="grid gap-4">
+              {[
+                [
+                  "Puntos Vibe",
+                  "Tablets o minipCs en biblioteca, patio cubierto o inspectoría. Modo kiosco, lector NFC y sesión que expira sola.",
+                ],
+                [
+                  "Laboratorio y PCs",
+                  "Acceso desde los computadores del colegio con lector NFC USB. El mismo flujo funcionará en la app de escritorio.",
+                ],
+                [
+                  "Tarjeta única + QR",
+                  "Cada tarjeta tiene un token irrepetible. El QR impreso abre la misma bienvenida en equipos sin lector NFC.",
+                ],
+              ].map(([title, text], index) => (
+                <article
+                  key={title}
+                  className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-strong/15 font-mono text-xs text-brand-strong">
+                    0{index + 1}
+                  </span>
+                  <div>
+                    <h3 className="font-medium text-white">{title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-zinc-400">{text}</p>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
@@ -423,7 +471,7 @@ export default function Home() {
             <div className="grid gap-4 sm:grid-cols-2">
               {[
                 ["Tarjeta NFC", "Chip NTAG213 reprogramado y personalizado con el isologotipo."],
-                ["QR de respaldo", "Acceso directo para teléfonos sin lectura NFC."],
+                ["QR de respaldo", "Acceso impreso para equipos sin NFC; abre la bienvenida de tu tarjeta única."],
                 ["Stickers Vibe Check", "Personaliza tu estado: estudio, conversar o buscar equipo."],
                 ["Packaging circular", "Kraft reciclado, cierre mecánico y rotulado normativo."],
               ].map(([title, text]) => (
