@@ -70,8 +70,10 @@ ambos usuarios pertenezcan a la comunidad escolar registrada.
 - **Isologotipo:** escudo circular con el texto integrado; uso en tarjetas, sellos y avatar.
 - **Estética digital:** interfaces modernas tipo glassmorphism, gradientes y acentos
   tecnológicos.
-- **Paleta y tipografías oficiales:** **abierto** — falta el detalle de códigos de color y
-  familias tipográficas.
+- **Paleta:** derivada de las referencias visuales (`#6D7ED3` como tinta principal,
+  documentada en `docs/marca/analisis-visual.md`). Pendiente confirmar contra un manual
+  cerrado.
+- **Tipografías oficiales:** **abierto** — falta la familia tipográfica de marca.
 
 ## 8. Validación (piloto)
 

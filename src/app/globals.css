@@ -3,17 +3,18 @@
 :root {
   --ink: #07070d;
   --surface: #10101c;
-  --brand: #7c5cff;
-  --aqua: #22d3ee;
-  --lime: #c6ff4f;
+  /* Paleta de marca derivada de las referencias visuales (docs/marca/analisis-visual.md) */
+  --brand: #6D7ED3;      /* tinta azul, cuerpo del trazo del logotipo */
+  --brand-soft: #9FB3E8; /* tono secundario suave (etiquetas / glows) */
+  --brand-strong: #8FA7F8; /* tono de acento (CTAs / selección) */
 }
 
 @theme inline {
   --color-ink: var(--ink);
   --color-surface: var(--surface);
   --color-brand: var(--brand);
-  --color-aqua: var(--aqua);
-  --color-lime: var(--lime);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-strong: var(--brand-strong);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -30,7 +31,7 @@ body {
 }
 
 ::selection {
-  background: var(--lime);
+  background: var(--brand-strong);
   color: var(--ink);
 }
 
@@ -49,7 +50,7 @@ body {
 }
 
 .text-gradient {
-  background: linear-gradient(100deg, #ffffff 20%, var(--aqua) 50%, var(--brand) 80%);
+  background: linear-gradient(100deg, #ffffff 20%, var(--brand-soft) 50%, var(--brand) 80%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

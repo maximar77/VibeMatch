@@ -1,41 +1,20 @@
 import type { ReactNode } from "react";
-
-function Isotipo({ className = "h-9 w-9" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
-      <defs>
-        <linearGradient id="iso" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#22d3ee" />
-          <stop offset="60%" stopColor="#7c5cff" />
-          <stop offset="100%" stopColor="#c6ff4f" />
-        </linearGradient>
-      </defs>
-      <rect width="48" height="48" rx="14" fill="url(#iso)" />
-      <g stroke="#07070d" strokeOpacity=".35" strokeWidth="1.5">
-        {[8, 16, 24, 32, 40].map((x) => (
-          <line key={x} x1={x} y1="0" x2={x - 20} y2="48" />
-        ))}
-      </g>
-      <path
-        d="M14 22c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4v3c0 2.2-1.8 4-4 4h-5l-4 3v-3h-1c-1.1 0-2-.9-2-2v-5Z"
-        fill="#07070d"
-        fillOpacity=".85"
-      />
-      <text x="18" y="25.5" fontSize="5" fontWeight="700" fill="#c6ff4f" fontFamily="monospace">
-        HOLA
-      </text>
-      <path d="M30 18c1.5-2 3.5-3 6-3" stroke="#07070d" strokeWidth="2" strokeLinecap="round" />
-      <path d="M31 13c2.5-3 5.5-4.5 9-4.5" stroke="#07070d" strokeOpacity=".55" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
+import Image from "next/image";
 
 function Logo() {
   return (
-    <a href="#inicio" className="flex items-center gap-3">
-      <Isotipo />
+    <a href="#inicio" className="flex items-center gap-2.5">
+      {/* Isotipo real recortado de la hoja de identidad (fondo transparente). */}
+      <Image
+        src="/marca/isotipo.png"
+        alt=""
+        width={615}
+        height={375}
+        className="block h-9 w-auto"
+        priority
+      />
       <span className="text-lg font-bold tracking-[0.18em]">
-        VIBE<span className="text-lime">•</span>MATCH
+        VIBE<span className="text-brand-strong">•</span>MATCH
       </span>
     </a>
   );
@@ -114,13 +93,14 @@ export default function Home() {
           <Logo />
           <nav className="hidden items-center gap-7 text-sm text-zinc-400 md:flex">
             <a className="transition hover:text-white" href="#como-funciona">Cómo funciona</a>
+            <a className="transition hover:text-white" href="#identidad">Identidad</a>
             <a className="transition hover:text-white" href="#zonas">Zonas</a>
             <a className="transition hover:text-white" href="#pack">El pack</a>
             <a className="transition hover:text-white" href="#seguridad">Seguridad</a>
           </nav>
           <a
             href="#pack"
-            className="rounded-full bg-lime px-4 py-2 text-sm font-semibold text-ink transition hover:bg-lime/85"
+            className="rounded-full bg-brand-strong px-4 py-2 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
           >
             Quiero mi pack
           </a>
@@ -138,7 +118,7 @@ export default function Home() {
           <div className="relative mx-auto grid w-full max-w-6xl gap-14 px-5 pb-24 pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:pt-28">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-lime" />
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-strong" />
                 Proyecto escolar · Colegio Superior del Maipo
               </span>
               <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
@@ -180,7 +160,7 @@ export default function Home() {
             {/* Tarjeta / perfil */}
             <div className="relative mx-auto w-full max-w-sm">
               <div
-                className="absolute inset-0 -z-10 rounded-[2.5rem] bg-gradient-to-br from-brand/40 via-aqua/20 to-lime/20 blur-2xl"
+                className="absolute inset-0 -z-10 rounded-[2.5rem] bg-gradient-to-br from-brand/40 via-brand-soft/20 to-brand-strong/20 blur-2xl"
                 aria-hidden="true"
               />
               <div className="animate-float relative rounded-[2rem] p-[1px]">
@@ -189,15 +169,15 @@ export default function Home() {
                     <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-400">
                       Vibe Card
                     </span>
-                    <div className="flex items-center gap-1 text-lime">
-                      <span className="h-4 w-4 rounded-full border border-lime/60" />
-                      <span className="h-4 w-4 rounded-full border border-lime/40" />
-                      <span className="h-4 w-4 rounded-full border border-lime/20" />
+                    <div className="flex items-center gap-1 text-brand-strong">
+                      <span className="h-4 w-4 rounded-full border border-brand-strong/60" />
+                      <span className="h-4 w-4 rounded-full border border-brand-strong/40" />
+                      <span className="h-4 w-4 rounded-full border border-brand-strong/20" />
                     </div>
                   </div>
 
                   <div className="mt-8 flex items-center gap-4">
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-aqua font-bold text-white">
+                    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-soft font-bold text-white">
                       MO
                       <span className="absolute inset-0 rounded-2xl border border-white/40 animate-ring" />
                     </div>
@@ -207,9 +187,9 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="mt-6 rounded-2xl border border-lime/20 bg-lime/10 p-3">
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-lime/80">Vibe check</p>
-                    <p className="mt-1 text-sm font-medium text-lime">Buscando equipo de estudio</p>
+                  <div className="mt-6 rounded-2xl border border-brand-soft/20 bg-brand-soft/10 p-3">
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-brand-soft/80">Vibe check</p>
+                    <p className="mt-1 text-sm font-medium text-brand-strong">Buscando equipo de estudio</p>
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-2">
@@ -242,7 +222,7 @@ export default function Home() {
         {/* Cómo funciona */}
         <section id="como-funciona" className="border-y border-white/5 bg-white/[0.02]">
           <div className="mx-auto w-full max-w-6xl px-5 py-20">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-aqua">Cómo funciona</p>
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">Cómo funciona</p>
             <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
               Tres pasos entre el patio y tu comunidad.
             </h2>
@@ -261,11 +241,102 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Identidad */}
+        <section id="identidad" className="border-y border-white/5 bg-white/[0.02]">
+          <div className="mx-auto w-full max-w-6xl px-5 py-20">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
+                  Identidad visual
+                </p>
+                <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+                  La marca, en sus cuatro formas.
+                </h2>
+                <p className="mt-5 max-w-xl text-zinc-400">
+                  VibeMatch se aplica como logotipo, isotipo, imagotipo e isologotipo. Cada variante tiene un uso
+                  distinto según el manual de identidad corporativa.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  name: "Logotipo",
+                  img: "/marca/logotipo.png",
+                  alt: "Logotipo VIBE•MATCH en trazo geométrico",
+                  w: 624,
+                  h: 174,
+                  text: "VIBE•MATCH",
+                  use: "Cabecera, firma de marca y piezas principales.",
+                },
+                {
+                  name: "Isotipo",
+                  img: "/marca/isotipo.png",
+                  alt: "Isotipo VibeMatch: símbolo con ondas NFC y globos de chat",
+                  w: 615,
+                  h: 375,
+                  text: "Símbolo de líneas dinámicas.",
+                  use: "Avatar, favicon, interfaz y sellos pequeños.",
+                },
+                {
+                  name: "Imagotipo",
+                  img: "/marca/imagotipo.png",
+                  alt: "Imagotipo VibeMatch: isotipo junto al logotipo",
+                  w: 675,
+                  h: 303,
+                  text: "Isotipo + logotipo lado a lado.",
+                  use: "Comunicación impresa y merchandising.",
+                },
+                {
+                  name: "Isologotipo",
+                  img: "/marca/isologotipo.png",
+                  alt: "Isologotipo VibeMatch: escudo circular con la marca integrada",
+                  w: 351,
+                  h: 372,
+                  text: "Escudo con marca integrada.",
+                  use: "Tarjeta NFC, sello y avatar de marca.",
+                },
+              ].map((variant) => (
+                <article key={variant.name} className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div className="flex h-28 items-center justify-center rounded-2xl bg-[#F6F6F2] p-4">
+                    <Image
+                      src={variant.img}
+                      alt={variant.alt}
+                      width={variant.w}
+                      height={variant.h}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-white">{variant.name}</h3>
+                  <p className="mt-1 text-sm text-zinc-400">{variant.text}</p>
+                  <p className="mt-2 text-xs text-zinc-500">{variant.use}</p>
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-12 rounded-3xl border border-white/10 bg-white/[0.03] p-6 lg:p-10">
+              <Image
+                src="/marca/buena-idea.png"
+                alt="Hoja de identidad de VibeMatch con las cuatro variantes: logotipo, isotipo, imagotipo e isologotipo"
+                width={512}
+                height={410}
+                className="mx-auto h-48 w-auto object-contain rounded-xl"
+                sizes="(max-width: 640px) 90vw, 512px"
+              />
+              <p className="mt-4 text-xs text-center text-zinc-500">
+                Hoja completa de identidad (render digital). Las cuatro variantes conviven en una sola composición;
+                se muestra completa para evitar recortes arbitrarios del símbolo.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Zonas */}
         <section id="zonas" className="mx-auto w-full max-w-6xl px-5 py-20">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-aqua">Zonas de interés</p>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">Zonas de interés</p>
               <h2 className="mt-3 max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">
                 Canchitas para lo que realmente te importa.
               </h2>
@@ -294,12 +365,12 @@ export default function Home() {
         {/* Seguridad */}
         <section id="seguridad" className="relative overflow-hidden border-y border-white/5 bg-surface">
           <div
-            className="pointer-events-none absolute -right-32 top-0 h-96 w-96 rounded-full bg-aqua/10 blur-[100px]"
+            className="pointer-events-none absolute -right-32 top-0 h-96 w-96 rounded-full bg-brand-soft/10 blur-[100px]"
             aria-hidden="true"
           />
           <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-5 py-20 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-lime">Seguridad escolar</p>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">Seguridad escolar</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
                 Un espacio seguro también es un espacio libre.
               </h2>
@@ -316,7 +387,7 @@ export default function Home() {
                 ["Privacidad primero", "Tus datos y enlaces externos son opcionales y están bajo tu control."],
               ].map(([title, text]) => (
                 <li key={title} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-lime/15 text-lime">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-strong/15 text-brand-strong">
                     <Check />
                   </span>
                   <div>
@@ -333,7 +404,7 @@ export default function Home() {
         <section id="pack" className="mx-auto w-full max-w-6xl px-5 py-20">
           <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-aqua">Phygital Pack</p>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">Phygital Pack</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
                 Un pack que se siente y se conecta.
               </h2>
@@ -343,7 +414,7 @@ export default function Home() {
               </p>
               <a
                 href="mailto:hola@vibematch.cl"
-                className="mt-8 inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3 text-sm font-semibold text-ink transition hover:bg-lime/85"
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-strong px-6 py-3 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
               >
                 Pedir información
                 <span aria-hidden="true">→</span>
@@ -367,7 +438,7 @@ export default function Home() {
 
         {/* CTA */}
         <section className="mx-auto w-full max-w-6xl px-5 pb-20">
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-brand/30 via-surface to-aqua/20 p-10 text-center sm:p-16">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-brand/30 via-surface to-brand-soft/20 p-10 text-center sm:p-16">
             <div className="pointer-events-none absolute inset-0 grid-bg" aria-hidden="true" />
             <div className="relative">
               <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
@@ -391,7 +462,13 @@ export default function Home() {
       <footer className="border-t border-white/5">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 text-xs text-zinc-500 sm:flex-row">
           <div className="flex items-center gap-2">
-            <Isotipo className="h-6 w-6" />
+            <Image
+              src="/marca/isotipo.png"
+              alt=""
+              width={615}
+              height={375}
+              className="block h-7 w-auto"
+            />
             <span className="font-mono tracking-widest">VIBEMATCH</span>
           </div>
           <p>Proyecto escolar · Colegio Superior del Maipo · Chile</p>

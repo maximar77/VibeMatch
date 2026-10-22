@@ -40,9 +40,11 @@ La app queda disponible en <http://localhost:3000>.
 
 ```
 VibeMatch/
-├── src/app/               App Router: layout, página principal y estilos globales
-├── public/                Recursos estáticos
+├── src/app/               App Router: layout, página principal, estilos e icono
+├── public/marca/          Recortes de logotipo, isotipo, imagotipo e isologotipo
 ├── docs/                  Documentación original y especificación funcional
+│   └── marca/             Análisis visual y paleta derivada de las referencias
+├── Referencia VibeMatch/  Imágenes y documentos originales del equipo
 ├── AGENTS.md              Reglas de Next.js para asistentes de código
 ├── next.config.ts
 └── package.json
@@ -63,7 +65,8 @@ Resumen navegable: [`docs/README.md`](docs/README.md) · Especificación funcion
 
 - [x] Repositorio Git + GitHub privado con documentación base.
 - [x] Scaffold de Next.js, TypeScript y Tailwind CSS.
-- [ ] Landing page de presentación de la marca.
+- [x] Landing page de presentación de la marca.
+- [x] Identidad visual aplicada: logotipo, isotipo, imagotipo, isologotipo y favicon reales.
 - [ ] Prototipo de perfiles, matching y zonas de interés.
 - [ ] Panel de moderación y logs.
 - [ ] Integración NFC/QR.
@@ -82,6 +85,8 @@ Las ramas principales son `main` (estable) y ramas cortas por funcionalidad
 
 ### Notas de diseño
 
-La paleta y las tipografías definitivas aún no están en los manuales. La landing usa una
-paleta provisional (violeta/cian/lima) que debe reemplazarse cuando el equipo entregue los
-códigos oficiales. Ver [`docs/producto.md`](docs/producto.md#9-decisiones-abiertas).
+La paleta se derivó de las imágenes de referencia (`#6D7ED3` como tinta principal) y está
+documentada en [`docs/marca/analisis-visual.md`](docs/marca/analisis-visual.md). Las cuatro
+variantes de marca se recortaron a PNG con fondo transparente en `public/marca/`. Cuando el
+equipo entregue los archivos vectoriales o los códigos oficiales, se reemplazan los recortes
+sin tocar la estructura de la landing.
