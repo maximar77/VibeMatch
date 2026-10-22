@@ -1,0 +1,44 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+vendor/
+
+# Builds
+dist/
+build/
+out/
+.next/
+.nuxt/
+coverage/
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Logs y temporales
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+tmp/
+temp/
+
+# Documentos ofimáticos temporales (Word)
+~$*.docx
+~$*.doc
+~$*.xlsx
