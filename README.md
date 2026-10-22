@@ -8,16 +8,44 @@ moderado dentro de la comunidad escolar.
 - **Público objetivo:** estudiantes de 12 a 22 años de comunidades escolares y académicas.
 - **Establecimiento piloto:** Colegio Superior del Maipo (Chile).
 - **Responsable:** Maximo Orellana.
+- **Repositorio:** https://github.com/maximar77/VibeMatch (privado)
+
+## Stack
+
+- [Next.js 16](https://nextjs.org/) (App Router, Turbopack)
+- React 19 + TypeScript
+- Tailwind CSS 4
+- ESLint
+
+## Puesta en marcha
+
+Requiere Node.js 20.9 o superior (probado con Node 24 LTS).
+
+```bash
+npm install
+npm run dev
+```
+
+La app queda disponible en <http://localhost:3000>.
+
+| Comando | Descripción |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm start` | Ejecutar el build |
+| `npm run lint` | Análisis con ESLint |
+| `npm run typecheck` | Verificación de tipos |
 
 ## Estructura del repositorio
 
 ```
 VibeMatch/
-├── docs/                  Documentos originales del proyecto (.docx)
-│   └── README.md          Índice y resumen de cada documento
-├── docs/producto.md       Especificación funcional extraída de los documentos
-├── README.md
-└── .gitignore
+├── src/app/               App Router: layout, página principal y estilos globales
+├── public/                Recursos estáticos
+├── docs/                  Documentación original y especificación funcional
+├── AGENTS.md              Reglas de Next.js para asistentes de código
+├── next.config.ts
+└── package.json
 ```
 
 ## Documentación
@@ -29,12 +57,13 @@ VibeMatch/
 | `docs/Manual de Identidad Corporativa Completo - VibeMatch.docx` | Versión extendida del manual: equipo, identidad visual, producto y flujo UX. |
 | `docs/Actividad de Packaging y Diseño - VibeMatch.docx` | Packaging, normativa chilena (SERNAC, Minsal, SUBTEL) y stand de ventas. |
 
-Resumen navegable: [`docs/README.md`](docs/README.md) · Especificación: [`docs/producto.md`](docs/producto.md)
+Resumen navegable: [`docs/README.md`](docs/README.md) · Especificación funcional: [`docs/producto.md`](docs/producto.md)
 
 ## Estado del proyecto
 
-- [x] Repositorio Git inicializado y documentación base versionada.
-- [ ] Definición del stack de la plataforma web/app.
+- [x] Repositorio Git + GitHub privado con documentación base.
+- [x] Scaffold de Next.js, TypeScript y Tailwind CSS.
+- [ ] Landing page de presentación de la marca.
 - [ ] Prototipo de perfiles, matching y zonas de interés.
 - [ ] Panel de moderación y logs.
 - [ ] Integración NFC/QR.
@@ -45,7 +74,14 @@ Resumen navegable: [`docs/README.md`](docs/README.md) · Especificación: [`docs
 git status
 git add .
 git commit -m "descripción del cambio"
+git push
 ```
 
 Las ramas principales son `main` (estable) y ramas cortas por funcionalidad
 (`feat/...`, `fix/...`, `docs/...`).
+
+### Notas de diseño
+
+La paleta y las tipografías definitivas aún no están en los manuales. La landing usa una
+paleta provisional (violeta/cian/lima) que debe reemplazarse cuando el equipo entregue los
+códigos oficiales. Ver [`docs/producto.md`](docs/producto.md#9-decisiones-abiertas).

@@ -1,6 +1,13 @@
 # Dependencias
 node_modules/
+.pnp
+.pnp.*
 .pnpm-store/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 vendor/
 
 # Builds
@@ -9,7 +16,9 @@ build/
 out/
 .next/
 .nuxt/
+.vercel/
 coverage/
+*.tsbuildinfo
 
 # Variables de entorno y secretos
 .env
@@ -42,3 +51,6 @@ temp/
 ~$*.docx
 ~$*.doc
 ~$*.xlsx
+
+# Generado por Next.js
+next-env.d.ts

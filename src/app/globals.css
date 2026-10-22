@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #07070d;
+  --surface: #10101c;
+  --brand: #7c5cff;
+  --aqua: #22d3ee;
+  --lime: #c6ff4f;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-surface: var(--surface);
+  --color-brand: var(--brand);
+  --color-aqua: var(--aqua);
+  --color-lime: var(--lime);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--ink);
+  color: #f4f4f8;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+}
+
+.glass {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.02));
+  border: 1px solid rgb(255 255 255 / 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.text-gradient {
+  background: linear-gradient(100deg, #ffffff 20%, var(--aqua) 50%, var(--brand) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-14px) rotate(-3deg); }
+}
+
+@keyframes ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+.animate-float {
+  animation: float 7s ease-in-out infinite;
+}
+
+.animate-ring {
+  animation: ring 2.4s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-ring {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
