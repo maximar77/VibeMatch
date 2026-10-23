@@ -32,6 +32,11 @@ data/tarjetas-demo.csv
 data/tarjetas/
 data/profiles.json
 data/*.local.json
+data/asistencia.json
+data/permisos.json
+data/anotaciones.json
+tarjetas-guest.txt
+data/tarjetas-guest-listado.csv
 
 # Sistema operativo
 Thumbs.db

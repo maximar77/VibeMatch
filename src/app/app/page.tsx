@@ -3,7 +3,10 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { CacheProfile } from "@/components/cache-profile";
 import { ProfileForm } from "@/components/profile-form";
+import { ShareProfileButton } from "@/components/share-profile-button";
+import { SyncStatus } from "@/components/sync-status";
 import { iniciales, leerSesion } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
 import { etiquetaVibe } from "@/lib/profile-schema";
@@ -154,7 +157,9 @@ async function ContenidoApp() {
 
   return (
     <AppShell active="app">
+      <CacheProfile perfil={perfil} />
       <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-5 py-12">
+        <SyncStatus />
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
@@ -168,6 +173,18 @@ async function ContenidoApp() {
               viaja con tu cuenta para que la app lo cargue en cualquier dispositivo.
             </p>
           </div>
+          <Link
+            href="/app/escanear"
+            className="text-xs font-medium text-zinc-400 transition hover:text-white"
+          >
+            → Escanear tarjeta NFC / QR
+          </Link>
+          <Link
+            href="/app/perfil-offline"
+            className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white transition hover:border-white/35 hover:bg-white/5"
+          >
+            Perfil sin conexión
+          </Link>
           <Link
             href="/app/perfil"
             className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white transition hover:border-white/35 hover:bg-white/5"
@@ -217,6 +234,8 @@ async function ContenidoApp() {
             {perfil.bio ? (
               <p className="mt-5 text-sm leading-relaxed text-zinc-400">“{perfil.bio}”</p>
             ) : null}
+
+            <ShareProfileButton perfil={perfil} establecimiento={school} />
 
             <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-zinc-500">
               <span>Tarjeta {card.id}</span>
@@ -292,6 +311,50 @@ async function ContenidoApp() {
                   </div>
                 ))}
               </div>
+            </section>
+
+            <section id="zonas" className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand-soft">
+                Funciones escolares · NFC
+              </p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight">
+                La tarjeta también ayuda al colegio.
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                Con la misma tarjeta, el establecimiento puede registrar tres cosas
+                en segundos, sin cuadernos ni planillas.
+              </p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-400/15 to-emerald-500/5 p-4">
+                  <p className="text-sm font-semibold text-white">Pasar lista</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
+                    Al tocar la tarjeta, el alumno queda como presente, atrasado o
+                    ausente con la hora exacta.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-sky-400/15 to-blue-500/5 p-4">
+                  <p className="text-sm font-semibold text-white">Permisos de baño</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
+                    Registra salida y regreso. El profesor ve quién está fuera y
+                    cuánto lleva.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-300/15 to-orange-500/5 p-4">
+                  <p className="text-sm font-semibold text-white">Anotaciones</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
+                    Positivas o negativas, al instante y con tu tarjeta como
+                    respaldo.
+                  </p>
+                </div>
+              </div>
+              <p className="mt-4 text-xs leading-relaxed text-zinc-500">
+                Puedes revisar tus propios registros y los detalles del tratamiento
+                de datos en la{" "}
+                <Link href="/privacidad" className="text-brand-soft underline decoration-brand-soft/30 underline-offset-2 hover:text-white">
+                  política de privacidad
+                </Link>
+                .
+              </p>
             </section>
 
             <section className="rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5">

@@ -26,8 +26,16 @@ const TOKEN_PATTERN = /^[A-Za-z0-9_-]{24,128}$/;
 type StoredCard = {
   id: string;
   tokenHash: string;
+  /** Nombre de presentación histórico (se mantiene por compatibilidad). */
   holder?: string | null;
+  /** Curso histórico (se mantiene por compatibilidad). */
   level?: string | null;
+  /** Nombre completo del estudiante, tal como aparece en la lista del curso. */
+  fullName?: string | null;
+  /** Curso del estudiante, por ejemplo: "Media 1° C". */
+  course?: string | null;
+  /** Número de lista dentro del curso. */
+  listNumber?: number | null;
   kind?: "personal" | "public";
   status?: "active" | "revoked";
   createdAt?: string;
@@ -42,6 +50,9 @@ export type Tarjeta = {
   id: string;
   holder: string | null;
   level: string | null;
+  fullName: string | null;
+  course: string | null;
+  listNumber: number | null;
   kind: "personal" | "public";
   status: "active" | "revoked";
   createdAt: string | null;
@@ -89,14 +100,29 @@ function readStore(): Required<Pick<CardStore, "school" | "cards">> {
 }
 
 function toTarjeta(card: StoredCard): Tarjeta {
+  const course = card.course ?? card.level ?? null;
   return {
     id: card.id,
     holder: card.holder ?? null,
-    level: card.level ?? null,
+    level: card.level ?? course,
+    fullName: card.fullName ?? card.holder ?? null,
+    course,
+    listNumber:
+      typeof card.listNumber === "number" && Number.isFinite(card.listNumber)
+        ? card.listNumber
+        : null,
     kind: card.kind ?? "personal",
     status: card.status ?? "active",
     createdAt: card.createdAt ?? null,
   };
+}
+
+function buscarPorHash(hash: string): StoredCard | null {
+  for (const card of readStore().cards) {
+    if (card.status === "revoked") continue;
+    if (card.tokenHash && safeEqual(card.tokenHash, hash)) return card;
+  }
+  return null;
 }
 
 /**
@@ -108,18 +134,56 @@ export function validarToken(token: string): Acceso | null {
   if (!TOKEN_PATTERN.test(clean)) return null;
 
   const store = readStore();
-  const hash = hashToken(clean);
-  let match: StoredCard | null = null;
-
-  for (const card of store.cards) {
-    if (card.status === "revoked") continue;
-    if (card.tokenHash && safeEqual(card.tokenHash, hash)) {
-      match = card;
-    }
-  }
-
+  const match = buscarPorHash(hashToken(clean));
   if (!match) return null;
   return { card: toTarjeta(match), school: store.school };
+}
+
+/**
+ * Busca una tarjeta por su token (por ejemplo, el token leído del NFC).
+ * Devuelve null si el token no existe o la tarjeta está revocada.
+ */
+export function buscarTarjetaPorToken(token: string): Tarjeta | null {
+  const clean = token.trim();
+  if (!TOKEN_PATTERN.test(clean)) return null;
+  const match = buscarPorHash(hashToken(clean));
+  return match ? toTarjeta(match) : null;
+}
+
+/** Lista todas las tarjetas activas del establecimiento. */
+export function listarTarjetas(): Tarjeta[] {
+  return readStore()
+    .cards.filter((card) => card.status !== "revoked")
+    .map(toTarjeta);
+}
+
+/** Lista las tarjetas de un curso, ordenadas por número de lista. */
+export function listarAlumnosPorCurso(curso: string): Tarjeta[] {
+  const objetivo = normalizarCurso(curso);
+  return listarTarjetas()
+    .filter(
+      (card) =>
+        card.kind === "personal" &&
+        card.course !== null &&
+        normalizarCurso(card.course) === objetivo,
+    )
+    .sort((a, b) => {
+      const na = a.listNumber ?? Number.MAX_SAFE_INTEGER;
+      const nb = b.listNumber ?? Number.MAX_SAFE_INTEGER;
+      if (na !== nb) return na - nb;
+      return (a.fullName ?? a.id).localeCompare(b.fullName ?? b.id, "es");
+    });
+}
+
+/** Normaliza un curso para comparar: "Media 1° C" === "media 1 c". */
+export function normalizarCurso(curso: string): string {
+  return curso
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[°º]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 /**

@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "package.json", "use": "@next/nextjs-vercel-build" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/" }
+  ],
+  "env": {
+    "VIBEMATCH_SECRET": "@vibematch_secret",
+    "VIBEMATCH_PUBLIC_URL": "@vibematch_public_url",
+    "VIBEMATCH_COOKIE_SECURE": "1"
+  }
+}

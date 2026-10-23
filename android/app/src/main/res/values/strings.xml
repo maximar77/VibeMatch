@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">VibeMatch</string>
+    <string name="title_activity_main">VibeMatch</string>
+    <string name="package_name">cl.vibematch.app</string>
+    <string name="custom_url_scheme">cl.vibematch.app</string>
+</resources>

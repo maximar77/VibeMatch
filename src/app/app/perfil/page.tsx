@@ -3,7 +3,9 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { CacheProfile } from "@/components/cache-profile";
 import { ProfileForm } from "@/components/profile-form";
+import { SyncStatus } from "@/components/sync-status";
 import { leerSesion } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
 
@@ -46,7 +48,9 @@ async function ContenidoPerfil() {
 
   return (
     <AppShell active="perfil">
+      <CacheProfile perfil={perfil} />
       <main className="relative z-10 mx-auto w-full max-w-3xl flex-1 px-5 py-12">
+        <SyncStatus />
         <Link
           href="/app"
           className="text-xs font-medium text-zinc-400 transition hover:text-white"

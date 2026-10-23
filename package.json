@@ -4,12 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:public": "node scripts/dev-public.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.3",
+    "@capgo/capacitor-nfc": "^8.3.4",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0"

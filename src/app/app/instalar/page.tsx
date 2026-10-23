@@ -98,25 +98,29 @@ async function ContenidoInstalar() {
           <aside className="grid content-start gap-6">
             <section className="rounded-[2rem] border border-brand-strong/20 bg-gradient-to-br from-brand/20 via-surface to-surface p-6">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand-soft">
-                Próximamente
+                Apps nativas
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight">
-                Apps nativas para Android y Windows.
+                Android y Windows, con NFC.
               </h2>
               <div className="mt-5 grid gap-3">
                 <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                   <div>
                     <p className="text-sm font-medium text-white">Android · APK</p>
-                    <p className="mt-1 text-xs text-zinc-400">En preparación</p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      Funciona sin conexión y guarda tu perfil en el teléfono
+                    </p>
                   </div>
-                  <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-200">
-                    En preparación
+                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-200">
+                    En compilación
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                   <div>
                     <p className="text-sm font-medium text-white">Windows · EXE</p>
-                    <p className="mt-1 text-xs text-zinc-400">En preparación</p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      Lector NFC y panel del profesor para escritorio
+                    </p>
                   </div>
                   <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-200">
                     En preparación
@@ -124,8 +128,10 @@ async function ContenidoInstalar() {
                 </div>
               </div>
               <p className="mt-4 text-xs leading-relaxed text-zinc-400">
-                Mientras tanto, la web app instalable funciona en todos los
-                dispositivos y usa el mismo perfil. No publicaremos descargas falsas.
+                La app de Android incluirá las funciones escolares NFC (asistencia,
+                permisos de baño y anotaciones) y funcionará sin conexión. Mientras
+                tanto, la web app instalable usa el mismo perfil. No publicaremos
+                descargas falsas.
               </p>
             </section>
 
