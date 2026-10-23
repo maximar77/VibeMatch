@@ -20,13 +20,20 @@ import {
 } from "@/lib/profile-schema";
 
 function cookieOptions() {
+  // Detrás de HTTPS (por ejemplo Cloudflare Tunnel) la cookie debe ir marcada
+  // como Secure. VIBEMATCH_COOKIE_SECURE=1 fuerza esto; secure:false queda solo
+  // para pruebas en http://localhost o en la red local.
+  const secure =
+    process.env.VIBEMATCH_COOKIE_SECURE === "1" ||
+    (process.env.VIBEMATCH_COOKIE_SECURE !== "0" &&
+      process.env.VIBEMATCH_PUBLIC_URL?.startsWith("https://") === true);
+
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     path: "/",
     maxAge: SESSION_MAX_AGE_SECONDS,
-    // En producción con HTTPS: VIBEMATCH_COOKIE_SECURE=1
-    secure: process.env.VIBEMATCH_COOKIE_SECURE === "1",
+    secure,
   };
 }
 
