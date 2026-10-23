@@ -15,10 +15,12 @@ interacción inicial mediante tecnología de proximidad.
 | --- | --- |
 | Tarjeta NFC | Se acerca a un Punto Vibe o a un lector del equipo institucional. No se usa el teléfono personal de otro compañero. |
 | QR / ID único | Código impreso en la tarjeta y el empaque; se escanea desde un equipo del colegio. |
-| Web App | URL única `/a/<token>`; no requiere instalar una app ni usar el celular personal. |
+| Web App / PWA | URL única `/a/<token>`; funciona en el navegador institucional y puede instalarse como app en iPhone, Mac, Android o Windows. |
+| Token público | `vibematch-acceso-publico-2026` abre solo la landing y los contactos para pedir el kit; no crea sesión ni perfil. |
 
 Flujo UX: **aproximación en un punto institucional → canje de token → bienvenida →
-perfil y zonas de interés**.
+onboarding de perfil (solo la primera vez) → dashboard y zonas de interés → instalación
+opcional de la PWA**.
 
 La autenticación valida el token único de la tarjeta contra un registro de hashes SHA-256.
 Si es válido, se cambia por una cookie de sesión firmada con HMAC (8 horas) y se muestra la
@@ -26,15 +28,45 @@ bienvenida. El token no contiene nombre, curso ni RUT. El acceso está diseñado
 depender de dispositivos personales durante la jornada escolar (Ley 21.801); ver
 [`arquitectura/acceso-y-dispositivos.md`](arquitectura/acceso-y-dispositivos.md).
 
+El registro distingue tarjetas `personal` y `public`. La portada `/` sin token muestra un
+error de acceso: la landing pública solo se abre con el token genérico. Para el piloto se
+generaron 100 tarjetas guest únicas (`VM-G0001`…`VM-G0100`), sin nombre, para que cada
+persona complete su perfil al entrar.
+
 ## 3. Perfil de usuario
 
-- Nombre preferido.
-- Pronombres.
-- Intereses / zonas de interés.
-- Vibe Check: estado de ánimo o disposición del día (ej. "Modo estudio", "Disponible para
-  conversar", "Busco equipo").
-- Enlaces opcionales a redes sociales externas.
-- Anonimato optativo para consultas sensibles o participación inicial.
+### 3.1 Onboarding y persistencia
+
+El perfil se pide en el primer ingreso con una tarjeta personal y se guarda asociado al
+`cardId` en `data/profiles.json` (ignorado por Git). En las siguientes entradas se carga
+automáticamente. Se puede editar desde `/app/perfil`.
+
+Campos implementados:
+
+- Nombre preferido (2–32 caracteres, obligatorio).
+- Pronombres (opcional: ella, él, elle o prefiero no decirlo).
+- Curso (7° Básico a 4° Medio, u “Otro”/sin especificar).
+- Intereses / zonas de interés (1 a 6, obligatorio).
+- Vibe Check: disposición actual (ej. "Modo estudio", "Abierto/a a conversar",
+  "Busco equipo", "Solo explorando").
+- Descripción breve opcional (máx. 180 caracteres).
+- Consentimiento obligatorio, con enlace a `/privacidad`.
+
+Pendiente/abierto:
+
+- Enlaces opcionales a redes sociales externas (aún no implementados).
+- Anonimato optativo para consultas sensibles.
+- Retención, exportación y eliminación de datos desde la propia cuenta.
+- Versionado del consentimiento y autorización de apoderado para menores de 14 años.
+
+### 3.2 Instalación y apps
+
+- **PWA instalable:** la web puede añadirse a pantalla de inicio o Dock en iPhone, iPad,
+  Mac, Android y Windows. La sección `/app/instalar` está protegida por sesión y perfil.
+- **APK Android y EXE Windows:** siguen en preparación. La UI los muestra como
+  “En preparación”; no hay descargas falsas.
+- El perfil guardado en la web es la base para que las apps nativas lo carguen al iniciar
+  sesión con la tarjeta.
 
 ## 4. Matching y comunidad
 
@@ -88,14 +120,19 @@ depender de dispositivos personales durante la jornada escolar (Ley 21.801); ver
 
 ## 9. Decisiones abiertas
 
-1. Stack: **decidido** Next.js + React + TypeScript para la web; APK (Capacitor) y EXE
-   (Tauri) quedan planificadas en [`plan-apps.md`](plan-apps.md).
-2. Alcance del MVP: acceso por tarjeta, bienvenida y dashboard base ya implementados;
-   chat, matching y moderación siguen abiertos.
-3. Modelo de datos y autenticación: registro JSON con hashes y cookie HMAC en el MVP;
-   falta migrar a base de datos y panel de administración.
+1. Stack: **decidido** Next.js + React + TypeScript para la web; PWA instalable implementada;
+   APK (Capacitor) y EXE (Tauri) quedan planificadas en [`plan-apps.md`](plan-apps.md).
+2. Alcance del MVP: acceso por tarjeta, token público, onboarding de perfil, dashboard,
+   edición de perfil y PWA instalable ya implementados; chat, matching y moderación siguen
+   abiertos.
+3. Modelo de datos y autenticación: `data/cards.json` con hashes, `data/profiles.json` con
+   perfiles y cookie HMAC en el MVP; falta migrar a base de datos, definir retención y
+   construir el panel de administración.
 4. Infraestructura y privacidad de menores (Ley 21.719 de protección de datos en Chile).
 5. Lectura NFC: se priorizan lectores institucionales (USB/tablet); Web NFC en navegador
    queda como opción secundaria.
 6. Identidad gráfica definitiva: colores, tipografías y archivos vectoriales.
 7. Definición del piloto: cursos, cantidad de tarjetas, puntos de acceso y responsables.
+   Ya existen 100 tarjetas guest y un token público para solicitar el kit.
+8. Distribución de las apps nativas: Play Store privada/MDM para Android y firma de código
+   para Windows. La PWA no requiere tienda.

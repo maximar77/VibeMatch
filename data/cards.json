@@ -1,7 +1,7 @@
 {
   "version": 1,
   "school": "Colegio Superior del Maipo",
-  "updatedAt": "2026-10-22T22:05:24.952Z",
+  "updatedAt": "2026-10-22T23:37:52.010Z",
   "cards": [
     {
       "id": "VM-0001",
@@ -26,6 +26,915 @@
       "level": "1° Medio",
       "status": "active",
       "createdAt": "2026-10-22T22:05:24.952Z"
+    },
+    {
+      "id": "VM-G0001",
+      "tokenHash": "107885ae243a14a426c03bc7259030b709c1ec88fc398b34128c0cfc238dd773",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.895Z"
+    },
+    {
+      "id": "VM-G0002",
+      "tokenHash": "fe3eca43041ea721cc13fc011b3324a3d45132148ccb13121e9d8ea986f0e6c4",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0003",
+      "tokenHash": "2f3800d7d8e124e25ad9047f5b0c3f768761187d32a213bdb49e523e2c448d1b",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0004",
+      "tokenHash": "dfaf8c9360cab84827a51539e4df5a4b55350e796fa76fd15bacd6402021b7e7",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0005",
+      "tokenHash": "67872b1ba3c567992d2b60cef4f0c80455c5b74ce2cf354770e12067ebdd8b5f",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0006",
+      "tokenHash": "ab1feb627002b45a715471cbd0e27fd3060c7d4c35ffee5e08909310236751e3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0007",
+      "tokenHash": "ed28b9c510a3136ab6e6c003872d5ca5d0df223622f4dce65c35ab6258652d54",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0008",
+      "tokenHash": "9bcd78a77d330818ba5dff8e3c0cabff3e1fd1c3f20735a64e56052edb177781",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0009",
+      "tokenHash": "f06a2247498c0da806ce96cf1a7988e46c1bf24c380653d177462cc59efa3ad4",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0010",
+      "tokenHash": "ce795c79ab2617a9ed3eb186b0a6b4ec936d7492c3a618ba1bf358c8467c8ea8",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0011",
+      "tokenHash": "4fb92de149fa835dd1654747d911e6d5c19e72384f82bba0fcc6040c88ec9c86",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0012",
+      "tokenHash": "ff5ae54accf6c59af716c23acb1d636f0c7d269e14de5391496733a85da95de6",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0013",
+      "tokenHash": "0afc1ef5fcc512ffd38763948a938e81eec113a0b0016e0b1178aa84f18a0242",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0014",
+      "tokenHash": "b118303fd2152f54b191d7e9e5f0cd2d605300e6dd1ac018fa8e66dc8c9e0f6f",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0015",
+      "tokenHash": "39fe7c12d8505ddf8bd8e090881d45a3e5e0acb0c8fbcc4ec64994ceeb422b0b",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.896Z"
+    },
+    {
+      "id": "VM-G0016",
+      "tokenHash": "7d0d59546a54f4d11c77f2c57272a85aad25694b466b217b31ffd40bdf188362",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0017",
+      "tokenHash": "a5c7553c11e89d8de91f6276ce3cf717cc15ec0b4ddd843ad7fa1c143a376844",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0018",
+      "tokenHash": "15c2ee7c3995c3b1366d5c7f9d791ed164f09963e0661e793912cf4c8fa88f3e",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0019",
+      "tokenHash": "dc053d7974c61cc20b5d0b479bcc423fed554e19f6ce5e3eea48b69472195856",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0020",
+      "tokenHash": "20b5e83817551ab0f2caee9f9a1f70040d53a5aad207cc96f3fd82dcaf02e825",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0021",
+      "tokenHash": "8e5bce15a73a550132834568f1882d8c60433ff02af59472acda048d50d24d09",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0022",
+      "tokenHash": "1c7e7ca5168377a8621b35e51aec60936f1742992b1d8757a149455ef6964cad",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0023",
+      "tokenHash": "a697cf96e85308a0121a78314788c3222ad80911db263427f6f4ec19f7fd2e70",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0024",
+      "tokenHash": "1f28016f6cdfcd8ebc497127ba2ae977c14171322a43560a107ac51e7e9ebd10",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0025",
+      "tokenHash": "43504b7a40fe361ca04f1fb596f3a2361eaa9d83835f64a9ceb0d1707373e2d8",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0026",
+      "tokenHash": "7ffe8f6a41f77a51de0e504f4c05bba567daa88477c4d32e5370e92215b86aef",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0027",
+      "tokenHash": "d2de199d293e880b30373b89ca227fb1273acd3472f6806b61660e2eb86ee5ed",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0028",
+      "tokenHash": "996a6b69e4a1206eba7cebe1130dcd1e027aa2b59ea359e0a679452348d0fe90",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0029",
+      "tokenHash": "6ca3ec2c265e3b319e543caad2a4bd1f3d0816c4e98df6bd892d42294bcad6d3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0030",
+      "tokenHash": "248440b8102909f59032bc75699b0da13a8517d655e70b4ae9cd83b866206577",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0031",
+      "tokenHash": "b63e30d4e49926bb4fd1e2c70e1afb199d270d22699b1f924129939f245b2aac",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0032",
+      "tokenHash": "ec81564d4950969c3cfce82e8e1494bbcf2ce0782ab126021372bd919f356619",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0033",
+      "tokenHash": "393dfaafb10b697768e288bf9fc6f0cf2dabb2cd1a7a9c0e4968509fc8e0988e",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.897Z"
+    },
+    {
+      "id": "VM-G0034",
+      "tokenHash": "847ddd1cd6f6b6c03769d7471f4767c44dc185cd927575948e3f8a3a0af30f77",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0035",
+      "tokenHash": "a8f1822b638828c900b9333d1b4a1fe51fe2b97b2e000c7d498b73341842046c",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0036",
+      "tokenHash": "a257b5cb338130b2502f79d8350ebce8087cb237c85fbf48826cbfef4e315601",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0037",
+      "tokenHash": "efaa1a8730ba175a37a7644d4dac0659f3f3d503a8d911a5134cfbd69d7e1fdb",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0038",
+      "tokenHash": "05c78449f9e2ce4baf601f2faf29372788ddd28986a806500890c85213409f02",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0039",
+      "tokenHash": "469d7630143c02069722bdf5edaee35fc1ab680e56999ceee2a13827ac2ad860",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0040",
+      "tokenHash": "95dde1733ff602ddaa45e5077e46cdecb2a0f537486a054330e9b03ee2a06cb3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0041",
+      "tokenHash": "227a9971bc4bc10882c27e9cedea8e28893d419ab3d6aa4c2ff2a3c9a07d3224",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.898Z"
+    },
+    {
+      "id": "VM-G0042",
+      "tokenHash": "01b24e2841f4981b0db7dbb4f80cac79d8bdec56e8a54e027356b4e776566e4f",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0043",
+      "tokenHash": "e62e95448fcd00de701737b68faa8af829c66eb044621f53ccfcab56e8c0a209",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0044",
+      "tokenHash": "74322d45c8b780323073b170762ec1f67a82acec3a5ccf3dc3b06bf399ab82fa",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0045",
+      "tokenHash": "baba816298742a0f6d75b07ffdd6af0654900297e5b50f1b47d9da9fdd91467a",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0046",
+      "tokenHash": "4a3e0b09aef4e6570d9bb728c1e409b40a9498c41ab62e784da1743a4b071b70",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0047",
+      "tokenHash": "bb0d7ce527111ac18971de1bba3c35708a225fd0aae2e47eeb8e18a71d8fa656",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0048",
+      "tokenHash": "83e3a7ffe87f4940722e492adcec8d967d5bc430a5562d99f9df649defab0641",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0049",
+      "tokenHash": "9278d59589357c85515ded44410e46af87e3bc6577b6c8e12079413e1e83f685",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0050",
+      "tokenHash": "577c4f0ec75bfe5363d754639650a5f6e36221ed211c4c093d55d33d73c92baa",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0051",
+      "tokenHash": "b382c52c06af893342a6bcb8fbe3e29b423f03e6a24d168e260c396a15fdbc45",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0052",
+      "tokenHash": "0c40670cb6d6e350cc21c23f841395d3ee46cec3f95ac40771b7b2e7adae006e",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0053",
+      "tokenHash": "f0424474206e40402f360e487481a63763fac73587002ebb7e0a08906497cb7b",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0054",
+      "tokenHash": "328bf6ac31720630f27be9a9d0f051cfd2b95d9d16311ae99ee277620b8a05bf",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0055",
+      "tokenHash": "a04b788a5bde31807049a4b69552e9a519427594d39fc867a536b7d02c83bc54",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0056",
+      "tokenHash": "288e4ed9c1197148031d761c4b106efb01b3a69eaa5f249814250dad80f19daa",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0057",
+      "tokenHash": "a9e9ba6bcb18b1b8212ae3b43daaf0804a8fcf2c64bc72c9067757941c831997",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0058",
+      "tokenHash": "e51f9d787741fe42e6a29604870248d2f774a0d2bc6f40489c71b37e7e4a4f06",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0059",
+      "tokenHash": "09ef44d19c75a11132f2b9c04702e8de7c83dd8d1d20d4a17b97c67bef0ea601",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0060",
+      "tokenHash": "dca2ee0b6492a20a56ff538a9832f550b14a5ac433f70b1527b21b4a30414411",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0061",
+      "tokenHash": "65cd03a5418adfb6db92667464455a846ab82ef2e392f660b44cce00316630dd",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0062",
+      "tokenHash": "5f9d25e1c9c2e2fc7ed706b8db5fdee8dd27b7368ec61dd1594517e1e24776c1",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0063",
+      "tokenHash": "c5c0c60ea949032dee7bdfa62c04215d1001675df48d8ab8edf4ce180ebae224",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0064",
+      "tokenHash": "29f885d2020f53fd719fa1f24ff43f4b5af8bcca5df72f0f141f62f4feeb38dd",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0065",
+      "tokenHash": "1e9882c5238aa67da8cc205582408d519317c3b6898aa2ead748d1771107ca8a",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0066",
+      "tokenHash": "98a60cc6d42d9e95e75caaf109f2002237ac852f13438819cfa68dd4febf9202",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0067",
+      "tokenHash": "9ca78c0925cd9a274e60eab0ec16c9c3501360d65afcccd3849722a249f5fc6e",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0068",
+      "tokenHash": "e00a8d17be361372092362dcfb59b32fda5148eee988305057917068daf598de",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0069",
+      "tokenHash": "3361056866a06f43aad410ea7dc790a2e5d7d1a0e341da4960f1df0b5fd15bc1",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0070",
+      "tokenHash": "7a4bcd478cc74659c0db00126defc8651cca319bb4ff9011f365e1481cf42493",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0071",
+      "tokenHash": "d39031ae851fdb5c915c5e11d52951c0e64aec402a262b1b9a51ff3e4f975ccb",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0072",
+      "tokenHash": "72169ba84bab8d9033a49b77509f09af621e9379eb59a331a75d15a3f21c4234",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0073",
+      "tokenHash": "b86cdd85b877918d137ab7c1f50bcdd72953f395b2a45b2a7c7003997af33b2d",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0074",
+      "tokenHash": "d8776d2dd71967a28261774a862ecf06e8bf149fcc112f8918f5814b3add97eb",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0075",
+      "tokenHash": "a446c17475092f698f5eb7c84c3514d2d393d67f8819a7e1ab188a1f87ad6fb3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0076",
+      "tokenHash": "8b7dd532e0b7a69c015e79fb1725b26abc0adbbb7e7161a5fa4efc271812a4f3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0077",
+      "tokenHash": "4e211951d3ba918e2b85e8a83eef88c8b4b8fb7df4df09b924da3ac2b5f8f747",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0078",
+      "tokenHash": "50cbe9fd12876d808726010b79549903ee4a3bc79c57b8a551192127e0c2339b",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0079",
+      "tokenHash": "3e84a7ab3b39b64cc8adbf80383ce0cf9dd214169421efc5bfde620917b9c14f",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0080",
+      "tokenHash": "7e75d4182ac4e08e7e5694caf82eb8cc24c1f4e112f4c5e739de1ab49c7f8c34",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0081",
+      "tokenHash": "f09466f628a26e0cd35e925a6623620064f5d8cfc5028ea977e13a3ac2b493b3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0082",
+      "tokenHash": "54a3688480d4ac514945390238644c29bdd7dc4eb5efed0c48c7cc938e2d1303",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.899Z"
+    },
+    {
+      "id": "VM-G0083",
+      "tokenHash": "8569636a9aef31e32933e165ad072c974a61ae252bcfd808da2935efe1d33b92",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0084",
+      "tokenHash": "43cd24c61ad3c554aa04f42dc9d4563ed1864bf3891705e935a2cfd5ea90777c",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0085",
+      "tokenHash": "39fd86c83534fe0acc20ab708ec3b20516503ee65e6d7737462ec3029962b2bf",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0086",
+      "tokenHash": "5c2b58fcd09e94f0ac154524a842d95a5aa28c6b675f2527593df4a9feaeeaa3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0087",
+      "tokenHash": "017b11dc2ec633bdc59f012a2ac01bf29885a666da2f288bf6c9d1f8cbdef526",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0088",
+      "tokenHash": "28493f856187b5d6b2a8a86058011a49392c6e596f54e93b069343f707fd4037",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0089",
+      "tokenHash": "373c77f0fe16087ab2c969f47d4561179c22c605158c9162d7553ba7eb77fb0f",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0090",
+      "tokenHash": "881b3c11365defe1409b6afd6d2dd946e87bc6756a39f8df2550b8f9bfd2bac3",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0091",
+      "tokenHash": "7540dd5f290d532ff6cffa1f11a6192202e9e2c6fc0e83dbf561d90ac267e799",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0092",
+      "tokenHash": "1afe7d091e738914f861149c7cb79ec075547c5cd0432d881ed11a8c11d17452",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0093",
+      "tokenHash": "4a335c6222365775105dc599fab51c70424575f5ed1b0c71748756981d08c28c",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0094",
+      "tokenHash": "3f1eef4b36e3e979088805abaf5be8461a655b56ebfc3eb680b19acf18eb0339",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0095",
+      "tokenHash": "8892d92b2ea206fc1e3af127fb78e689f9d9bb6d6d1902cc02300489ce19f344",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0096",
+      "tokenHash": "2d4708dceda78272b105f3700d6fff2e74b67c0d23f18c6bfac473dacda3a591",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0097",
+      "tokenHash": "91148ced5774f7098c3501af91fe789fb77d4ffcbaad54ba0f507221d4839027",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0098",
+      "tokenHash": "8af04283c0010b5dac9361481b6051ada6cbb959910378abead6c7ab969de871",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0099",
+      "tokenHash": "8ce11c763ad92bd4143390470b307a1eb0befd276ae53bf66f3a82d687db11ab",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-G0100",
+      "tokenHash": "a67294f5d5a55535523a2d3bb5bb78b10112f307ad81c3c44971c8495997ddaf",
+      "holder": null,
+      "level": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:51.900Z"
+    },
+    {
+      "id": "VM-PUBLIC",
+      "tokenHash": "3464ea1bc6474ec1b2e1134343f0c9a3dc3a58e2797897d6fd4290f0fa4782cd",
+      "holder": "Acceso público",
+      "level": null,
+      "kind": "public",
+      "status": "active",
+      "createdAt": "2026-10-22T23:37:52.010Z"
     }
   ]
 }

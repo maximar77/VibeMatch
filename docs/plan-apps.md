@@ -1,6 +1,7 @@
-# Plan de apps: APK (Android) y EXE (Windows)
+# Plan de apps: PWA, APK (Android) y EXE (Windows)
 
-> Estado: planificación. El flujo web de acceso por tarjeta ya está implementado.
+> Estado: web con tarjeta, onboarding y PWA instalable implementados. APK y EXE siguen en
+> planificación; la UI muestra “En preparación”, sin descargas falsas.
 > Última actualización: 22 de octubre de 2026.
 
 ## 1. Restricción que ordena el plan
@@ -9,11 +10,13 @@ Por la Ley 21.801, la app **no puede asumir que el estudiante usará su teléfon
 personal durante la jornada escolar**. Por eso el orden de prioridad es:
 
 1. **Web + tarjeta** en equipos institucionales (ya funciona).
-2. **EXE** para computadores del colegio con lector NFC USB (prioridad escolar).
-3. **APK** para tablets institucionales, docentes/administración y uso fuera de la
+2. **PWA instalable** para iPhone, Mac, Android y Windows (ya funciona; opcional).
+3. **EXE** para computadores del colegio con lector NFC USB (prioridad escolar).
+4. **APK** para tablets institucionales, docentes/administración y uso fuera de la
    jornada o en contextos autorizados por el reglamento.
 
-La APK no es el canal principal dentro del colegio; el `.exe` y los Puntos Vibe sí.
+La APK no es el canal principal dentro del colegio; el `.exe` y los Puntos Vibe sí. La
+PWA cubre desde ya el caso “quiero VibeMatch como app” sin tienda ni descarga lateral.
 
 ## 2. Arquitectura compartida
 
@@ -21,8 +24,9 @@ La APK no es el canal principal dentro del colegio; el `.exe` y los Puntos Vibe 
 Tarjeta NFC / QR
       │  https://dominio/a/<token>
       ▼
-Web Next.js (UI + Server Actions + API)
+Web Next.js (UI + Server Actions + PWA + API)
       │  valida token → cookie de sesión
+      ├── PWA instalable (misma UI, iPhone/Mac/Android/Windows)
       ▼
 APK (Capacitor)        EXE (Tauri 2)
 Android / tablet       Windows 10/11 + WebView2
@@ -31,17 +35,31 @@ Android / tablet       Windows 10/11 + WebView2
 La app nativa no debe reimplementar la lógica de negocio: envuelve la misma interfaz
 web y usa una API estable para el canje de token, la sesión y el cierre.
 
-### API necesaria antes de las apps
+### Web app instalable (ya implementada)
+
+- Manifiesto en `src/app/manifest.ts` con `start_url: /app`, iconos 192/512 y maskable.
+- Service worker en `public/sw.js` que cachea solo estáticos; nunca HTML privado.
+- Página `/app/instalar` protegida por sesión y perfil, con instrucciones por plataforma.
+- En iPhone/iPad: Safari → Compartir → Añadir a pantalla de inicio.
+- En Mac: Safari → Archivo → Añadir al Dock, o instalar desde Chrome/Edge.
+- En Android/Windows: instalación desde Chrome/Edge.
+- Requiere HTTPS o `localhost`. No sustituye la integración NFC nativa del EXE/APK.
+
+### API necesaria antes de las apps nativas
 
 | Endpoint | Método | Uso |
 |---|---|---|
 | `/api/acceso/[token]` | `POST` | Canjear token por sesión; devuelve cookie `HttpOnly` o token de corta duración. |
 | `/api/sesion` | `GET` | Datos mínimos de la tarjeta y del establecimiento. |
+| `/api/perfil` | `GET` | Perfil asociado a la tarjeta/sesión, para cargarlo en la app. |
+| `/api/perfil` | `PUT` | Crear o actualizar el perfil; valida consentimiento e intereses. |
 | `/api/salir` | `POST` | Revocar la sesión del dispositivo. |
 | `/api/tarjetas/[id]/revocar` | `POST` | Administración (requiere rol). |
 
 Recomendación: mantener Server Actions para la web y exponer estos endpoints para las
-apps. Todos con rate limiting, HTTPS, validación de origen y logs sin tokens.
+apps. Para las apps nativas conviene un canje de token por credencial de dispositivo de
+corta duración, no reutilizar la cookie del navegador. Todos con rate limiting, HTTPS,
+validación de origen y logs sin tokens ni PII.
 
 ## 3. APK con Capacitor
 
@@ -104,15 +122,16 @@ certificado de firma de código (recomendado).
 
 | Fase | Entregable | Criterio de aceptación |
 |---|---|---|
-| 1 | Web + tarjeta + bienvenida | Token válido entra; token inválido no; sesión expira; build pasa. |
-| 2 | Punto Vibe piloto | Tablet/PC + lector abre la bienvenida y cierra sesión sola. |
-| 3 | API de apps | Canje de token y sesión funcionan fuera del navegador. |
-| 4 | APK beta | NFC y QR abren la bienvenida en tablet institucional. |
+| 1 | Web + tarjeta + onboarding + PWA | Token válido entra; token inválido no; perfil persiste; instalación protegida; build pasa. |
+| 2 | Punto Vibe piloto | Tablet/PC + lector abre la bienvenida, crea perfil y cierra sesión sola. |
+| 3 | API de apps y perfiles | Canje de token, sesión y lectura/escritura de perfil funcionan fuera del navegador. |
+| 4 | APK beta | NFC y QR abren la bienvenida en tablet institucional y cargan el perfil. |
 | 5 | EXE beta | Lector USB abre la bienvenida en Windows y el modo kiosco resiste uso real. |
-| 6 | Piloto y endurecimiento | Rate limiting, base de datos, panel de revocación y auditoría. |
+| 6 | Piloto y endurecimiento | Rate limiting, base de datos, panel de revocación, retención y auditoría. |
 
-Esfuerzo estimado: API + APK beta, 2–3 semanas; EXE beta con NFC, 2–3 semanas; piloto y
-endurecimiento, 2–4 semanas. Son estimaciones, no compromisos de fecha.
+Esfuerzo estimado: API + perfiles, 1–2 semanas; APK beta, 2–3 semanas; EXE beta con NFC,
+2–3 semanas; piloto y endurecimiento, 2–4 semanas. Son estimaciones, no compromisos de
+fecha.
 
 ## 6. Decisiones abiertas
 
@@ -130,3 +149,5 @@ endurecimiento, 2–4 semanas. Son estimaciones, no compromisos de fecha.
 - No se escribirán tokens en logs, analítica ni URLs de terceros.
 - No se reutilizarán tarjetas revocadas.
 - No se almacenarán tokens en claro en el repositorio.
+- No se publicarán botones de descarga de APK/EXE hasta que existan binarios firmados y
+  probados; la UI los muestra como “En preparación”.

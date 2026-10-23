@@ -61,8 +61,20 @@ Ver [`producto.md`](producto.md) para la especificación funcional que guiará l
 ## Documentación técnica
 
 - [`arquitectura/acceso-y-dispositivos.md`](arquitectura/acceso-y-dispositivos.md): Ley
-  21.801, canales de acceso, flujo de token, sesión y operación escolar.
-- [`plan-apps.md`](plan-apps.md): plan de la APK (Capacitor) y del ejecutable de Windows
-  (Tauri), API necesaria y fases.
+  21.801, canales de acceso, tokens guest/público, flujo de onboarding, persistencia de
+  perfiles, PWA y operación escolar.
+- [`plan-apps.md`](plan-apps.md): PWA instalable ya implementada y plan de la APK
+  (Capacitor) y del ejecutable de Windows (Tauri), API y fases.
 - [`marca/analisis-visual.md`](marca/analisis-visual.md): paleta y recortes de marca
   derivados de las referencias originales.
+
+## Estado actual de la web
+
+- `/` sin token muestra un error de acceso; no es la landing pública.
+- `/a/vibematch-acceso-publico-2026` abre la landing con los contactos para pedir el kit.
+- `/a/<token-personal>` abre la bienvenida; al entrar se crea la sesión.
+- El primer ingreso pide perfil; luego queda guardado para las siguientes entradas.
+- `/app` muestra el dashboard, `/app/perfil` permite editar y `/app/instalar` explica cómo
+  instalar la PWA. Las apps APK/EXE siguen en preparación.
+- Existen 100 tarjetas guest únicas, 3 demos y 1 token público en `data/cards.json` (solo
+  hashes). Los tokens en claro están en `data/tarjetas-demo.csv`, ignorado por Git.

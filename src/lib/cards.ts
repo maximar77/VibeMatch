@@ -1,6 +1,7 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { io } from "next/cache";
 import { cookies } from "next/headers";
 
 /**
@@ -27,6 +28,7 @@ type StoredCard = {
   tokenHash: string;
   holder?: string | null;
   level?: string | null;
+  kind?: "personal" | "public";
   status?: "active" | "revoked";
   createdAt?: string;
 };
@@ -40,6 +42,7 @@ export type Tarjeta = {
   id: string;
   holder: string | null;
   level: string | null;
+  kind: "personal" | "public";
   status: "active" | "revoked";
   createdAt: string | null;
 };
@@ -90,6 +93,7 @@ function toTarjeta(card: StoredCard): Tarjeta {
     id: card.id,
     holder: card.holder ?? null,
     level: card.level ?? null,
+    kind: card.kind ?? "personal",
     status: card.status ?? "active",
     createdAt: card.createdAt ?? null,
   };
@@ -146,6 +150,10 @@ function leerSesionDesdeValor(value: string): string | null {
  * Se usa dentro de un <Suspense> para cumplir con Cache Components.
  */
 export async function leerSesion(): Promise<Acceso | null> {
+  // La validación compara la expiración contra la hora actual. `io()` saca
+  // esa lectura del shell estático para que Cache Components no la congele.
+  await io();
+
   const cookieStore = await cookies();
   const value = cookieStore.get(SESSION_COOKIE)?.value;
   if (!value) return null;

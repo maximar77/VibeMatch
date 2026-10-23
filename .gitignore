@@ -30,6 +30,7 @@ coverage/
 # Enlaces y tokens de tarjetas (los hashes viven en data/cards.json)
 data/tarjetas-demo.csv
 data/tarjetas/
+data/profiles.json
 data/*.local.json
 
 # Sistema operativo
