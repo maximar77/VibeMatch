@@ -300,15 +300,16 @@ async function ContenidoApp() {
               </h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {zonas.map((zona) => (
-                  <div
+                  <a
                     key={zona.name}
-                    className={`rounded-2xl border border-white/10 bg-gradient-to-br ${zona.accent} p-4`}
+                    href={`/app/chat/${zona.name.toLowerCase()}`}
+                    className="block rounded-2xl border border-white/10 bg-gradient-to-br p-4 hover:bg-white/[0.05] transition"
                   >
                     <p className="text-sm font-semibold text-white">{zona.name}</p>
                     <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
                       {zona.text}
                     </p>
-                  </div>
+                  </a>
                 ))}
               </div>
             </section>
