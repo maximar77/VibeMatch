@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { leerSesion } from "@/lib/cards";
+import { leerPerfil } from "@/lib/profiles";
 import { listarMensajes, guardarMensaje } from "@/lib/chat";
 import { validarMensaje, evaluarMensaje } from "@/lib/moderacion";
 
@@ -42,11 +43,14 @@ export async function POST(
   }
 
   const evaluacion = evaluarMensaje(texto);
+  const perfil = leerPerfil(acceso.card.id);
+  const vibe = perfil?.vibe ?? "conversar";
+
   const mensaje = guardarMensaje({
     canal,
     usuarioId: acceso.card.id,
-    usuarioName: acceso.card.holder ?? "Alumno",
-    usuarioVibe: undefined, // Se completa desde el perfil si está disponible
+    usuarioNombre: acceso.card.holder ?? "Alumno",
+    usuarioVibe: vibe,
     texto: evaluacion.textoFiltrado,
     timestamp: new Date().toISOString(),
     editado: false,
@@ -54,7 +58,7 @@ export async function POST(
   });
 
   return NextResponse.json(
-    { mensaje, filtrado: !evaluacion.apto, motivo: evaluacion.motivo },
+    { mensaje, filtrado: !evaluacion.apto, motivo: evaluacion.motivo, vibe },
     { headers: { "cache-control": "no-store" } },
   );
 }

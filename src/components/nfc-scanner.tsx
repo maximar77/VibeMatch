@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useEffect } from "react";
-import { leerNFCMejorEsfuerzo } from "@/lib/nfc-native";
+import { leerNFCNativo } from "@/lib/nfc-native";
 import { nfcWebSupported } from "@/lib/nfc-web";
 
 type Props = {
@@ -25,7 +25,7 @@ export function NFCScanner({
     setEstado("leyendo");
     setMensaje("Acérca la tarjeta NFC al lector…");
 
-    const resultado = await leerNFCMejorEsfuerzo();
+    const resultado = await leerNFCNativo();
 
     if (resultado.ok) {
       const { cardId } = resultado;
