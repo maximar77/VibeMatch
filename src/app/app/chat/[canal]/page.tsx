@@ -111,9 +111,9 @@ async function ContenidoChat({ params }: { params: { canal: string } }) {
 
 function etiquetaVibe(vibe: string): string {
   const etiquetas: Record<string, string> = {
-    busco-equipo: "Busco equipo",
+    "busco-equipo": "Busco equipo",
     conversar: "Conversando",
-    modo-estudio: "Modo estudio",
+    "modo-estudio": "Modo estudio",
     explorando: "Explorando",
   };
   return etiquetas[vibe] ?? vibe;
