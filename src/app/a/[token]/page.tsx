@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { AccessDenied } from "@/components/access-denied";
 import { LandingPage } from "@/components/landing-page";
-import { validarToken, type Acceso } from "@/lib/cards";
+import { validarToken, type Acceso, aplicarDatosTarjeta } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
 import { entrarAction } from "@/app/actions";
 
@@ -15,12 +15,14 @@ export const metadata: Metadata = {
 
 export default function AccesoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ nombre?: string; curso?: string; nro?: string }>;
 }) {
   return (
     <Suspense fallback={<CargandoAcceso />}>
-      <AccesoContenido params={params} />
+      <AccesoContenido params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -59,10 +61,13 @@ function CargandoAcceso() {
 
 async function AccesoContenido({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ nombre?: string; curso?: string; nro?: string }>;
 }) {
   const { token } = await params;
+  const sp = await searchParams;
   const acceso = validarToken(token);
 
   if (!acceso) {
@@ -74,6 +79,31 @@ async function AccesoContenido({
         detail="Pide ayuda en inspectoría o al equipo de convivencia de tu colegio. No compartas el enlace de tu tarjeta con otras personas."
       />
     );
+  }
+
+  // Nuevo método: si la URL trae datos de usuario, se aplican a la tarjeta como base.
+  const nombreParam = sp?.nombre ? decodeURIComponent(sp.nombre) : null;
+  const cursoParam = sp?.curso ? decodeURIComponent(sp.curso) : null;
+  const nroParam = sp?.nro ? Number(sp.nro) : null;
+
+  if (nombreParam || cursoParam || nroParam) {
+    aplicarDatosTarjeta(token, {
+      nombre: nombreParam,
+      curso: cursoParam,
+      nro: nroParam,
+    });
+    // Reflejar en la vista inmediatamente.
+    if (nombreParam) {
+      acceso.card.holder = nombreParam;
+      acceso.card.fullName = nombreParam;
+    }
+    if (cursoParam) {
+      acceso.card.level = cursoParam;
+      acceso.card.course = cursoParam;
+    }
+    if (nroParam !== null && !Number.isNaN(nroParam)) {
+      acceso.card.listNumber = nroParam;
+    }
   }
 
   // El token genérico muestra la landing pública con los contactos para pedir

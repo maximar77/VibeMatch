@@ -39,11 +39,17 @@ const quiet = args.has("quiet") || count > 10;
 const baseUrl = (
   args.get("base") ??
   process.env.BASE_URL ??
-  "http://localhost:3100"
+  "http://localhost:3000"
 ).replace(/\/$/, "");
 const school = process.env.SCHOOL_NAME ?? "Colegio Superior del Maipo";
 const publicToken =
   args.get("public-token") ?? "vibematch-acceso-publico-2026";
+
+const fullNameArg = args.get("name") || args.get("nombre") || args.get("fullname");
+const courseArg = args.get("course") || args.get("curso") || args.get("level");
+const listArg = args.get("list") || args.get("numero") || args.get("nlista");
+const listNumberArg = listArg ? Number(listArg) : null;
+const cardIdArg = args.get("id") || args.get("cardid");
 
 const dataDir = path.join(process.cwd(), "data");
 const storePath = path.join(dataDir, "cards.json");
@@ -117,7 +123,7 @@ if (publicMode) {
 
   for (let i = 0; i < count; i += 1) {
     const n = startIndex + i + 1;
-    const id = `${prefix}${String(n).padStart(4, "0")}`;
+    const id = cardIdArg && count === 1 && i === 0 ? cardIdArg : `${prefix}${String(n).padStart(4, "0")}`;
     let token = "";
     let tokenHash = "";
 
@@ -128,18 +134,29 @@ if (publicMode) {
 
     usedHashes.add(tokenHash);
 
-    const [holder, level] = guest
-      ? [null, null]
-      : (demoPeople[(n - 1) % demoPeople.length] ?? [
-          `Estudiante ${n}`,
-          "Sin curso",
-        ]);
+    let holder = null;
+    let level = null;
+    if (fullNameArg) {
+      holder = fullNameArg;
+    } else if (!guest) {
+      const demo = demoPeople[(n - 1) % demoPeople.length];
+      holder = demo?.[0] ?? `Estudiante ${n}`;
+    }
+    if (courseArg) {
+      level = courseArg;
+    } else if (!guest && !fullNameArg) {
+      const demo = demoPeople[(n - 1) % demoPeople.length];
+      level = demo?.[1] ?? null;
+    }
 
     const card = {
       id,
       tokenHash,
       holder,
       level,
+      course: courseArg ?? level ?? null,
+      fullName: holder,
+      listNumber: Number.isFinite(listNumberArg) ? listNumberArg : null,
       kind: "personal",
       status: "active",
       createdAt: new Date().toISOString(),
@@ -160,9 +177,22 @@ if (generated.length > 0) {
 
   writeFileSync(storePath, `${JSON.stringify(store, null, 2)}\n`, "utf8");
 
-  const csvHeader = "id,holder,level,token,url,estado";
+  const csvHeader = "id,nombre,curso,nro_lista,holder,level,fullName,course,listNumber,token,url,estado";
   const csvRows = generated.map((card) =>
-    [card.id, card.holder, card.level, card.token, card.url, card.status]
+    [
+      card.id,
+      card.fullName ?? card.holder ?? "",
+      card.course ?? card.level ?? "",
+      card.listNumber ?? "",
+      card.holder,
+      card.level,
+      card.fullName,
+      card.course,
+      card.listNumber,
+      card.token,
+      card.url,
+      card.status,
+    ]
       .map((value) => `"${String(value ?? "").replaceAll('"', '""')}"`)
       .join(","),
   );

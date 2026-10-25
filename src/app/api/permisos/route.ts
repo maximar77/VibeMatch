@@ -76,12 +76,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const cardId = String(cuerpo.cardId ?? acceso.card.id);
+  const cardIdRaw = String(cuerpo.cardId ?? acceso.card.id);
   const accion = String(cuerpo.accion ?? "salida");
   const curso = String(cuerpo.curso ?? acceso.card.level ?? "Sin asignar");
   const fecha = String(cuerpo.fecha ?? fechaLocal());
   const hora = String(cuerpo.hora ?? horaLocal());
   const registradoPor = String(cuerpo.registradoPor ?? acceso.card.id);
+
+  const { buscarTarjetaPorToken, listarTarjetas } = await import("@/lib/cards");
+  const tarjetaPorToken = buscarTarjetaPorToken(cardIdRaw);
+  const tarjeta = tarjetaPorToken ?? listarTarjetas().find((t) => t.id === cardIdRaw) ?? null;
+  const cardId = tarjeta?.id ?? acceso.card.id;
 
   const activos = listarPermisos({ cardId, fecha, abiertos: true });
   const abierto = activos[0];

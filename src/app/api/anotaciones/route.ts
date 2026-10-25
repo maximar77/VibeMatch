@@ -98,8 +98,13 @@ export async function POST(request: Request) {
     );
   }
 
+  const { buscarTarjetaPorToken, listarTarjetas } = await import("@/lib/cards");
+  const tarjetaPorToken = buscarTarjetaPorToken(cardId);
+  const tarjeta = tarjetaPorToken ?? listarTarjetas().find((t) => t.id === cardId) ?? null;
+  const tarjetaId = tarjeta?.id ?? acceso.card.id;
+
   const anotacion = guardarAnotacion({
-    cardId,
+    cardId: tarjetaId,
     curso,
     tipo: tipoRaw,
     categoria: categoriaRaw as CategoriaAnotacion,

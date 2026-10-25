@@ -65,3 +65,15 @@ temp/
 
 # Generado por Next.js
 next-env.d.ts
+
+.vercel
+vercel.env
+.vercel/*
+*.local.env
+
+# Artefactos locales
+bore.zip
+captura*.png
+build-output.txt
+contexto-IA.tx
+

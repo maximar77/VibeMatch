@@ -27,7 +27,7 @@ function Cargando() {
 export default function ChatCanalPage({
   params,
 }: {
-  params: { canal: string };
+  params: Promise<{ canal: string }>;
 }) {
   return (
     <Suspense fallback={<Cargando />}>
@@ -36,7 +36,7 @@ export default function ChatCanalPage({
   );
 }
 
-async function ContenidoChat({ params }: { params: { canal: string } }) {
+async function ContenidoChat({ params }: { params: Promise<{ canal: string }> }) {
   const acceso = await leerSesion();
   if (!acceso || acceso.card.kind === "public") {
     redirect("/");

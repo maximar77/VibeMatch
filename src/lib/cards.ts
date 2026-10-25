@@ -1,5 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { io } from "next/cache";
 import { cookies } from "next/headers";
@@ -44,6 +44,7 @@ type StoredCard = {
 type CardStore = {
   school?: string;
   cards?: StoredCard[];
+  updatedAt?: string;
 };
 
 export type Tarjeta = {
@@ -236,4 +237,57 @@ export function iniciales(nombre: string | null): string {
   if (!nombre) return "VM";
   const parts = nombre.trim().split(/\s+/).slice(0, 2);
   return parts.map((part) => part.charAt(0).toUpperCase()).join("") || "VM";
+}
+
+/**
+ * Aplica datos de usuario (nombre/curso/número de lista) a una tarjeta existente
+ * a partir de los parámetros de la URL. Permite que cualquier token guest se
+ * convierta en la base de una cuenta cuando la URL trae esos datos, sin tener
+ * que registrar la tarjeta por adelantado.
+ *
+ * Devuelve true si la tarjeta existía y se actualizó.
+ */
+export function aplicarDatosTarjeta(
+  token: string,
+  datos: { nombre?: string | null; curso?: string | null; nro?: number | null },
+): boolean {
+  const clean = token.trim();
+  if (!TOKEN_PATTERN.test(clean)) return false;
+
+  const targetHash = hashToken(clean);
+  let parsed: CardStore;
+  try {
+    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8")) as CardStore;
+  } catch {
+    return false;
+  }
+  if (!parsed || !Array.isArray(parsed.cards)) return false;
+
+  const idx = parsed.cards.findIndex((card) => card.tokenHash === targetHash);
+  if (idx === -1) return false;
+
+  const card = parsed.cards[idx];
+  if (datos.nombre && datos.nombre.trim()) {
+    card.holder = datos.nombre.trim();
+    card.fullName = datos.nombre.trim();
+  }
+  if (datos.curso && datos.curso.trim()) {
+    card.level = datos.curso.trim();
+    card.course = datos.curso.trim();
+  }
+  if (datos.nro !== null && datos.nro !== undefined && !Number.isNaN(datos.nro)) {
+    card.listNumber = Number(datos.nro);
+  }
+
+  parsed.updatedAt = new Date().toISOString();
+
+  try {
+    mkdirSync(path.dirname(STORE_PATH), { recursive: true });
+    const temporary = `${STORE_PATH}.${process.pid}.tmp`;
+    writeFileSync(temporary, `${JSON.stringify(parsed, null, 2)}\n`, "utf8");
+    renameSync(temporary, STORE_PATH);
+  } catch {
+    return false;
+  }
+  return true;
 }

@@ -4,6 +4,8 @@ import { leerProfesorSesion } from "@/lib/teachers";
 import { obtenerAsistencia, registrarAsistenciaAction } from "@/app/profesor-actions";
 import { salirProfesorAction } from "@/app/profesor-actions";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Asistencia en vivo · VibeMatch Docente",
   robots: { index: false, follow: false },

@@ -4,6 +4,8 @@ import { leerProfesorSesion } from "@/lib/teachers";
 import { obtenerPermisos, registrarPermisoBanoAction } from "@/app/profesor-actions";
 import { salirProfesorAction } from "@/app/profesor-actions";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Permisos de baño · VibeMatch Docente",
   robots: { index: false, follow: false },

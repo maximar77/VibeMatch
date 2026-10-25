@@ -31,23 +31,16 @@ export function NFCScanner({
       const { cardId } = resultado;
       setMensaje(`Tarjeta leída: ${cardId}`);
 
-      let acceso: any = null;
-      try {
-        const { buscarTarjetaPorToken } = await import("@/lib/cards");
-        acceso = buscarTarjetaPorToken(cardId);
-      } catch {
-        // Ignorar errores de validación.
-      }
+      // La validación de tarjetas es server-only (next/headers, node:fs).
+      // Se valida en el servidor al abrir el enlace /a/[token].
+      // Aquí solo notificamos el cardId leído por NFC.
 
       setEstado("exito");
-      onTarjetaLeida?.(cardId, acceso);
+      onTarjetaLeida?.(cardId, null);
 
-      if (autoRedirect && acceso) {
-        if (acceso.card.kind === "personal") {
-          window.location.href = `/app/perfil?tarjeta=${encodeURIComponent(cardId)}`;
-        } else {
-          window.location.href = `/app`;
-        }
+      if (autoRedirect) {
+        // Validar en el servidor abriendo el enlace de la tarjeta.
+        window.location.href = `/a/${encodeURIComponent(cardId)}`;
       }
     } else {
       setEstado("error");

@@ -2,15 +2,24 @@
  * Lector NFC Web para VibeMatch.
  *
  * Utiliza la Web NFC API (NDEFReader) disponible en Chrome/Android y
- * navegadores modernos. Lee el número de serie (UID) de la tarjeta NFC
- * y lo devuelve como cadena hexadecimal para identificarla en el sistema.
+ * navegadores modernos. Prioriza leer el mensaje NDEF con la URL /a/<token>
+ * de la tarjeta. Si no hay NDEF válido, intenta usar el UID como fallback.
  *
  * Nota: esta API requiere un contexto seguro (HTTPS o localhost).
  */
 
+type NDEFRecord = {
+  recordType?: string;
+  data?: DataView | ArrayBuffer | Uint8Array;
+};
+
+type NDEFMessage = {
+  records?: NDEFRecord[];
+};
+
 type NDEFReaderEvent = Event & {
   serialNumber?: Uint8Array;
-  message?: { records: Array<{ data: Uint8Array }> };
+  message?: NDEFMessage;
 };
 
 type NDEFReaderInstance = {
@@ -28,11 +37,123 @@ export function nfcWebSupported(): boolean {
   return typeof window !== "undefined" && typeof (window as any).NDEFReader !== "undefined";
 }
 
+function toUint8Array(data: NDEFRecord["data"]): Uint8Array | null {
+  if (!data) return null;
+  if (data instanceof Uint8Array) return data;
+  if (data instanceof ArrayBuffer) return new Uint8Array(data);
+  if (data instanceof DataView) {
+    const arr = new Uint8Array(data.byteLength);
+    for (let i = 0; i < data.byteLength; i += 1) {
+      arr[i] = data.getUint8(i);
+    }
+    return arr;
+  }
+  return null;
+}
+
+function decodeRecord(record: NDEFRecord): string | null {
+  const bytes = toUint8Array(record.data);
+  if (!bytes || bytes.length === 0) return null;
+
+  const type = (record.recordType || "").toLowerCase();
+
+  // URL record (well-known type "U")
+  if (type === "url") {
+    const prefixMap: Record<number, string> = {
+      0x00: "",
+      0x01: "http://www.",
+      0x02: "https://www.",
+      0x03: "http://",
+      0x04: "https://",
+      0x05: "tel:",
+      0x06: "mailto:",
+      0x07: "ftp://anonymous:anonymous@",
+      0x08: "ftp://ftp.",
+      0x09: "ftps://",
+      0x0a: "sftp://",
+      0x0b: "smb://",
+      0x0c: "nfs://",
+      0x0d: "ftp://",
+      0x0e: "dav://",
+      0x0f: "news:",
+      0x10: "telnet://",
+      0x11: "imap:",
+      0x12: "rtsp://",
+      0x13: "urn:",
+      0x14: "pop:",
+      0x15: "sip:",
+      0x16: "sips:",
+      0x17: "tftp:",
+      0x18: "btspp://",
+      0x19: "btl2cap://",
+      0x1a: "btgoep://",
+      0x1b: "tcpobex://",
+      0x1c: "irdaobex://",
+      0x1d: "file://",
+      0x1e: "urn:epc:id:",
+      0x1f: "urn:epc:tag:",
+      0x20: "urn:epc:pat:",
+      0x21: "urn:epc:raw:",
+      0x22: "urn:epc:",
+      0x23: "urn:nfc:",
+    };
+    const prefix = prefixMap[bytes[0]] ?? "";
+    const rest = new TextDecoder().decode(bytes.slice(1));
+    return prefix + rest;
+  }
+
+  // Absolute URL
+  if (type === "absolute-url") {
+    return new TextDecoder().decode(bytes);
+  }
+
+  // Text record
+  if (type === "text") {
+    if (bytes.length === 0) return null;
+    const status = bytes[0];
+    const isUtf16 = (status & 0x80) !== 0;
+    const langCodeLength = status & 0x3f;
+    const textBytes = bytes.slice(1 + langCodeLength);
+    return new TextDecoder(isUtf16 ? "utf-16" : "utf-8").decode(textBytes);
+  }
+
+  // Smart poster or unknown - try to decode as text
+  try {
+    const text = new TextDecoder().decode(bytes);
+    if (text.includes("http") || text.includes("/a/")) return text;
+  } catch {
+    // ignore
+  }
+
+  return null;
+}
+
+function extraerTokenDesdeUrl(url: string): string | null {
+  try {
+    // Intentar parsear como URL completa
+    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "http://localhost");
+    const path = parsed.pathname;
+    // Buscar /a/<token>
+    const match = path.match(/\/a\/([A-Za-z0-9_-]{24,128})/);
+    if (match?.[1]) return match[1];
+    // Si el path completo es el token
+    const cleanPath = path.replace(/^\//, "");
+    if (/^[A-Za-z0-9_-]{24,128}$/.test(cleanPath)) return cleanPath;
+  } catch {
+    // Intentar regex directo
+    const match = url.match(/\/a\/([A-Za-z0-9_-]{24,128})/);
+    if (match?.[1]) return match[1];
+  }
+  // Si es directamente un token
+  if (/^[A-Za-z0-9_-]{24,128}$/.test(url.trim())) return url.trim();
+  return null;
+}
+
 /**
  * Lee una tarjeta NFC mediante Web NFC API.
  *
  * @param timeoutMs Tiempo máximo de espera en milisegundos (default 10s).
- * @returns El ID de la tarjeta (UID en hex) o un error.
+ * @returns El token/cardId de la tarjeta o un error.
  */
 export async function leerNFCWeb(
   timeoutMs = 10_000,
@@ -60,6 +181,22 @@ export async function leerNFCWeb(
       const reader = new NDEFReaderCtor() as NDEFReaderInstance;
 
       const onScan = (event: NDEFReaderEvent) => {
+        // Primero intentar leer mensaje NDEF con URL/token
+        const message = event.message;
+        if (message?.records && message.records.length > 0) {
+          for (const record of message.records) {
+            const decoded = decodeRecord(record);
+            if (decoded) {
+              const token = extraerTokenDesdeUrl(decoded);
+              if (token) {
+                finalizar({ ok: true, cardId: token, source: "web-nfc" });
+                return;
+              }
+            }
+          }
+        }
+
+        // Fallback: usar UID serialNumber
         const serial = event.serialNumber;
         if (serial && serial.length > 0) {
           const cardId = Array.from(serial as unknown as number[])
@@ -67,12 +204,13 @@ export async function leerNFCWeb(
             .join("")
             .toUpperCase();
           finalizar({ ok: true, cardId, source: "web-nfc" });
-        } else {
-          finalizar({
-            ok: false,
-            error: "No se pudo leer el identificador de la tarjeta NFC.",
-          });
+          return;
         }
+
+        finalizar({
+          ok: false,
+          error: "No se pudo leer el identificador de la tarjeta NFC.",
+        });
       };
 
       const onError = (_error: Event) => {
@@ -86,7 +224,7 @@ export async function leerNFCWeb(
       reader.onreading = onScan;
 
       reader.scan().then(() => {
-        // Escaneo iniciado correctamente; el resultado llegá por onreading/onreadingerror.
+        // Escaneo iniciado correctamente; el resultado llegará por onreading/onreadingerror.
       }).catch((err: unknown) => {
         finalizar({
           ok: false,

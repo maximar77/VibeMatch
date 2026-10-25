@@ -21,6 +21,43 @@ function esAppNativa(): boolean {
   return typeof window !== "undefined" && Boolean((window as any).Capacitor);
 }
 
+function extraerTokenDesdeUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const path = parsed.pathname;
+    const match = path.match(/\/a\/([A-Za-z0-9_-]{24,128})/);
+    if (match?.[1]) return match[1];
+  } catch {
+    // ignore
+  }
+  const match = url.match(/\/a\/([A-Za-z0-9_-]{24,128})/);
+  if (match?.[1]) return match[1];
+  if (/^[A-Za-z0-9_-]{24,128}$/.test(url.trim())) return url.trim();
+  return null;
+}
+
+function bytesAHex(bytes: unknown): string | null {
+  if (!bytes) return null;
+  if (typeof bytes === "string") {
+    // Ya es hex o string
+    if (/^[0-9A-Fa-f]+$/.test(bytes)) return bytes.toUpperCase();
+    return null;
+  }
+  if (Array.isArray(bytes)) {
+    return bytes
+      .map((b: number) => Number(b).toString(16).padStart(2, "0"))
+      .join("")
+      .toUpperCase();
+  }
+  if (bytes instanceof Uint8Array) {
+    return Array.from(bytes)
+      .map((b: number) => b.toString(16).padStart(2, "0"))
+      .join("")
+      .toUpperCase();
+  }
+  return null;
+}
+
 /**
  * Lee una tarjeta NFC mediante el plugin nativo de Capacitor.
  *
@@ -49,23 +86,54 @@ export async function leerNFCNativo(): Promise<NfcNativeResult> {
     }
 
     const resultado = await Nfc.readOnce();
-    const serial = resultado.identifier;
 
-    if (!serial || serial.length === 0) {
+    // Intentar leer NDEF primero
+    if (resultado?.message?.records) {
+      const records = Array.isArray(resultado.message.records)
+        ? resultado.message.records
+        : [resultado.message.records];
+      for (const record of records) {
+        const payload = record?.payload || record?.data || record?.recordPayload;
+        if (typeof payload === "string") {
+          const token = extraerTokenDesdeUrl(payload);
+          if (token) return { ok: true, cardId: token, source: "capacitor-nfc" };
+        }
+        if (payload && typeof payload === "object") {
+          const text = new TextDecoder().decode(payload);
+          const token = extraerTokenDesdeUrl(text);
+          if (token) return { ok: true, cardId: token, source: "capacitor-nfc" };
+        }
+      }
+    }
+
+    // También revisar otros campos comunes
+    const ndefUrl = resultado?.url || resultado?.ndef?.url || resultado?.message?.url;
+    if (typeof ndefUrl === "string") {
+      const token = extraerTokenDesdeUrl(ndefUrl);
+      if (token) return { ok: true, cardId: token, source: "capacitor-nfc" };
+    }
+
+    const serial = resultado?.identifier || resultado?.id || resultado?.serialNumber;
+
+    if (!serial || (Array.isArray(serial) && serial.length === 0)) {
       return {
         ok: false,
         error: "No se pudo leer el identificador de la tarjeta NFC.",
       };
     }
 
-    // identifier puede venir como string hex o como array de bytes según el plugin.
+    const cardIdHex = bytesAHex(serial);
     const cardId =
-      typeof serial === "string"
+      typeof serial === "string" && /^[0-9A-Fa-f]+$/.test(serial)
         ? serial.toUpperCase()
-        : Array.from(serial as unknown as number[])
-            .map((b: number) => b.toString(16).padStart(2, "0"))
-            .join("")
-            .toUpperCase();
+        : cardIdHex;
+
+    if (!cardId) {
+      return {
+        ok: false,
+        error: "No se pudo leer el identificador de la tarjeta NFC.",
+      };
+    }
 
     return { ok: true, cardId, source: "capacitor-nfc" };
   } catch (err: unknown) {

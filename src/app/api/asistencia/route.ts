@@ -75,12 +75,17 @@ export async function POST(request: Request) {
   }
 
   // Obtener nombre y número de lista de la tarjeta si está disponible.
-  const tarjeta = buscarTarjetaPorToken(cardId);
-  const nombre = tarjeta?.fullName ?? acceso.card.holder ?? "Sin nombre";
+  const tarjetaPorToken = buscarTarjetaPorToken(cardId);
+  const tarjeta = tarjetaPorToken ?? 
+    (await import("@/lib/cards")).listarTarjetas().find((t) => t.id === cardId) ?? 
+    null;
+  
+  const tarjetaId = tarjeta?.id ?? acceso.card.id;
+  const nombre = tarjeta?.fullName ?? tarjeta?.holder ?? acceso.card.holder ?? "Sin nombre";
   const numeroLista = tarjeta?.listNumber ?? null;
 
   const registro = guardarAsistencia({
-    cardId,
+    cardId: tarjetaId,
     curso,
     nombre,
     numeroLista,

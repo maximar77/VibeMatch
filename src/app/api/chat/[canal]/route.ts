@@ -14,7 +14,15 @@ export async function GET(
   }
 
   const { canal } = await params;
-  const mensajes = listarMensajes(canal);
+  const { searchParams } = new URL(request.url);
+  const vibeFilter = searchParams.get("vibe");
+
+  let mensajes = listarMensajes(canal);
+
+  // Filtrar por vibe si se especifica
+  if (vibeFilter) {
+    mensajes = mensajes.filter((m) => m.usuarioVibe === vibeFilter);
+  }
 
   return NextResponse.json({ canal, mensajes }, { headers: { "cache-control": "no-store" } });
 }
