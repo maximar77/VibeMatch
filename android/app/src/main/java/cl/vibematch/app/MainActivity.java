@@ -165,6 +165,14 @@ public class MainActivity extends BridgeActivity {
             .edit()
             .putString(KEY_SERVER, url)
             .apply();
+
+        // Al guardar desde vibematch://config no hay que reabrir el diálogo al
+        // recrear la actividad. Los deep links de tarjeta sí se conservan.
+        Intent actual = getIntent();
+        if (actual != null && esConfiguracion(actual)) {
+            actual.setData(null);
+            actual.removeExtra("configurar");
+        }
         recreate();
     }
 
