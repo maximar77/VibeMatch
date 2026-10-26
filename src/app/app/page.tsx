@@ -257,8 +257,8 @@ async function ContenidoApp() {
                   Lleva tu perfil contigo.
                 </h2>
                 <p className="mt-2 max-w-md text-sm leading-relaxed text-zinc-300">
-                  Instala la web app en iPhone, Mac, Android o Windows. Tu perfil y
-                  tu tarjeta ya están listos; las versiones APK y EXE están en
+                  Instala la web app en iPhone, Mac, Android o Windows. La APK 1.0.0
+                  para tablets institucionales ya está disponible; el EXE sigue en
                   preparación.
                 </p>
                 <Link

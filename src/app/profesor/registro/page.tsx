@@ -131,6 +131,19 @@ export default async function ProfesorRegistroPage({
               </select>
             </label>
           </div>
+          <label className="flex flex-col gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+              Contraseña de la cuenta (opcional, mín. 6)
+            </span>
+            <input
+              name="password"
+              type="password"
+              minLength={6}
+              maxLength={64}
+              placeholder="••••••"
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
+            />
+          </label>
           <button
             type="submit"
             className="w-full rounded-full bg-brand-strong px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"

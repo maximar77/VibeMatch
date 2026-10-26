@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { io } from "next/cache";
 import { cookies } from "next/headers";
+import { DATA_DIR } from "@/lib/data-dir";
 
 /**
  * Acceso por tarjeta única.
@@ -12,7 +13,7 @@ import { cookies } from "next/headers";
  * (HMAC) para que el token desaparezca de la barra de direcciones.
  */
 
-const STORE_PATH = path.join(process.cwd(), "data", "cards.json");
+const STORE_PATH = path.join(DATA_DIR, "cards.json");
 const configuredSecret = process.env.VIBEMATCH_SECRET;
 const SESSION_SECRET = configuredSecret ?? "vibematch-demo-secret-cambiar-en-produccion";
 let warnedAboutSecret = false;

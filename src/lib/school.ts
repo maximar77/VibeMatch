@@ -10,7 +10,9 @@ import type {
   Anotacion,
   PermisoBano,
   RegistroAsistencia,
+  Amigo,
 } from "@/lib/school-schema";
+import { DATA_DIR } from "@/lib/data-dir";
 
 /**
  * Persistencia local de la gestión escolar VibeMatch.
@@ -20,8 +22,6 @@ import type {
  * si el proceso se interrumpe. Todos estos archivos están ignorados por Git
  * porque contienen datos de estudiantes.
  */
-
-const DATA_DIR = path.join(process.cwd(), "data");
 
 type Store<T> = { version: 1; items: T[] };
 
@@ -222,6 +222,128 @@ export function guardarArchivoAsistencia(teacherId: string, csv: string): string
 }
 
 /** Reconstruye y guarda el archivo del profesor a partir de sus registros. */
+// ------------------------------------------------------------ amigos
+
+export function listarAmigos(ownerCardId?: string): Amigo[] {
+  const { items } = leerStore<Amigo>("amigos");
+  return ownerCardId
+    ? items.filter((a) => a.ownerCardId === ownerCardId)
+    : items;
+}
+
+export function guardarAmigo(
+  amigo: Omit<Amigo, "id" | "createdAt">,
+): Amigo {
+  const store = leerStore<Amigo>("amigos");
+  const existente = store.items.find(
+    (a) => a.ownerCardId === amigo.ownerCardId && a.friendCardId === amigo.friendCardId,
+  );
+  if (existente) return existente;
+  const guardado: Amigo = {
+    ...amigo,
+    id: `amigo_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+  };
+  store.items = [...store.items, guardado];
+  escribirStore("amigos", store);
+  return guardado;
+}
+
+// ------------------------------------------------------------ csv permisos (baño)
+
+export function generarCsvPermisos(permisos: PermisoBano[]): string {
+  const encabezado = [
+    "Fecha",
+    "N° lista",
+    "Nombre (tarjeta)",
+    "Tarjeta",
+    "Curso",
+    "Salida",
+    "Regreso",
+    "Duración (min)",
+    "Excede límite",
+    "Registrado por",
+  ];
+  const filas = [...permisos]
+    .sort((a, b) => {
+      const fecha = a.fecha.localeCompare(b.fecha);
+      if (fecha !== 0) return fecha;
+      return a.inicio.localeCompare(b.inicio);
+    })
+    .map((p) =>
+      [
+        p.fecha,
+        "",
+        "",
+        p.cardId,
+        p.curso,
+        p.inicio,
+        p.fin ?? "En curso",
+        p.duracionMin ?? "",
+        p.excedeLimite ? "Sí" : "No",
+        p.registradoPor,
+      ]
+        .map(celdaCsv)
+        .join(","),
+    );
+  return `\uFEFF${[encabezado.map(celdaCsv).join(","), ...filas].join("\r\n")}\r\n`;
+}
+
+// Resumen por alumno: cuántas veces pidió baño y en qué días.
+export function generarCsvResumenBano(permisos: PermisoBano[]): string {
+  const porAlumno = new Map<string, { veces: number; dias: Set<string>; totalMin: number }>();
+  for (const p of permisos) {
+    const acc = porAlumno.get(p.cardId) ?? { veces: 0, dias: new Set(), totalMin: 0 };
+    acc.veces += 1;
+    acc.dias.add(p.fecha);
+    acc.totalMin += p.duracionMin ?? 0;
+    porAlumno.set(p.cardId, acc);
+  }
+  const encabezado = ["Tarjeta", "Veces (permisos)", "Días distintos", "Total minutos fuera", "Detalle de días"];
+  const filas = [...porAlumno.entries()]
+    .sort((a, b) => b[1].veces - a[1].veces)
+    .map(([cardId, acc]) =>
+      [
+        cardId,
+        acc.veces,
+        acc.dias.size,
+        acc.totalMin,
+        [...acc.dias].sort().join(" | "),
+      ]
+        .map(celdaCsv)
+        .join(","),
+    );
+  return `\uFEFF${[encabezado.map(celdaCsv).join(","), ...filas].join("\r\n")}\r\n`;
+}
+
+export function actualizarArchivoPermisos(teacherId: string): { ruta: string; total: number } {
+  const permisos = listarPermisos({}).filter((p) => p.registradoPor === teacherId);
+  const csv = generarCsvPermisos(permisos) + "\r\n--- RESUMEN POR ALUMNO ---\r\n" + generarCsvResumenBano(permisos);
+  const ARCHIVOS_DIR = path.join(DATA_DIR, "archivos-profesor");
+  mkdirSync(ARCHIVOS_DIR, { recursive: true });
+  const nombre = `${teacherId}-permisos.csv`;
+  const ruta = path.join(ARCHIVOS_DIR, nombre);
+  writeFileSync(ruta, csv, "utf8");
+  return { ruta: path.posix.join("data/archivos-profesor", nombre), total: permisos.length };
+}
+
+export function actualizarArchivoAmigos(teacherId: string, ownerCardId?: string): { ruta: string; total: number } {
+  const amigos = ownerCardId ? listarAmigos(ownerCardId) : listarAmigos();
+  const encabezado = ["Tarjeta dueño", "Tarjeta amigo", "Nombre", "Curso", "N° lista", "Agregado"];
+  const filas = amigos.map((a) =>
+    [a.ownerCardId, a.friendCardId, a.nombre, a.curso ?? "", a.numeroLista ?? "", a.createdAt]
+      .map(celdaCsv)
+      .join(","),
+  );
+  const csv = `\uFEFF${[encabezado.map(celdaCsv).join(","), ...filas].join("\r\n")}\r\n`;
+  const ARCHIVOS_DIR = path.join(DATA_DIR, "archivos-profesor");
+  mkdirSync(ARCHIVOS_DIR, { recursive: true });
+  const nombre = `${teacherId}-amigos.csv`;
+  const ruta = path.join(ARCHIVOS_DIR, nombre);
+  writeFileSync(ruta, csv, "utf8");
+  return { ruta: path.posix.join("data/archivos-profesor", nombre), total: amigos.length };
+}
+
 export function actualizarArchivoProfesor(teacherId: string): {
   ruta: string;
   total: number;

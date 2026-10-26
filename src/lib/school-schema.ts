@@ -104,7 +104,17 @@ export function etiquetaAsistencia(estado: EstadoAsistencia): string {
   return ETIQUETAS_ASISTENCIA[estado];
 }
 
-/** Genera un id corto y estable para registros nuevos. */
+export type Amigo = {
+  id: string;
+  /** Tarjeta del alumno que agrega al amigo. */
+  ownerCardId: string;
+  /** Tarjeta del alumno amigo. */
+  friendCardId: string;
+  nombre: string;
+  curso: string | null;
+  numeroLista: number | null;
+  createdAt: string;
+};
 export function nuevoId(prefijo: string): string {
   const azar = Math.random().toString(36).slice(2, 10);
   return `${prefijo}_${Date.now().toString(36)}${azar}`;

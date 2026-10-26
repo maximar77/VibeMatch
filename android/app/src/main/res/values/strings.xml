@@ -4,4 +4,5 @@
     <string name="title_activity_main">VibeMatch</string>
     <string name="package_name">cl.vibematch.app</string>
     <string name="custom_url_scheme">cl.vibematch.app</string>
+    <string name="configurar_servidor">Configurar servidor</string>
 </resources>

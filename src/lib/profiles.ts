@@ -6,6 +6,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import { DATA_DIR } from "@/lib/data-dir";
 import type { Perfil } from "@/lib/profile-schema";
 
 /**
@@ -16,7 +17,6 @@ import type { Perfil } from "@/lib/profile-schema";
  * después podrán usar las apps Android/Windows y la API.
  */
 
-const DATA_DIR = path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "profiles.json");
 
 type ProfileStore = {

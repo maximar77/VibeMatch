@@ -15,7 +15,12 @@ import {
   listarAsistencia,
   listarPermisos,
   listarAnotaciones,
+  guardarAmigo,
+  actualizarArchivoPermisos,
+  actualizarArchivoAmigos,
+  actualizarArchivoProfesor,
 } from "@/lib/school";
+import { buscarTarjetaPorToken, listarTarjetas } from "@/lib/cards";
 import {
   esEstadoAsistencia,
   type EstadoAsistencia,
@@ -25,8 +30,9 @@ import {
 
 export async function entrarProfesorAction(formData: FormData) {
   const codigo = String(formData.get("codigo") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
 
-  const profesor = autenticarProfesor(codigo);
+  const profesor = autenticarProfesor(codigo, password);
   if (!profesor) {
     redirect("/profesor/login?error=credenciales_invalidas");
   }
@@ -45,7 +51,6 @@ export async function salirProfesorAction() {
   redirect("/profesor/login");
 }
 
-import { buscarTarjetaPorToken, listarTarjetas } from "@/lib/cards";
 import { leerProfesorSesion } from "@/lib/teachers";
 
 export async function registrarAsistenciaAction(formData: FormData): Promise<void> {
@@ -248,6 +253,53 @@ export async function obtenerPermisos(filtro: {
   return listarPermisos({ ...filtro });
 }
 
+export async function registrarAmigoAction(formData: FormData): Promise<void> {
+  const profesor = await leerProfesorSesion();
+  if (!profesor) redirect("/profesor/login");
+
+  const ownerCardId = String(formData.get("ownerCardId") ?? "").trim();
+  const friendCardIdRaw = String(formData.get("friendCardId") ?? "").trim();
+  if (!ownerCardId || !friendCardIdRaw) return;
+
+  const tarjetaPorToken = buscarTarjetaPorToken(friendCardIdRaw);
+  const tarjeta = tarjetaPorToken ?? listarTarjetas().find((t) => t.id === friendCardIdRaw);
+  if (!tarjeta) return;
+
+  guardarAmigo({
+    ownerCardId,
+    friendCardId: tarjeta.id,
+    nombre: tarjeta.fullName ?? tarjeta.holder ?? "Alumno",
+    curso: tarjeta.course ?? tarjeta.level ?? null,
+    numeroLista: tarjeta.listNumber ?? null,
+  });
+}
+
+export async function exportarArchivosProfesorAction(): Promise<void> {
+  const profesor = await leerProfesorSesion();
+  if (!profesor) redirect("/profesor/login");
+  actualizarArchivoProfesor(profesor.id);
+  actualizarArchivoPermisos(profesor.id);
+  actualizarArchivoAmigos(profesor.id);
+}
+
+export async function resolverTarjetaAction(cardIdRaw: string): Promise<{
+  id: string;
+  nombre: string;
+  curso: string;
+  numeroLista: number | null;
+} | null> {
+  const profesor = await leerProfesorSesion();
+  if (!profesor) return null;
+  const tarjetaPorToken = buscarTarjetaPorToken(cardIdRaw);
+  const tarjeta = tarjetaPorToken ?? listarTarjetas().find((t) => t.id === cardIdRaw);
+  if (!tarjeta) return null;
+  return {
+    id: tarjeta.id,
+    nombre: tarjeta.fullName ?? tarjeta.holder ?? "Alumno",
+    curso: tarjeta.course ?? tarjeta.level ?? profesor.curso,
+    numeroLista: tarjeta.listNumber ?? null,
+  };
+}
 export async function obtenerAnotaciones(filtro: {
   curso?: string;
   tipo?: "positiva" | "negativa";
@@ -272,6 +324,7 @@ export async function registrarProfesorAction(formData: FormData) {
   const nivelRaw = String(formData.get("nivel") ?? "");
   const anioRaw = String(formData.get("anio") ?? "");
   const letraRaw = String(formData.get("letra") ?? "");
+  const password = String(formData.get("password") ?? "").trim();
 
   if (!codigoInstitucionalValido(codigoInstitucional)) {
     redirect("/profesor/registro?error=institucional_invalido");
@@ -295,6 +348,7 @@ export async function registrarProfesorAction(formData: FormData) {
     nivel: nivelRaw as Nivel,
     anio,
     letra: letraRaw as Letra,
+    password: password || null,
   });
 
   if (!resultado.ok) {

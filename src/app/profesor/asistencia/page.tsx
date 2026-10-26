@@ -31,6 +31,9 @@ export default async function AsistenciaPage() {
             <span className="text-xs text-zinc-400">
               {profesor.nombre} · {profesor.curso}
             </span>
+            <a href="/profesor/escanear" className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
+              Escanear alumno
+            </a>
             <form action={salirProfesorAction}>
               <button type="submit" className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
                 Cerrar sesión

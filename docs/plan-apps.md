@@ -1,8 +1,9 @@
 # Plan de apps: PWA, APK (Android) y EXE (Windows)
 
-> Estado: web con tarjeta, onboarding y PWA instalable implementados. APK y EXE siguen en
-> planificación; la UI muestra “En preparación”, sin descargas falsas.
-> Última actualización: 22 de octubre de 2026.
+> Estado: web con tarjeta, onboarding, panel docente y PWA implementados. APK Android
+> **1.0.0 compilada y firmada** con NFC, QR, deep links y servidor configurable en el
+> dispositivo. El EXE sigue en planificación.
+> Última actualización: 26 de octubre de 2026.
 
 ## 1. Restricción que ordena el plan
 
@@ -28,7 +29,7 @@ Web Next.js (UI + Server Actions + PWA + API)
       │  valida token → cookie de sesión
       ├── PWA instalable (misma UI, iPhone/Mac/Android/Windows)
       ▼
-APK (Capacitor)        EXE (Tauri 2)
+APK (Capacitor 1.0.0)  EXE (Tauri 2)
 Android / tablet       Windows 10/11 + WebView2
 ```
 
@@ -47,14 +48,15 @@ web y usa una API estable para el canje de token, la sesión y el cierre.
 
 ### API necesaria antes de las apps nativas
 
-| Endpoint | Método | Uso |
-|---|---|---|
-| `/api/acceso/[token]` | `POST` | Canjear token por sesión; devuelve cookie `HttpOnly` o token de corta duración. |
-| `/api/sesion` | `GET` | Datos mínimos de la tarjeta y del establecimiento. |
-| `/api/perfil` | `GET` | Perfil asociado a la tarjeta/sesión, para cargarlo en la app. |
-| `/api/perfil` | `PUT` | Crear o actualizar el perfil; valida consentimiento e intereses. |
-| `/api/salir` | `POST` | Revocar la sesión del dispositivo. |
-| `/api/tarjetas/[id]/revocar` | `POST` | Administración (requiere rol). |
+| Endpoint | Método | Uso | Estado |
+|---|---|---|---|
+| `/api/perfil` | `GET` | Perfil asociado a la tarjeta/sesión, para cargarlo en la app. | Implementado |
+| `/api/perfil` | `PUT` | Crear o actualizar el perfil; valida consentimiento e intereses. | Implementado |
+| `/api/health` | `GET` | Estado del proceso, volumen y secreto para Docker/Oracle. | Implementado |
+| `/api/acceso/[token]` | `POST` | Canjear token por sesión para clientes que no usan la web embebida. | Pendiente (la APK usa la cookie del WebView) |
+| `/api/sesion` | `GET` | Datos mínimos de la tarjeta y del establecimiento. | Pendiente |
+| `/api/salir` | `POST` | Revocar la sesión del dispositivo. | Pendiente |
+| `/api/tarjetas/[id]/revocar` | `POST` | Administración (requiere rol). | Pendiente |
 
 Recomendación: mantener Server Actions para la web y exponer estos endpoints para las
 apps. Para las apps nativas conviene un canje de token por credencial de dispositivo de
@@ -63,34 +65,57 @@ validación de origen y logs sin tokens ni PII.
 
 ## 3. APK con Capacitor
 
+Estado: **1.0.0 compilada y firmada** (`versionCode 1`), lista para instalar y probar.
+La app usa la web remota para no duplicar la lógica de negocio ni la sesión.
+
 **Por qué Capacitor:** reutiliza la UI web, permite empaquetar en Android y tiene
-plugins de NFC y almacenamiento seguro. Evita mantener dos interfaces.
+plugins de NFC y almacenamiento. Evita mantener dos interfaces.
 
-Alcance de la primera versión:
+Implementado en esta versión:
 
-- Lanzar la web embebida apuntando al dominio oficial.
-- Leer NFC (NDEF con URL `/a/<token>`) y abrir la bienvenida.
-- Escanear QR con la cámara como respaldo.
-- Guardar la sesión en almacenamiento seguro; botón de cierre.
-- Deep link `https://dominio/a/<token>` y esquema `vibematch://a/<token>`.
-- Modo tablet institucional: pantalla completa y bloqueo de navegación externa.
+- Web remota por HTTPS (`server.url`) con la misma sesión, Server Actions y perfil.
+- **Servidor configurable sin recompilar:** primer arranque con diálogo, atajo
+  “Configurar servidor” y enlace `vibematch://config`. La URL queda en
+  `SharedPreferences` y se aplica antes de crear el Bridge.
+- Lectura NFC nativa (`@capgo/capacitor-nfc`): NDEF con URL `/a/<token>`, texto y UID
+  como respaldo.
+- Escaneo QR con `BarcodeDetector` y `jsqr`; entrada manual de token como último recurso.
+- Deep links `https://dominio/a/<token>` (App Links verificados con
+  `assetlinks.json`) y `vibematch://a/<token>`.
+- Firma release con keystore propio; APK y AAB generados.
+- Permisos de NFC y cámara, y filtros de intents declarados en el manifiesto.
 
-Pasos:
+Pendiente antes de un piloto masivo:
 
-1. Cerrar la API de acceso y sesión.
-2. Añadir `@capacitor/core`, `@capacitor/android`, plugin NFC y plugin de QR.
-3. Configurar `server.url` solo en desarrollo; en producción empaquetar los assets o
-   apuntar al dominio con HTTPS.
-4. Probar en una tablet Android con NFC y en un lector USB-C.
-5. Firmar el APK/AAB y definir distribución: Play Store privada, Managed Google Play
-   o instalación por MDM del colegio.
+- Probar en una tablet Android física con NFC y en un lector USB-C/OTG.
+- Definir distribución: Play Store privada, Managed Google Play o MDM del colegio.
+- Evaluar modo kiosco y bloqueo de navegación externa más estricto para tablets
+  institucionales.
+- Endurecer la sesión (la cookie del WebView es la sesión; evaluar credencial de
+  dispositivo de corta duración).
+- Rate limiting y auditoría en los endpoints públicos.
 
-Requisitos: JDK 21, Android Studio, SDK 35+, cuenta de firma y un dispositivo de
-prueba con NFC.
+Compilación (Windows PowerShell):
 
-Riesgos: WebView + NFC tienen permisos y ciclos de vida distintos; el lector NFC USB
-en Android requiere OTG y un plugin específico. Validar hardware antes de prometer
-soporte universal.
+```powershell
+$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"
+$env:ANDROID_HOME="$env:LOCALAPPDATA\Android\Sdk"
+$env:VIBEMATCH_APP_URL="https://TU_DOMINIO"   # opcional: URL de fábrica
+npx cap sync android
+cd android
+.\gradlew.bat assembleRelease bundleRelease
+```
+
+La firma se lee de `android/keystore.properties`, que está ignorado por Git. El keystore
+vive fuera del repositorio (`C:\Users\idk\Documents\VibeMatch-keys\`) y debe respaldarse:
+sin él no se pueden publicar actualizaciones de la misma app. La huella SHA-256 de firma
+está en `public/.well-known/assetlinks.json` y en [`apk.md`](apk.md).
+
+Requisitos: JDK 21, Android SDK 36+, cuenta de firma y un dispositivo de prueba con NFC.
+
+Riesgos: WebView + NFC tienen permisos y ciclos de vida distintos; el lector NFC USB en
+Android requiere OTG y un plugin específico. Validar hardware antes de prometer soporte
+universal.
 
 ## 4. EXE con Tauri 2
 
@@ -124,8 +149,8 @@ certificado de firma de código (recomendado).
 |---|---|---|
 | 1 | Web + tarjeta + onboarding + PWA | Token válido entra; token inválido no; perfil persiste; instalación protegida; build pasa. |
 | 2 | Punto Vibe piloto | Tablet/PC + lector abre la bienvenida, crea perfil y cierra sesión sola. |
-| 3 | API de apps y perfiles | Canje de token, sesión y lectura/escritura de perfil funcionan fuera del navegador. |
-| 4 | APK beta | NFC y QR abren la bienvenida en tablet institucional y cargan el perfil. |
+| 3 | API de apps y perfiles | `/api/perfil` GET/PUT y healthcheck listos; canje de token para clientes nativos y cierre de sesión pendientes. |
+| 4 | APK beta | APK 1.0.0 firmada con NFC, QR, deep links y servidor configurable. Falta validarla en tablet física y definir distribución. |
 | 5 | EXE beta | Lector USB abre la bienvenida en Windows y el modo kiosco resiste uso real. |
 | 6 | Piloto y endurecimiento | Rate limiting, base de datos, panel de revocación, retención y auditoría. |
 
@@ -149,5 +174,6 @@ fecha.
 - No se escribirán tokens en logs, analítica ni URLs de terceros.
 - No se reutilizarán tarjetas revocadas.
 - No se almacenarán tokens en claro en el repositorio.
-- No se publicarán botones de descarga de APK/EXE hasta que existan binarios firmados y
-  probados; la UI los muestra como “En preparación”.
+- No se publicará un botón de descarga en la web hasta que el dominio de producción esté
+  activo; el APK firmado se distribuye por release privada o MDM. La UI mantiene el EXE
+  como “En preparación”.

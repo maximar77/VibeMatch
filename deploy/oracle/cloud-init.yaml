@@ -1,0 +1,29 @@
+#cloud-config
+# Cloud-init opcional para Oracle Cloud (Ubuntu 24.04).
+# Pégalo en "Show advanced options → Initialization script" al crear la instancia.
+# Instala Docker, el plugin Compose y prepara el firewall. El despliegue de la
+# app se hace después con deploy/oracle/install.sh.
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - ca-certificates
+  - curl
+  - git
+  - ufw
+  - openssl
+
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - systemctl enable --now docker
+  - apt-get install -y docker-compose-plugin
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw allow 443/udp
+  - ufw --force enable
+  - usermod -aG docker ubuntu
+  - touch /var/log/vibematch-cloud-init.done
+
+final_message: "VibeMatch: Docker y firewall listos. Continúa con deploy/oracle/install.sh"

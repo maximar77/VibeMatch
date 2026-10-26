@@ -20,6 +20,9 @@ equipos del establecimiento (Puntos Vibe, laboratorio y, más adelante, la app d
 - React 19 + TypeScript
 - Tailwind CSS 4
 - PWA instalable (manifest + service worker)
+- Android nativo con [Capacitor 8](https://capacitorjs.com/) (APK 1.0.0 firmada)
+- NFC (`@capgo/capacitor-nfc`) y QR (`jsqr` + `BarcodeDetector`)
+- Producción con Docker + Caddy en Oracle Cloud
 - ESLint
 
 ## Puesta en marcha
@@ -77,6 +80,54 @@ La web app es instalable (PWA): manifiesto, service worker e iconos están en
 `src/app/manifest.ts`, `public/sw.js` y `public/icons/`. La instalación requiere HTTPS o
 `localhost`; en iPhone se hace con Safari → Compartir → Añadir a pantalla de inicio.
 
+### App Android (APK)
+
+La versión **1.0.0** está compilada y firmada. La app envuelve la misma web con Capacitor
+para reutilizar la sesión, las Server Actions y el perfil, y añade lectura NFC nativa, QR
+con cámara y deep links.
+
+- Paquete `cl.vibematch.app`, `minSdk 24`, `targetSdk 36`.
+- Servidor por defecto: `https://vibematch.cl`. En el primer arranque se puede cambiar
+  por el dominio real o por la demo; también con el atajo **Configurar servidor** o
+  `vibematch://config`.
+- La URL se guarda en el dispositivo: **no hay que recompilar** para apuntar a otro
+  dominio. Está pensada para desplegar Oracle sin volver a firmar.
+- Artefactos `VibeMatch-1.0.0.apk` y `VibeMatch-1.0.0.aab` adjuntos en la
+  [release de GitHub](https://github.com/maximar77/VibeMatch/releases/latest).
+  Instrucciones, huella de firma y límites en [`docs/apk.md`](docs/apk.md).
+
+```bash
+# Compilar (Windows PowerShell)
+$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"
+$env:ANDROID_HOME="$env:LOCALAPPDATA\Android\Sdk"
+npx cap sync android
+cd android
+.\gradlew.bat assembleRelease bundleRelease
+```
+
+La firma se lee de `android/keystore.properties` (ignorado por Git). El keystore de
+release debe respaldarse fuera del repositorio; sin él no se pueden publicar
+actualizaciones de la misma app.
+
+## Producción en Oracle Cloud
+
+La guía completa está en [`deploy/oracle/README.md`](deploy/oracle/README.md): creación de
+la instancia, Security List y `ufw`, DNS, Caddy con HTTPS automático, Docker Compose,
+volumen persistente, backups, restauración, actualización y checklist.
+
+```bash
+# En la instancia, después de clonar y configurar deploy/oracle/.env
+sudo bash deploy/oracle/install.sh
+
+# Verificación
+curl -fsS https://TU_DOMINIO/api/health
+# {"ok":true,"service":"vibematch","checks":{...}}
+```
+
+El endpoint `/api/health` comprueba que el proceso responde, que el directorio de datos es
+escribible y que `VIBEMATCH_SECRET` está configurado. En Oracle los datos persisten en el
+volumen `vibematch_data`; en Vercel la demo usa `/tmp` y por eso no es persistente.
+
 Variables relevantes:
 
 | Variable | Uso |
@@ -85,6 +136,7 @@ Variables relevantes:
 | `VIBEMATCH_COOKIE_SECURE=1` | Activa `Secure` cuando el sitio se sirve por HTTPS. |
 | `BASE_URL` | Dominio impreso por el generador (por defecto `http://localhost:3100`). |
 | `SCHOOL_NAME` | Nombre del establecimiento en las tarjetas generadas. |
+| `VIBEMATCH_DATA_DIR` | Opcional. Directorio de datos alternativo (por ejemplo `/tmp/vibematch-data` en una demo sin disco persistente). En Oracle se omite para usar `./data`. |
 
 Copia `.env.example` a `.env.local` y completa `VIBEMATCH_SECRET` antes de un despliegue real.
 
@@ -102,6 +154,9 @@ VibeMatch/
 ├── public/icons/          Iconos 192/512, maskable y Apple Touch
 ├── public/marca/          Recortes de logotipo, isotipo, imagotipo e isologotipo
 ├── scripts/               Generador de tarjetas, guests y token público
+├── deploy/oracle/         Docker Compose, Caddy, backups y guía de Oracle Cloud
+├── android/               Proyecto Capacitor/Android y firma de la APK
+├── public/.well-known/    assetlinks.json para App Links de Android
 ├── data/cards.json        Registro de tarjetas (solo hashes) — no versionar tokens
 ├── data/profiles.json     Perfiles locales — ignorado por Git (datos personales)
 ├── docs/                  Documentación, especificación y arquitectura
@@ -122,7 +177,9 @@ VibeMatch/
 | `docs/Manual de Identidad Corporativa Completo - VibeMatch.docx` | Versión extendida del manual: equipo, identidad visual, producto y flujo UX. |
 | `docs/Actividad de Packaging y Diseño - VibeMatch.docx` | Packaging, normativa chilena (SERNAC, Minsal, SUBTEL) y stand de ventas. |
 | `docs/arquitectura/acceso-y-dispositivos.md` | Ley 21.801, canales de acceso, tokens guest/público, onboarding, perfiles, PWA y seguridad. |
-| `docs/plan-apps.md` | Web app instalable, plan de la APK (Capacitor) y del `.exe` (Tauri), API necesaria y fases. |
+| `docs/plan-apps.md` | Web app instalable, estado de la APK (Capacitor), plan del `.exe` (Tauri), API necesaria y fases. |
+| `docs/apk.md` | APK 1.0.0: instalación, configuración del servidor, firma, compilación y límites. |
+| `deploy/oracle/README.md` | Despliegue completo en Oracle Cloud: red, DNS, HTTPS, Docker, persistencia, backups y actualizaciones. |
 
 Resumen navegable: [`docs/README.md`](docs/README.md) · Especificación funcional: [`docs/producto.md`](docs/producto.md)
 
@@ -140,11 +197,13 @@ Resumen navegable: [`docs/README.md`](docs/README.md) · Especificación funcion
 - [x] Dashboard con perfil, zonas de interés, instalación y cierre de sesión.
 - [x] Web app instalable (PWA): manifiesto, service worker, iconos y página de instalación protegida.
 - [x] Generación de tarjetas con tokens únicos (solo hashes en el repositorio).
+- [x] API de perfil para la app (`/api/perfil` GET/PUT) y healthcheck de producción.
+- [x] Despliegue de producción preparado para Oracle Cloud (Docker, Caddy, volumen, backups).
+- [x] Build y firma de la app Android 1.0.0 (APK + AAB) con NFC, QR y deep links.
 - [ ] Codificación física de tarjetas NFC y generación de QR imprimibles.
 - [ ] Matching, chat moderado y zonas de interés conectadas a datos reales.
 - [ ] Panel de moderación, revocación y logs.
-- [ ] API de perfiles y sesión para las apps APK/EXE.
-- [ ] Build y distribución de la app Android (APK) y Windows (EXE); por ahora “en preparación”.
+- [ ] Build y distribución del ejecutable de Windows (EXE); la UI lo muestra “en preparación”.
 
 ## Flujo de trabajo
 

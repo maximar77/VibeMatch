@@ -4,14 +4,16 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * Configuración de la app Android de VibeMatch.
  *
  * La app carga la web desde el servidor remoto (server.url) para reutilizar
- * Next.js, acciones de servidor y cookies de sesión. El perfil se cachea en el
- * dispositivo (ver src/lib/offline-profile.ts) para funcionar sin conexión.
+ * Next.js, las Server Actions y las cookies de sesión. El perfil se cachea en
+ * el dispositivo (ver src/lib/offline-profile.ts) para funcionar sin conexión.
  *
- * Cambiar VIBEMATCH_APP_URL permite apuntar a la red local o a otro dominio
- * sin tocar el código.
+ * La URL se fija al compilar:
+ *   VIBEMATCH_APP_URL=https://tu-dominio.cl npx cap sync android
+ *
+ * En producción debe ser el dominio HTTPS de Oracle Cloud (Caddy). No uses una
+ * URL de túnel temporal (trycloudflare, ngrok) para una APK distribuida.
  */
-const servidorRemoto =
-  process.env.VIBEMATCH_APP_URL ?? "https://unlock-coal-gem-dozen.trycloudflare.com";
+const servidorRemoto = process.env.VIBEMATCH_APP_URL ?? "https://vibematch.cl";
 
 const config: CapacitorConfig = {
   appId: "cl.vibematch.app",
@@ -20,12 +22,18 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: false,
     captureInput: true,
-    webContentsDebuggingEnabled: false,
+    webContentsDebuggingEnabled: process.env.VIBEMATCH_DEBUG === "1",
   },
   server: {
     url: servidorRemoto,
     cleartext: servidorRemoto.startsWith("http://"),
     androidScheme: "https",
+    allowNavigation: [
+      "vibematch.cl",
+      "www.vibematch.cl",
+      // Host temporal de pruebas (Vercel). Quitar cuando Oracle esté activo.
+      "vibe-match-zeta.vercel.app",
+    ],
   },
   plugins: {
     SplashScreen: {

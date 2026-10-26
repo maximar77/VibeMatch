@@ -1,0 +1,29 @@
+{
+  email {$ACME_EMAIL}
+}
+
+# Caddy obtiene y renueva el certificado de Let's Encrypt automáticamente.
+# Requiere que el DNS del dominio apunte a la IP pública de la instancia y que
+# los puertos 80/443 estén abiertos.
+{$VIBEMATCH_DOMAIN} {
+	encode zstd gzip
+
+	reverse_proxy web:3000 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

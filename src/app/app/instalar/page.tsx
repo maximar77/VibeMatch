@@ -108,11 +108,11 @@ async function ContenidoInstalar() {
                   <div>
                     <p className="text-sm font-medium text-white">Android · APK</p>
                     <p className="mt-1 text-xs text-zinc-400">
-                      Funciona sin conexión y guarda tu perfil en el teléfono
+                      NFC y QR en tablets del colegio; requiere conexión al servidor
                     </p>
                   </div>
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-200">
-                    En compilación
+                    Disponible
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -128,10 +128,10 @@ async function ContenidoInstalar() {
                 </div>
               </div>
               <p className="mt-4 text-xs leading-relaxed text-zinc-400">
-                La app de Android incluirá las funciones escolares NFC (asistencia,
-                permisos de baño y anotaciones) y funcionará sin conexión. Mientras
-                tanto, la web app instalable usa el mismo perfil. No publicaremos
-                descargas falsas.
+                La APK 1.0.0 añade lectura NFC y QR para tablets institucionales y se
+                instala por MDM o por el equipo de VibeMatch; no hay un botón de descarga
+                pública. El perfil se cachea en el dispositivo, pero las acciones
+                escolares requieren conexión. El EXE de Windows sigue en preparación.
               </p>
             </section>
 

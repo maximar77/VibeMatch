@@ -1,4 +1,4 @@
-import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import {
   existsSync,
   mkdirSync,
@@ -9,6 +9,7 @@ import {
 import path from "node:path";
 import { io } from "next/cache";
 import { cookies } from "next/headers";
+import { DATA_DIR } from "@/lib/data-dir";
 import {
   etiquetaCurso,
   normalizarCodigo,
@@ -28,7 +29,6 @@ import {
  * Los datos viven en data/teachers.json, ignorado por Git.
  */
 
-const DATA_DIR = path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "teachers.json");
 const configuredSecret = process.env.VIBEMATCH_SECRET;
 const SESSION_SECRET = configuredSecret ?? "vibematch-demo-secret-cambiar-en-produccion";
@@ -40,6 +40,8 @@ const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 type StoredTeacher = DatosProfesor & {
   codeHash: string;
+  /** Hash scrypt de la contraseña opcional de la cuenta (formato salt:hash). */
+  passwordHash?: string | null;
 };
 
 type TeacherStore = {
@@ -96,6 +98,29 @@ function hashCodigo(codigo: string): string {
     .digest("hex");
 }
 
+/** Genera un hash scrypt de la contraseña (formato "salt:hash" en base64). */
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16);
+  const hash = scryptSync(password, salt, 64);
+  return `${salt.toString("base64")}:${hash.toString("base64")}`;
+}
+
+/** Verifica una contraseña contra un hash scrypt. */
+export function verificarPassword(password: string, stored: string | null | undefined): boolean {
+  if (!stored) return true; // cuenta sin contraseña: acceso por código
+  const [saltB64, hashB64] = stored.split(":");
+  if (!saltB64 || !hashB64) return false;
+  try {
+    const salt = Buffer.from(saltB64, "base64");
+    const expected = Buffer.from(hashB64, "base64");
+    const actual = scryptSync(password, salt, expected.length);
+    if (actual.length !== expected.length) return false;
+    return timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
+}
+
 function safeEqual(a: string, b: string): boolean {
   const bufferA = Buffer.from(a);
   const bufferB = Buffer.from(b);
@@ -146,6 +171,7 @@ export function registrarProfesor(datos: {
   nivel: Nivel;
   anio: number;
   letra: Letra;
+  password?: string | null;
 }): ResultadoRegistro {
   const store = readStore();
   const curso = etiquetaCurso(datos.nivel, datos.anio, datos.letra);
@@ -172,6 +198,9 @@ export function registrarProfesor(datos: {
     letra: datos.letra,
     curso,
     codeHash,
+    passwordHash: datos.password && datos.password.trim().length >= 6
+      ? hashPassword(datos.password.trim())
+      : null,
     createdAt: now,
     lastLoginAt: null,
   };
@@ -182,14 +211,19 @@ export function registrarProfesor(datos: {
   return { ok: true, profesor: aProfesor(stored), codigoPersonal };
 }
 
-/** Valida el código personal de un profesor y actualiza su último acceso. */
-export function autenticarProfesor(codigo: string): Profesor | null {
+/** Valida el código personal de un profesor (y contraseña opcional) y actualiza su último acceso. */
+export function autenticarProfesor(codigo: string, password?: string): Profesor | null {
   const codeHash = hashCodigo(codigo);
   const store = readStore();
   const index = store.teachers.findIndex((teacher) =>
     safeEqual(teacher.codeHash, codeHash),
   );
   if (index === -1) return null;
+
+  const teacher = store.teachers[index];
+  if (teacher.passwordHash && !verificarPassword(password ?? "", teacher.passwordHash)) {
+    return null;
+  }
 
   const now = new Date().toISOString();
   store.teachers[index] = { ...store.teachers[index], lastLoginAt: now };

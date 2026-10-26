@@ -13,8 +13,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import { DATA_DIR } from "@/lib/data-dir";
 
-const DATA_DIR = path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "chat.json");
 
 type MensajeChat = {

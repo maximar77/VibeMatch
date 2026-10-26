@@ -1,6 +1,33 @@
 node_modules
 .next
 .git
-data/tarjetas-demo.csv
+.vercel
+
+# El build web no necesita Android (y ahí vive keystore.properties).
+android
+
+# Datos locales: solo las tarjetas semilla (hashes) y el archivo base de docentes.
+data/*
+!data/cards.json
+!data/teachers.json
+
+# Secretos y archivos de entorno.
+.env
+.env.*
+!.env.example
+vercel.env
+deploy/oracle/.env
+deploy/oracle/backups
+
+# Archivos personales, temporales o de trabajo.
 *.log
-.env.local
+contexto-IA.tx
+tarjetas-guest.txt
+bore.zip
+build-output.txt
+tsc_output.txt
+tsc_test.txt
+tsconfig.tsbuildinfo
+captura*.png
+presentacion-VibeMatch
+Referencia VibeMatch

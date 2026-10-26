@@ -26,6 +26,7 @@ coverage/
 !.env.example
 *.pem
 *.key
+keystore.properties
 
 # Enlaces y tokens de tarjetas (los hashes viven en data/cards.json)
 data/tarjetas-demo.csv
@@ -76,4 +77,5 @@ bore.zip
 captura*.png
 build-output.txt
 contexto-IA.tx
+deploy/oracle/backups/
 

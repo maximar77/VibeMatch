@@ -48,8 +48,8 @@ export default function PrivacidadPage() {
             <h2 className="font-semibold text-white">Para qué los usamos</h2>
             <p className="mt-2 text-zinc-400">
               Solo para mostrarte tu perfil dentro de VibeMatch y cargarlo cuando
-              entres desde la web instalada o, más adelante, desde la app de Android
-              o Windows. No vendemos datos ni los usamos para publicidad.
+              entres desde la web instalada o desde la app de Android (y, más adelante,
+              desde Windows). No vendemos datos ni los usamos para publicidad.
             </p>
           </section>
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
