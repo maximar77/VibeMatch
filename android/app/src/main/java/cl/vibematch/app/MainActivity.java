@@ -46,6 +46,9 @@ public class MainActivity extends BridgeActivity {
         prepararConfiguracion();
         super.onCreate(savedInstanceState);
 
+        // BridgeActivity.load() ya despacha el intent inicial a onNewIntent, así
+        // que el arranque en frío desde una tarjeta o vibematch://config se
+        // procesa allí. Aquí solo queda el diálogo del primer arranque.
         SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         if (!prefs.contains(KEY_SERVER)) {
             if (getBridge() != null) {
@@ -53,16 +56,6 @@ public class MainActivity extends BridgeActivity {
             } else {
                 mostrarDialogoServidor();
             }
-            return;
-        }
-
-        // Arranque en frío desde una tarjeta NFC, un QR o el atajo de ajustes.
-        // El intent inicial no pasa por onNewIntent.
-        Intent inicial = getIntent();
-        if (esConfiguracion(inicial)) {
-            mostrarDialogoServidor();
-        } else {
-            handleDeepLink(inicial);
         }
     }
 

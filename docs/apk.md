@@ -18,10 +18,10 @@ y deep links.
 | Versión | `1.0.0` (`versionCode 1`) |
 | `minSdk` | 24 (Android 7.0) |
 | `targetSdk` / `compileSdk` | 36 (Android 16) |
-| Tamaño | 6.263.568 bytes (~6,0 MB) |
-| SHA-256 APK | `AA7372FFC17C4252EFF010DCF6497DE3D0E0BA79FA99C2C7174506D773607898` |
-| AAB | `VibeMatch-1.0.0.aab` (6.105.728 bytes) |
-| SHA-256 AAB | `6388DB22F492AF05BB28739A2E864F6F35094C03BCF38EC55A75656DE9D5D29F` |
+| Tamaño | 6.263.628 bytes (~6,0 MB) |
+| SHA-256 APK | `C46008D8F69E8709FCA669B593AABC2BEB959FFC9B9C4C78C22FFBF319A9D066` |
+| AAB | `VibeMatch-1.0.0.aab` (6.105.791 bytes) |
+| SHA-256 AAB | `285273F6D5A6906FEE0506395E7983F189196FD4CE03F6E6A11ACB9BB73335CD` |
 
 El AAB es el formato recomendado para Play Store. Para instalación directa en tablets del
 colegio se usa el APK. Descarga: [release v1.0.0](https://github.com/maximar77/VibeMatch/releases/tag/v1.0.0).
