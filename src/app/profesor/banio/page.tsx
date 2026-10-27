@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { leerProfesorSesion } from "@/lib/teachers";
 import { obtenerPermisos, registrarPermisoBanoAction } from "@/app/profesor-actions";
 import { salirProfesorAction } from "@/app/profesor-actions";
+import { ProfesorExportLinks } from "@/components/profesor-export-links";
+import { fechaEnZona, horaEnZona } from "@/lib/fecha";
 
 export const instant = false;
 
@@ -17,7 +20,7 @@ export default async function BanioPage() {
     redirect("/profesor/login");
   }
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = fechaEnZona();
   const abiertos = await obtenerPermisos({ fecha: hoy, abiertos: true });
 
   return (
@@ -27,13 +30,19 @@ export default async function BanioPage() {
           <span className="text-xl font-bold tracking-[0.18em]">
             VIBE<span className="text-brand-strong">•</span>MATCH
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-zinc-400">
               {profesor.nombre} · {profesor.curso}
             </span>
-            <a href="/profesor/escanear" className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
-              Escanear alumno
-            </a>
+            <Link href="/profesor/escanear" className="rounded-full bg-brand-strong px-4 py-2 text-xs font-semibold text-ink hover:bg-brand-strong/85">
+              Escanear
+            </Link>
+            <Link href="/profesor/asistencia" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
+              Asistencia
+            </Link>
+            <Link href="/profesor/anotaciones" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
+              Anotaciones
+            </Link>
             <form action={salirProfesorAction}>
               <button type="submit" className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
                 Cerrar sesión
@@ -52,6 +61,7 @@ export default async function BanioPage() {
               Salidas y retornos — {hoy}
             </h1>
           </div>
+          <ProfesorExportLinks curso={profesor.curso} />
         </div>
 
         <div className="glass rounded-[2rem] p-6">
@@ -84,9 +94,12 @@ export default async function BanioPage() {
                     <div className="flex items-center gap-3">
                       <span className="h-2 w-2 rounded-full bg-rose-400 animate-pulse" />
                       <div>
-                        <p className="text-sm font-medium text-white">{p.cardId}</p>
+                        <p className="text-sm font-medium text-white">
+                          {p.nombre || p.cardId}
+                        </p>
                         <p className="text-xs text-zinc-400">
-                          Salida: {p.inicio} · {transcurridoMin} min
+                          N° {p.numeroLista ?? "—"} · Salida: {p.inicio} ·{" "}
+                          {transcurridoMin} min
                         </p>
                       </div>
                     </div>
@@ -100,7 +113,7 @@ export default async function BanioPage() {
                       <input
                         name="hora"
                         type="hidden"
-                        defaultValue={new Date().toTimeString().slice(0, 5)}
+                        defaultValue={horaEnZona()}
                       />
                       <input name="registradoPor" type="hidden" defaultValue={profesor.id} />
                       <button
@@ -127,7 +140,7 @@ export default async function BanioPage() {
           </p>
           <form
             action={registrarPermisoBanoAction}
-            className="grid gap-3 sm:grid-cols-4"
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
           >
             <input
               name="fecha"
@@ -137,7 +150,7 @@ export default async function BanioPage() {
             <input
               name="hora"
               type="hidden"
-              defaultValue={new Date().toTimeString().slice(0, 5)}
+              defaultValue={horaEnZona()}
             />
             <input
               name="registradoPor"
@@ -153,6 +166,20 @@ export default async function BanioPage() {
                 type="text"
                 required
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
+              />
+            </label>
+            <label>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 block">
+                N° lista
+              </span>
+              <input
+                name="numeroLista"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={999}
+                placeholder="Opcional"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60"
               />
             </label>
             <label>

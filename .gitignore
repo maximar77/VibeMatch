@@ -36,6 +36,11 @@ data/*.local.json
 data/asistencia.json
 data/permisos.json
 data/anotaciones.json
+data/amigos.json
+data/chat.json
+data/muros.json
+data/student-security.json
+data/archivos-profesor/
 tarjetas-guest.txt
 data/tarjetas-guest-listado.csv
 

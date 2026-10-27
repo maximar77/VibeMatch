@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { leerProfesorSesion } from "@/lib/teachers";
 import { obtenerAsistencia, registrarAsistenciaAction } from "@/app/profesor-actions";
 import { salirProfesorAction } from "@/app/profesor-actions";
+import { ProfesorExportLinks } from "@/components/profesor-export-links";
+import { fechaEnZona, horaEnZona } from "@/lib/fecha";
 
 export const instant = false;
 
@@ -17,7 +20,7 @@ export default async function AsistenciaPage() {
     redirect("/profesor/login");
   }
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = fechaEnZona();
   const registros = await obtenerAsistencia({ fecha: hoy });
 
   return (
@@ -27,13 +30,19 @@ export default async function AsistenciaPage() {
           <span className="text-xl font-bold tracking-[0.18em]">
             VIBE<span className="text-brand-strong">•</span>MATCH
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-zinc-400">
               {profesor.nombre} · {profesor.curso}
             </span>
-            <a href="/profesor/escanear" className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
-              Escanear alumno
-            </a>
+            <Link href="/profesor/escanear" className="rounded-full bg-brand-strong px-4 py-2 text-xs font-semibold text-ink hover:bg-brand-strong/85">
+              Escanear
+            </Link>
+            <Link href="/profesor/banio" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
+              Baño
+            </Link>
+            <Link href="/profesor/anotaciones" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
+              Anotaciones
+            </Link>
             <form action={salirProfesorAction}>
               <button type="submit" className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
                 Cerrar sesión
@@ -52,6 +61,7 @@ export default async function AsistenciaPage() {
               Pasar lista — {hoy}
             </h1>
           </div>
+          <ProfesorExportLinks curso={profesor.curso} />
         </div>
 
         <div className="glass rounded-[2rem] p-6">
@@ -112,7 +122,7 @@ export default async function AsistenciaPage() {
           </p>
           <form
             action={registrarAsistenciaAction}
-            className="mt-4 grid gap-3 sm:grid-cols-4"
+            className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
           >
             <input
               name="fecha"
@@ -122,7 +132,7 @@ export default async function AsistenciaPage() {
             <input
               name="hora"
               type="hidden"
-              defaultValue={new Date().toTimeString().slice(0, 5)}
+              defaultValue={horaEnZona()}
             />
             <input
               name="registradoPor"
@@ -138,6 +148,20 @@ export default async function AsistenciaPage() {
                 type="text"
                 required
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
+              />
+            </label>
+            <label>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 block">
+                N° lista
+              </span>
+              <input
+                name="numeroLista"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={999}
+                placeholder="Opcional"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60"
               />
             </label>
             <label>

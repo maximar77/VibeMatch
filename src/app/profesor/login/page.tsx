@@ -56,10 +56,10 @@ export default async function ProfesorLoginPage({
               type="text"
               required
               minLength={12}
-              maxLength={12}
-              pattern="[A-HJ-NP-Z2-9]{12}"
+              maxLength={16}
+              pattern="[A-HJ-NP-Z2-9 -]{12,16}"
               autoCapitalize="characters"
-              placeholder="ABCD2345EFGH"
+              placeholder="ABCD 2345 EFGH"
               className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center font-mono text-lg tracking-[0.3em] text-white uppercase outline-none transition focus:border-brand-strong/60 focus:ring-2 focus:ring-brand-strong/20"
             />
           </label>

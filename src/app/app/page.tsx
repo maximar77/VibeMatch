@@ -1,375 +1,334 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { CacheProfile } from "@/components/cache-profile";
 import { ProfileForm } from "@/components/profile-form";
+import { RestoreLocalProfile } from "@/components/restore-local-profile";
 import { ShareProfileButton } from "@/components/share-profile-button";
 import { SyncStatus } from "@/components/sync-status";
 import { iniciales, leerSesion } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
 import { etiquetaVibe } from "@/lib/profile-schema";
+import { CANALES_CHAT } from "@/lib/chat";
+import { MUROS, contarTodas } from "@/lib/muros";
+import { estadoSeguridad } from "@/lib/student-security";
 
 export const metadata: Metadata = {
   title: "Mi VibeMatch",
   robots: { index: false, follow: false },
 };
 
-const zonas = [
+export const instant = false;
+
+const iconosChat: Record<string, string> = {
+  deportes: "⚽",
+  arte: "🎨",
+  videojuegos: "🎮",
+  estudio: "📚",
+};
+
+const acciones = [
   {
-    name: "Deportes",
-    text: "Equipos, torneos y partidos después de clases.",
-    accent: "from-orange-400/20 to-rose-500/10 text-orange-300",
+    href: "/app/chat",
+    icono: "💬",
+    titulo: "Canchitas de chat",
+    texto: "Conversa por intereses y arma equipo.",
   },
   {
-    name: "Arte",
-    text: "Portafolios, música y proyectos creativos.",
-    accent: "from-fuchsia-400/20 to-violet-500/10 text-fuchsia-300",
+    href: "/app/muros",
+    icono: "📸",
+    titulo: "Muros y fotos",
+    texto: "Publica textos, proyectos y momentos.",
   },
   {
-    name: "Videojuegos",
-    text: "Cooperativos, torneos internos y comunidades.",
-    accent: "from-cyan-400/20 to-blue-500/10 text-cyan-300",
+    href: "/app/seguridad",
+    icono: "🔒",
+    titulo: "Clave opcional",
+    texto: "Añade una segunda llave a tu cuenta.",
   },
   {
-    name: "Estudio",
-    text: "Grupos de repaso y tutorías entre pares.",
-    accent: "from-lime-300/20 to-emerald-500/10 text-lime-300",
+    href: "/app/perfil-offline",
+    icono: "📥",
+    titulo: "Copia sin conexión",
+    texto: "Guarda tu perfil en este dispositivo.",
   },
-];
+] as const;
 
 function Cargando() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5">
       <div className="pointer-events-none absolute inset-0 grid-bg" aria-hidden="true" />
-      <header className="relative z-10 border-b border-white/5">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center px-5">
-          <span className="font-mono text-sm tracking-[0.2em] text-zinc-400">VIBEMATCH</span>
-        </div>
-      </header>
-      <main className="relative z-10 flex flex-1 items-center justify-center px-5">
-        <div className="glass w-full max-w-md rounded-[2rem] p-8 text-center">
-          <div className="mx-auto h-10 w-10 animate-pulse rounded-full border border-brand-strong/40 bg-brand-strong/15" />
-          <p className="mt-5 text-sm text-zinc-400">Cargando tu perfil…</p>
-        </div>
-      </main>
+      <div className="glass relative z-10 w-full max-w-md rounded-[2rem] p-8 text-center">
+        <div className="mx-auto h-10 w-10 animate-pulse rounded-full border border-brand-strong/40 bg-brand-strong/15" />
+        <p className="mt-5 text-sm text-zinc-400">Cargando tu VibeMatch…</p>
+      </div>
     </div>
   );
 }
 
-export default function AppPage() {
+export default function AppPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ perfil?: string }>;
+}) {
   return (
     <Suspense fallback={<Cargando />}>
-      <ContenidoApp />
+      <ContenidoApp searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function ContenidoApp() {
+async function ContenidoApp({
+  searchParams,
+}: {
+  searchParams: Promise<{ perfil?: string }>;
+}) {
   const acceso = await leerSesion();
+  if (!acceso || acceso.card.kind === "public") redirect("/");
 
-  if (!acceso || acceso.card.kind === "public") {
-    redirect("/");
-  }
-
-  const { card, school } = acceso;
-  const perfil = leerPerfil(card.id);
+  const perfil = leerPerfil(acceso.card.id);
+  const params = await searchParams;
 
   if (!perfil) {
     return (
       <AppShell active="app">
-        <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-5 py-12">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-strong/25 bg-brand-strong/10 px-3 py-1 text-xs font-medium text-brand-soft">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand-strong" />
-              Último paso · perfil pendiente
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
-              Tarjeta {card.id}
-            </span>
-          </div>
+        <main className="relative z-10 mx-auto w-full max-w-3xl flex-1 px-5 py-12">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
+            Tarjeta {acceso.card.id} activa
+          </p>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+            Crea tu <span className="text-gradient">VibeMatch</span>.
+          </h1>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400">
+            Elige cómo quieres que te llamen, tu vibe y tus intereses. Podrás
+            cambiar todo después desde tu perfil.
+          </p>
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
-                Bienvenido/a a VibeMatch
-              </p>
-              <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-                Crea tu <span className="text-gradient">perfil</span>.
-              </h1>
-              <p className="mt-5 max-w-md text-sm leading-relaxed text-zinc-400">
-                Tu tarjeta ya está verificada. Cuéntanos cómo quieres aparecer y qué
-                te mueve. Guardaremos estos datos para que puedas cargarlos después
-                en la app de Android, Windows o en la web instalada.
-              </p>
+          <RestoreLocalProfile cardId={acceso.card.id} />
 
-              <dl className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <dt className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                    Establecimiento
-                  </dt>
-                  <dd className="mt-1 text-sm font-medium text-white">{school}</dd>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <dt className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                    Curso de la tarjeta
-                  </dt>
-                  <dd className="mt-1 text-sm font-medium text-white">
-                    {card.level ?? "Sin asignar"}
-                  </dd>
-                </div>
-              </dl>
-
-              <div className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5">
-                <p className="text-sm font-semibold text-amber-200">
-                  Tu privacidad primero
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-amber-100/70">
-                  Solo pedimos lo necesario para tu perfil. Puedes editar o revisar
-                  estos datos después desde “Mi VibeMatch”. Si usas un equipo
-                  compartido, cierra sesión al terminar.
-                </p>
-              </div>
-            </div>
-
-            <section className="glass rounded-[2rem] p-6 sm:p-8">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand-soft">
-                Tu identidad en VibeMatch
-              </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight">
-                ¿Cómo quieres que te vean?
-              </h2>
-              <p className="mt-2 text-sm text-zinc-400">
-                Los campos con * son obligatorios. Podrás cambiarlos más adelante.
-              </p>
-              <ProfileForm
-                fallbackName={card.holder}
-                fallbackLevel={card.level}
-                submitLabel="Guardar y entrar"
-              />
-            </section>
-          </div>
+          <section className="glass mt-8 rounded-[2rem] p-6 sm:p-8">
+            <ProfileForm
+              initial={null}
+              fallbackName={acceso.card.fullName ?? acceso.card.holder}
+              fallbackLevel={acceso.card.level}
+              submitLabel="Crear mi perfil"
+            />
+          </section>
         </main>
       </AppShell>
     );
   }
 
+  const seguridad = estadoSeguridad(acceso.card.id);
+  const conteoMuros = contarTodas();
+  const nombreVisible = perfil.displayName;
+
   return (
     <AppShell active="app">
       <CacheProfile perfil={perfil} />
-      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-5 py-12">
+      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-5 py-9 sm:py-12">
         <SyncStatus />
-        <div className="flex flex-wrap items-end justify-between gap-5">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
-              Perfil guardado
-            </p>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-              Hola, <span className="text-gradient">{perfil.displayName}</span>.
-            </h1>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400">
-              Este es tu espacio en VibeMatch. Tu tarjeta te da acceso y tu perfil
-              viaja con tu cuenta para que la app lo cargue en cualquier dispositivo.
-            </p>
-          </div>
-          <Link
-            href="/app/escanear"
-            className="text-xs font-medium text-zinc-400 transition hover:text-white"
-          >
-            → Escanear tarjeta NFC / QR
-          </Link>
-          <Link
-            href="/app/perfil-offline"
-            className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white transition hover:border-white/35 hover:bg-white/5"
-          >
-            Perfil sin conexión
-          </Link>
-          <Link
-            href="/app/perfil"
-            className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white transition hover:border-white/35 hover:bg-white/5"
-          >
-            Editar perfil
-          </Link>
-        </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <section className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-brand/20 via-surface to-surface p-6">
-            <div className="flex items-center gap-4">
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-soft text-lg font-bold text-white">
-                {iniciales(perfil.displayName)}
-                <span className="absolute inset-0 animate-ring rounded-2xl border border-white/40" />
+        {params.perfil === "guardado" && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+            <span>Perfil guardado. Ya apareces en tu comunidad.</span>
+            <Link
+              href="/app/seguridad"
+              className="rounded-full bg-emerald-300 px-3 py-1.5 text-xs font-bold text-ink transition hover:bg-emerald-200"
+            >
+              Proteger con clave
+            </Link>
+          </div>
+        )}
+
+        <section className="relative mt-6 overflow-hidden rounded-[2.4rem] border border-white/10 bg-white/[0.035] p-6 sm:p-8">
+          <div
+            className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-brand/20 blur-[90px]"
+            aria-hidden="true"
+          />
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.35rem] bg-gradient-to-br from-brand to-brand-soft text-xl font-bold text-white shadow-lg shadow-brand/20">
+                {iniciales(nombreVisible)}
               </div>
               <div>
-                <p className="text-xl font-semibold">{perfil.displayName}</p>
-                <p className="text-xs text-zinc-400">
-                  {[perfil.pronouns, perfil.level, school].filter(Boolean).join(" · ")}
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-brand-soft">
+                  Tu perfil
                 </p>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-brand-soft/20 bg-brand-soft/10 p-4">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-brand-soft/80">
-                Vibe check
-              </p>
-              <p className="mt-1 text-sm font-medium text-brand-strong">
-                {etiquetaVibe(perfil.vibe)}
-              </p>
-              <p className="mt-1 text-xs text-zinc-400">
-                Actualízalo cuando quieras desde tu perfil.
-              </p>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {perfil.interests.map((interested) => (
-                <span
-                  key={interested}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300"
-                >
-                  {interested}
-                </span>
-              ))}
-            </div>
-
-            {perfil.bio ? (
-              <p className="mt-5 text-sm leading-relaxed text-zinc-400">“{perfil.bio}”</p>
-            ) : null}
-
-            <ShareProfileButton perfil={perfil} establecimiento={school} />
-
-            <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-xs text-zinc-500">
-              <span>Tarjeta {card.id}</span>
-              <span className="flex items-center gap-1.5 text-zinc-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Verificada
-              </span>
-            </div>
-          </section>
-
-          <div className="grid content-start gap-6">
-            <section className="relative overflow-hidden rounded-[2rem] border border-brand-strong/25 bg-gradient-to-br from-brand/30 via-surface to-brand-soft/20 p-6">
-              <div className="pointer-events-none absolute inset-0 grid-bg" aria-hidden="true" />
-              <div className="relative">
-                <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand-soft">
-                  App VibeMatch
-                </p>
-                <h2 className="mt-2 text-2xl font-bold tracking-tight">
-                  Lleva tu perfil contigo.
-                </h2>
-                <p className="mt-2 max-w-md text-sm leading-relaxed text-zinc-300">
-                  Instala la web app en iPhone, Mac, Android o Windows. La APK 1.0.0
-                  para tablets institucionales ya está disponible; el EXE sigue en
-                  preparación.
-                </p>
-                <Link
-                  href="/app/instalar"
-                  className="mt-5 inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-zinc-200"
-                >
-                  Ver instalación
-                </Link>
-              </div>
-            </section>
-
-            <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand-soft">
-                Tu sesión
-              </p>
-              <dl className="mt-5 grid gap-3 sm:grid-cols-2">
-                {[
-                  ["Establecimiento", school],
-                  ["Tarjeta", card.id],
-                  ["Duración", "8 horas"],
-                  ["Acceso", "QR / NFC institucional"],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-                    <dt className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-                      {label}
-                    </dt>
-                    <dd className="mt-1 text-sm font-medium text-white">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-
-            <section id="zonas" className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand-soft">
-                Zonas de interés
-              </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight">
-                Elige dónde participar.
-              </h2>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {zonas.map((zona) => (
-                  <a
-                    key={zona.name}
-                    href={`/app/chat/${zona.name.toLowerCase()}`}
-                    className="block rounded-2xl border border-white/10 bg-gradient-to-br p-4 hover:bg-white/[0.05] transition"
-                  >
-                    <p className="text-sm font-semibold text-white">{zona.name}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
-                      {zona.text}
-                    </p>
-                  </a>
-                ))}
-              </div>
-            </section>
-
-            <section id="zonas" className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand-soft">
-                Funciones escolares · NFC
-              </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight">
-                La tarjeta también ayuda al colegio.
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                Con la misma tarjeta, el establecimiento puede registrar tres cosas
-                en segundos, sin cuadernos ni planillas.
-              </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-400/15 to-emerald-500/5 p-4">
-                  <p className="text-sm font-semibold text-white">Pasar lista</p>
-                  <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
-                    Al tocar la tarjeta, el alumno queda como presente, atrasado o
-                    ausente con la hora exacta.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-sky-400/15 to-blue-500/5 p-4">
-                  <p className="text-sm font-semibold text-white">Permisos de baño</p>
-                  <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
-                    Registra salida y regreso. El profesor ve quién está fuera y
-                    cuánto lleva.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-300/15 to-orange-500/5 p-4">
-                  <p className="text-sm font-semibold text-white">Anotaciones</p>
-                  <p className="mt-1 text-xs leading-relaxed text-zinc-300/80">
-                    Positivas o negativas, al instante y con tu tarjeta como
-                    respaldo.
-                  </p>
+                <h1 className="mt-1 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  Hola, {nombreVisible}.
+                </h1>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-brand-strong/25 bg-brand-strong/10 px-3 py-1 text-xs font-semibold text-brand-soft">
+                    {etiquetaVibe(perfil.vibe)}
+                  </span>
+                  {perfil.level && (
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300">
+                      {perfil.level}
+                    </span>
+                  )}
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-500">
+                    {acceso.card.id}
+                  </span>
                 </div>
               </div>
-              <p className="mt-4 text-xs leading-relaxed text-zinc-500">
-                Puedes revisar tus propios registros y los detalles del tratamiento
-                de datos en la{" "}
-                <Link href="/privacidad" className="text-brand-soft underline decoration-brand-soft/30 underline-offset-2 hover:text-white">
-                  política de privacidad
-                </Link>
-                .
-              </p>
-            </section>
+            </div>
 
-            <section className="rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-5">
-              <p className="text-sm font-semibold text-amber-200">
-                Dispositivo compartido
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-amber-100/70">
-                Si estás en un computador o tablet del colegio, cierra sesión al terminar
-                para que la siguiente persona no herede tu tarjeta. La sesión expira sola
-                a las 8 horas.
-              </p>
-            </section>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/app/perfil"
+                className="rounded-full bg-brand-strong px-4 py-2.5 text-xs font-semibold text-ink transition hover:bg-brand-strong/85"
+              >
+                Editar perfil
+              </Link>
+              <Link
+                href="/app/seguridad"
+                className="rounded-full border border-white/15 px-4 py-2.5 text-xs font-semibold text-white transition hover:border-white/35 hover:bg-white/5"
+              >
+                {seguridad.protegida ? "🔒 Clave activa" : "🔓 Poner clave"}
+              </Link>
+            </div>
           </div>
+
+          {perfil.bio && (
+            <p className="relative mt-6 max-w-3xl text-sm leading-relaxed text-zinc-300">
+              “{perfil.bio}”
+            </p>
+          )}
+
+          <div className="relative mt-5 flex flex-wrap gap-2">
+            {perfil.interests.map((interes) => (
+              <span
+                key={interes}
+                className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[11px] text-zinc-400"
+              >
+                {interes}
+              </span>
+            ))}
+          </div>
+
+          <ShareProfileButton perfil={perfil} establecimiento={acceso.school} />
+        </section>
+
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {acciones.map((accion) => (
+            <Link
+              key={accion.href}
+              href={accion.href}
+              className="group rounded-[1.6rem] border border-white/10 bg-white/[0.025] p-5 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.05]"
+            >
+              <span className="text-xl">{accion.icono}</span>
+              <p className="mt-3 text-sm font-semibold text-white">{accion.titulo}</p>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-500">{accion.texto}</p>
+              <span className="mt-3 inline-block text-xs font-semibold text-brand-soft opacity-0 transition group-hover:opacity-100">
+                Abrir →
+              </span>
+            </Link>
+          ))}
+        </section>
+
+        {!seguridad.protegida && (
+          <section className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-[1.6rem] border border-amber-300/20 bg-amber-300/[0.06] px-5 py-4">
+            <div>
+              <p className="text-sm font-semibold text-amber-100">
+                Tu cuenta todavía no tiene clave.
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-amber-100/60">
+                Es opcional. Sirve para que el enlace de tu tarjeta no sea suficiente
+                si alguien lo encuentra.
+              </p>
+            </div>
+            <Link
+              href="/app/seguridad"
+              className="rounded-full bg-amber-300 px-4 py-2 text-xs font-bold text-ink transition hover:bg-amber-200"
+            >
+              Crear clave
+            </Link>
+          </section>
+        )}
+
+        <div className="mt-10 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
+              Comunidad
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">
+              Tus canchitas
+            </h2>
+          </div>
+          <Link
+            href="/app/chat"
+            className="text-xs font-semibold text-zinc-400 transition hover:text-white"
+          >
+            Ver todas →
+          </Link>
         </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {CANALES_CHAT.map((canal) => (
+            <Link
+              key={canal.id}
+              href={`/app/chat/${canal.id}`}
+              className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4 transition hover:border-brand-strong/30 hover:bg-brand-strong/[0.06]"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-lg">{iconosChat[canal.id] ?? "💬"}</span>
+                <span className="text-[10px] uppercase tracking-wider text-zinc-600">
+                  Chat
+                </span>
+              </div>
+              <p className="mt-3 text-sm font-semibold text-white">#{canal.nombre}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
+                {canal.descripcion}
+              </p>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
+              Para mostrar
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">
+              Tus muros
+            </h2>
+          </div>
+          <Link
+            href="/app/muros"
+            className="text-xs font-semibold text-zinc-400 transition hover:text-white"
+          >
+            Ver todos →
+          </Link>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {MUROS.map((muro) => (
+            <Link
+              key={muro.id}
+              href={`/app/muros/${muro.id}`}
+              className={`rounded-[1.5rem] border border-white/10 bg-gradient-to-br p-5 transition hover:-translate-y-0.5 hover:border-white/20 ${muro.color}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xl">{muro.emoji}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/45">
+                  {conteoMuros[muro.id] ?? 0} publicacion
+                  {(conteoMuros[muro.id] ?? 0) === 1 ? "" : "es"}
+                </span>
+              </div>
+              <p className="mt-3 text-base font-bold text-white">{muro.nombre}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-white/60">
+                {muro.descripcion}
+              </p>
+            </Link>
+          ))}
+        </div>
+
+        <section className="mt-5 rounded-[1.6rem] border border-white/10 bg-white/[0.025] px-5 py-4 text-xs leading-relaxed text-zinc-500">
+          Tu perfil también queda guardado en este teléfono o navegador. Si el
+          servidor de la demo se reinicia, al volver a entrar intentaremos
+          restaurarlo automáticamente.
+        </section>
       </main>
     </AppShell>
   );

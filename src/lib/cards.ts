@@ -258,7 +258,9 @@ export function aplicarDatosTarjeta(
   const targetHash = hashToken(clean);
   let parsed: CardStore;
   try {
-    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8")) as CardStore;
+    parsed = JSON.parse(
+      readFileSync(STORE_PATH, "utf8").replace(/^\uFEFF/, ""),
+    ) as CardStore;
   } catch {
     return false;
   }

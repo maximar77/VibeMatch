@@ -1,8 +1,8 @@
 # Plan de apps: PWA, APK (Android) y EXE (Windows)
 
-> Estado: web con tarjeta, onboarding, panel docente y PWA implementados. APK Android
-> **1.0.0 compilada y firmada** con NFC, QR, deep links y servidor configurable en el
-> dispositivo. El EXE sigue en planificación.
+> Estado: web con tarjeta, onboarding, chats, muros, clave opcional, panel docente y PWA
+> implementados. APK Android **1.1.0 compilada y firmada** con NFC, QR, deep links,
+> servidor configurable y aviso de actualización. El EXE sigue en planificación.
 > Última actualización: 26 de octubre de 2026.
 
 ## 1. Restricción que ordena el plan
@@ -29,7 +29,7 @@ Web Next.js (UI + Server Actions + PWA + API)
       │  valida token → cookie de sesión
       ├── PWA instalable (misma UI, iPhone/Mac/Android/Windows)
       ▼
-APK (Capacitor 1.0.0)  EXE (Tauri 2)
+APK (Capacitor 1.1.0)  EXE (Tauri 2)
 Android / tablet       Windows 10/11 + WebView2
 ```
 
@@ -53,6 +53,7 @@ web y usa una API estable para el canje de token, la sesión y el cierre.
 | `/api/perfil` | `GET` | Perfil asociado a la tarjeta/sesión, para cargarlo en la app. | Implementado |
 | `/api/perfil` | `PUT` | Crear o actualizar el perfil; valida consentimiento e intereses. | Implementado |
 | `/api/health` | `GET` | Estado del proceso, volumen y secreto para Docker/Oracle. | Implementado |
+| `/api/app-version` | `GET` | Versión nativa, `versionCode`, URL del APK y novedades. | Implementado |
 | `/api/acceso/[token]` | `POST` | Canjear token por sesión para clientes que no usan la web embebida. | Pendiente (la APK usa la cookie del WebView) |
 | `/api/sesion` | `GET` | Datos mínimos de la tarjeta y del establecimiento. | Pendiente |
 | `/api/salir` | `POST` | Revocar la sesión del dispositivo. | Pendiente |
@@ -63,10 +64,16 @@ apps. Para las apps nativas conviene un canje de token por credencial de disposi
 corta duración, no reutilizar la cookie del navegador. Todos con rate limiting, HTTPS,
 validación de origen y logs sin tokens ni PII.
 
+> La demo de Vercel usa `/tmp` por instancia. Sirve para revisar la UI y el APK, pero no
+> comparte datos entre páginas, APIs y cold starts. El panel docente y la exportación CSV
+> deben probarse en Oracle o en un servidor con disco persistente.
+
 ## 3. APK con Capacitor
 
-Estado: **1.0.0 compilada y firmada** (`versionCode 1`), lista para instalar y probar.
-La app usa la web remota para no duplicar la lógica de negocio ni la sesión.
+Estado: **1.1.0 compilada y firmada** (`versionCode 2`), lista para instalar y probar.
+La app usa la web remota para no duplicar la lógica de negocio ni la sesión. La URL de
+fábrica es `https://vibematch-demo.vercel.app`; el dominio del colegio se cambia en el
+dispositivo sin recompilar.
 
 **Por qué Capacitor:** reutiliza la UI web, permite empaquetar en Android y tiene
 plugins de NFC y almacenamiento. Evita mantener dos interfaces.
@@ -82,6 +89,10 @@ Implementado en esta versión:
 - Escaneo QR con `BarcodeDetector` y `jsqr`; entrada manual de token como último recurso.
 - Deep links `https://dominio/a/<token>` (App Links verificados con
   `assetlinks.json`) y `vibematch://a/<token>`.
+- Aviso de actualización nativa desde `/api/app-version`, con URL de APK configurable
+  por `VIBEMATCH_APP_APK_URL`; un APK publicado puede reemplazar al instalado.
+- Puente nativo con versión, `versionCode`, agente de usuario `VibeMatch/…` y apertura
+  validada de enlaces.
 - Firma release con keystore propio; APK y AAB generados.
 - Permisos de NFC y cámara, y filtros de intents declarados en el manifiesto.
 
@@ -150,7 +161,7 @@ certificado de firma de código (recomendado).
 | 1 | Web + tarjeta + onboarding + PWA | Token válido entra; token inválido no; perfil persiste; instalación protegida; build pasa. |
 | 2 | Punto Vibe piloto | Tablet/PC + lector abre la bienvenida, crea perfil y cierra sesión sola. |
 | 3 | API de apps y perfiles | `/api/perfil` GET/PUT y healthcheck listos; canje de token para clientes nativos y cierre de sesión pendientes. |
-| 4 | APK beta | APK 1.0.0 firmada con NFC, QR, deep links y servidor configurable. Falta validarla en tablet física y definir distribución. |
+| 4 | APK beta | APK 1.1.0 firmada con NFC, QR, deep links, servidor configurable y aviso de actualización. Falta validarla en tablet física y definir distribución. |
 | 5 | EXE beta | Lector USB abre la bienvenida en Windows y el modo kiosco resiste uso real. |
 | 6 | Piloto y endurecimiento | Rate limiting, base de datos, panel de revocación, retención y auditoría. |
 

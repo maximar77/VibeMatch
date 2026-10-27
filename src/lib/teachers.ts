@@ -56,7 +56,7 @@ function readStore(): TeacherStore {
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8"));
+    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8").replace(/^\uFEFF/, ""));
   } catch (error) {
     throw new Error("No se pudo leer data/teachers.json.", { cause: error });
   }

@@ -13,7 +13,8 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * En producción debe ser el dominio HTTPS de Oracle Cloud (Caddy). No uses una
  * URL de túnel temporal (trycloudflare, ngrok) para una APK distribuida.
  */
-const servidorRemoto = process.env.VIBEMATCH_APP_URL ?? "https://vibematch.cl";
+const servidorRemoto =
+  process.env.VIBEMATCH_APP_URL ?? "https://vibematch-demo.vercel.app";
 
 const config: CapacitorConfig = {
   appId: "cl.vibematch.app",
@@ -29,10 +30,12 @@ const config: CapacitorConfig = {
     cleartext: servidorRemoto.startsWith("http://"),
     androidScheme: "https",
     allowNavigation: [
+      // Demo pública mientras Oracle no está aprovisionado.
+      "vibematch-demo.vercel.app",
+      "vibe-match-zeta.vercel.app",
+      // Dominio definitivo del colegio.
       "vibematch.cl",
       "www.vibematch.cl",
-      // Host temporal de pruebas (Vercel). Quitar cuando Oracle esté activo.
-      "vibe-match-zeta.vercel.app",
     ],
   },
   plugins: {

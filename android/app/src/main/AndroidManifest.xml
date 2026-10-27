@@ -29,6 +29,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="vibematch.cl" android:pathPrefix="/a/" />
                 <data android:scheme="https" android:host="www.vibematch.cl" android:pathPrefix="/a/" />
+                <data android:scheme="https" android:host="vibematch-demo.vercel.app" android:pathPrefix="/a/" />
                 <data android:scheme="https" android:host="vibe-match-zeta.vercel.app" android:pathPrefix="/a/" />
             </intent-filter>
 

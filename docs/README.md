@@ -63,10 +63,11 @@ Ver [`producto.md`](producto.md) para la especificación funcional que guiará l
 - [`arquitectura/acceso-y-dispositivos.md`](arquitectura/acceso-y-dispositivos.md): Ley
   21.801, canales de acceso, tokens guest/público, flujo de onboarding, persistencia de
   perfiles, PWA y operación escolar.
-- [`plan-apps.md`](plan-apps.md): PWA instalable, APK Android 1.0.0 (Capacitor) con NFC,
-  QR y servidor configurable, plan del ejecutable de Windows (Tauri), API y fases.
-- [`apk.md`](apk.md): instalación de la APK, configuración del servidor, firma,
-  compilación y límites conocidos.
+- [`plan-apps.md`](plan-apps.md): PWA instalable, APK Android 1.1.0 (Capacitor) con NFC,
+  QR, servidor configurable y actualización, plan del ejecutable de Windows (Tauri),
+  API y fases.
+- [`apk.md`](apk.md): instalación de la APK 1.1.0, configuración del servidor, firma,
+  actualización, compilación y límites conocidos.
 - [`../deploy/oracle/README.md`](../deploy/oracle/README.md): despliegue completo en
   Oracle Cloud con Docker, Caddy, HTTPS, volumen persistente y backups.
 - [`marca/analisis-visual.md`](marca/analisis-visual.md): paleta y recortes de marca
@@ -77,11 +78,15 @@ Ver [`producto.md`](producto.md) para la especificación funcional que guiará l
 - `/` sin token muestra un error de acceso; no es la landing pública.
 - `/a/vibematch-acceso-publico-2026` abre la landing con los contactos para pedir el kit.
 - `/a/<token-personal>` abre la bienvenida; al entrar se crea la sesión.
-- El primer ingreso pide perfil; luego queda guardado para las siguientes entradas.
-- `/app` muestra el dashboard, `/app/perfil` permite editar y `/app/instalar` explica cómo
-  instalar la PWA. La APK Android 1.0.0 ya está compilada y firmada; el EXE sigue en
-  preparación.
+- El primer ingreso pide perfil; luego queda guardado para las siguientes entradas y se
+  puede recuperar con la copia local del teléfono.
+- `/app` muestra perfil editable, chats, muros y seguridad. `/app/perfil` permite editar,
+  `/app/instalar` explica cómo instalar la PWA y `/app/perfil-offline` guarda la copia
+  local. La APK Android 1.1.0 ya está compilada y firmada; el EXE sigue en preparación.
+- `/profesor/*` permite registrar docentes con código institucional, iniciar sesión,
+  escanear tarjetas, guardar asistencia/baño/anotaciones y descargar CSV por curso.
 - Existen 100 tarjetas guest únicas, 3 demos y 1 token público en `data/cards.json` (solo
   hashes). Los tokens en claro están en `data/tarjetas-demo.csv`, ignorado por Git.
-- El despliegue de producción está preparado para Oracle Cloud; el endpoint
+- La demo pública está en <https://vibematch-demo.vercel.app> y usa almacenamiento
+  efímero. La producción persistente está preparada para Oracle Cloud; el endpoint
   `/api/health` verifica proceso, volumen y secreto.

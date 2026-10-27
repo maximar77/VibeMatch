@@ -50,6 +50,10 @@ export type RegistroAsistencia = {
 export type PermisoBano = {
   id: string;
   cardId: string;
+  /** Nombre completo o nombre visible del estudiante. */
+  nombre: string;
+  /** Número de lista dentro del curso (puede ser null). */
+  numeroLista: number | null;
   curso: string;
   fecha: string;
   /** Hora de salida en formato HH:MM. */
@@ -66,6 +70,10 @@ export type PermisoBano = {
 export type Anotacion = {
   id: string;
   cardId: string;
+  /** Nombre completo o nombre visible del estudiante. */
+  nombre: string;
+  /** Número de lista dentro del curso (puede ser null). */
+  numeroLista: number | null;
   curso: string;
   tipo: "positiva" | "negativa";
   categoria: CategoriaAnotacion;

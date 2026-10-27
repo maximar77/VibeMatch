@@ -35,7 +35,7 @@ function leerStore<T>(nombre: string): Store<T> {
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(readFileSync(ruta, "utf8"));
+    parsed = JSON.parse(readFileSync(ruta, "utf8").replace(/^\uFEFF/, ""));
   } catch (error) {
     throw new Error(`No se pudo leer data/${nombre}.json.`, { cause: error });
   }
@@ -162,7 +162,13 @@ export function guardarAnotacion(
 const ARCHIVOS_DIR = path.join(DATA_DIR, "archivos-profesor");
 
 function celdaCsv(value: unknown): string {
-  return `"${String(value ?? "").replaceAll('"', '""')}"`;
+  let texto = String(value ?? "");
+
+  // Evita que un nombre o comentario se evalúe como fórmula al abrir el CSV
+  // en Excel. El texto sigue siendo legible, pero queda forzado a string.
+  if (/^[=+\-@\t\r]/.test(texto)) texto = `'${texto}`;
+
+  return `"${texto.replaceAll('"', '""')}"`;
 }
 
 /**
@@ -255,7 +261,7 @@ export function generarCsvPermisos(permisos: PermisoBano[]): string {
   const encabezado = [
     "Fecha",
     "N° lista",
-    "Nombre (tarjeta)",
+    "Nombre completo",
     "Tarjeta",
     "Curso",
     "Salida",
@@ -268,13 +274,15 @@ export function generarCsvPermisos(permisos: PermisoBano[]): string {
     .sort((a, b) => {
       const fecha = a.fecha.localeCompare(b.fecha);
       if (fecha !== 0) return fecha;
+      const lista = (a.numeroLista ?? 0) - (b.numeroLista ?? 0);
+      if (lista !== 0) return lista;
       return a.inicio.localeCompare(b.inicio);
     })
     .map((p) =>
       [
         p.fecha,
-        "",
-        "",
+        p.numeroLista ?? "",
+        p.nombre ?? "",
         p.cardId,
         p.curso,
         p.inicio,
@@ -316,9 +324,73 @@ export function generarCsvResumenBano(permisos: PermisoBano[]): string {
   return `\uFEFF${[encabezado.map(celdaCsv).join(","), ...filas].join("\r\n")}\r\n`;
 }
 
+// ------------------------------------------------------------ csv anotaciones
+
+export function generarCsvAnotaciones(anotaciones: Anotacion[]): string {
+  const encabezado = [
+    "Fecha",
+    "Hora",
+    "N° lista",
+    "Nombre completo",
+    "Curso",
+    "Tipo",
+    "Categoría",
+    "Comentario",
+    "Tarjeta",
+    "Registrado por",
+  ];
+  const filas = [...anotaciones]
+    .sort((a, b) => {
+      const fecha = a.fecha.localeCompare(b.fecha);
+      if (fecha !== 0) return fecha;
+      const lista = (a.numeroLista ?? 0) - (b.numeroLista ?? 0);
+      if (lista !== 0) return lista;
+      return a.hora.localeCompare(b.hora);
+    })
+    .map((a) =>
+      [
+        a.fecha,
+        a.hora,
+        a.numeroLista ?? "",
+        a.nombre ?? "",
+        a.curso,
+        a.tipo,
+        a.categoria,
+        a.comentario,
+        a.cardId,
+        a.registradoPor,
+      ]
+        .map(celdaCsv)
+        .join(","),
+    );
+  return `\uFEFF${[encabezado.map(celdaCsv).join(","), ...filas].join("\r\n")}\r\n`;
+}
+
+export function actualizarArchivoAnotaciones(teacherId: string): {
+  ruta: string;
+  total: number;
+} {
+  const anotaciones = listarAnotaciones({}).filter(
+    (a) => a.registradoPor === teacherId,
+  );
+  const csv = generarCsvAnotaciones(anotaciones);
+  mkdirSync(ARCHIVOS_DIR, { recursive: true });
+  const nombre = `${teacherId}-anotaciones.csv`;
+  const ruta = path.join(ARCHIVOS_DIR, nombre);
+  writeFileSync(ruta, csv, "utf8");
+  return {
+    ruta: path.posix.join("data/archivos-profesor", nombre),
+    total: anotaciones.length,
+  };
+}
+
 export function actualizarArchivoPermisos(teacherId: string): { ruta: string; total: number } {
   const permisos = listarPermisos({}).filter((p) => p.registradoPor === teacherId);
-  const csv = generarCsvPermisos(permisos) + "\r\n--- RESUMEN POR ALUMNO ---\r\n" + generarCsvResumenBano(permisos);
+  const resumen = generarCsvResumenBano(permisos).replace(/^\uFEFF/, "");
+  const csv =
+    generarCsvPermisos(permisos) +
+    "\r\n--- RESUMEN POR ALUMNO ---\r\n" +
+    resumen;
   const ARCHIVOS_DIR = path.join(DATA_DIR, "archivos-profesor");
   mkdirSync(ARCHIVOS_DIR, { recursive: true });
   const nombre = `${teacherId}-permisos.csv`;

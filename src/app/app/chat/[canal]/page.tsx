@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { ChatPanel } from "@/components/chat-panel";
 import { leerSesion } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
-import { CANALES_CHAT, type CanalChat } from "@/lib/chat";
+import { CANALES_CHAT, esCanalChat, listarMensajes } from "@/lib/chat";
+import { etiquetaVibe } from "@/lib/profile-schema";
 
 export const metadata: Metadata = {
   title: "Canchita de chat · VibeMatch",
@@ -13,7 +16,7 @@ export const metadata: Metadata = {
 
 function Cargando() {
   return (
-    <AppShell active="app">
+    <AppShell active="chat">
       <main className="relative z-10 flex flex-1 items-center justify-center px-5">
         <div className="glass w-full max-w-md rounded-[2rem] p-8 text-center">
           <div className="mx-auto h-10 w-10 animate-pulse rounded-full border border-brand-strong/40 bg-brand-strong/15" />
@@ -43,17 +46,33 @@ async function ContenidoChat({ params }: { params: Promise<{ canal: string }> })
   }
 
   const { canal } = await params;
-  const canalInfo = CANALES_CHAT.find((c) => c.id === canal);
-  if (!canalInfo) {
-    redirect("/app");
+  if (!esCanalChat(canal)) {
+    redirect("/app/chat");
   }
 
+  const canalInfo = CANALES_CHAT.find((item) => item.id === canal)!;
   const perfil = leerPerfil(acceso.card.id);
+  const mensajes = listarMensajes(canal);
 
   return (
-    <AppShell active="app">
-      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-5 py-12">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <AppShell active="chat">
+      <main className="relative z-10 mx-auto w-full max-w-4xl flex-1 px-5 py-8 sm:py-12">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <Link
+            href="/app/chat"
+            className="text-xs font-medium text-zinc-400 transition hover:text-white"
+          >
+            ← Todas las canchitas
+          </Link>
+          <Link
+            href="/app/muros"
+            className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-300 transition hover:bg-white/5"
+          >
+            Ir a los muros
+          </Link>
+        </div>
+
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-brand-soft">
               Canchita de chat
@@ -73,48 +92,18 @@ async function ContenidoChat({ params }: { params: Promise<{ canal: string }> })
                   : "border-white/10 bg-white/[0.03] text-zinc-400"
               }`}
             >
-              <span className="h-1.5 w-1.5 rounded-full" />
+              <span className="h-1.5 w-1.5 rounded-full bg-current" />
               {etiquetaVibe(perfil?.vibe ?? "conversar")}
             </span>
           </div>
         </div>
 
-        {/* Área de mensajes */}
-        <div className="glass rounded-[2rem] p-4 h-[500px] overflow-y-auto flex flex-col-reverse gap-3">
-          <div className="text-center text-xs text-zinc-500 mt-auto">
-            No hay mensajes aún. Sé el primero en saludar.
-          </div>
-        </div>
-
-        {/* Formulario de envío */}
-        <form
-          className="mt-6 glass rounded-[2rem] p-4 flex gap-3"
-          action="#"
-        >
-          <input
-            type="text"
-            name="texto"
-            placeholder="Escribe un mensaje…"
-            className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
-          />
-          <button
-            type="submit"
-            className="rounded-full bg-brand-strong px-6 py-3 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
-          >
-            Enviar
-          </button>
-        </form>
+        <ChatPanel
+          canal={canal}
+          usuarioId={acceso.card.id}
+          mensajesIniciales={mensajes}
+        />
       </main>
     </AppShell>
   );
-}
-
-function etiquetaVibe(vibe: string): string {
-  const etiquetas: Record<string, string> = {
-    "busco-equipo": "Busco equipo",
-    conversar: "Conversando",
-    "modo-estudio": "Modo estudio",
-    explorando: "Explorando",
-  };
-  return etiquetas[vibe] ?? vibe;
 }

@@ -5,6 +5,7 @@ import { AccessDenied } from "@/components/access-denied";
 import { LandingPage } from "@/components/landing-page";
 import { validarToken, type Acceso, aplicarDatosTarjeta } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
+import { tieneClaveEstudiante } from "@/lib/student-security";
 import { entrarAction } from "@/app/actions";
 
 export const metadata: Metadata = {
@@ -18,7 +19,12 @@ export default function AccesoPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ nombre?: string; curso?: string; nro?: string }>;
+  searchParams: Promise<{
+    nombre?: string;
+    curso?: string;
+    nro?: string;
+    error?: string;
+  }>;
 }) {
   return (
     <Suspense fallback={<CargandoAcceso />}>
@@ -64,7 +70,12 @@ async function AccesoContenido({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ nombre?: string; curso?: string; nro?: string }>;
+  searchParams: Promise<{
+    nombre?: string;
+    curso?: string;
+    nro?: string;
+    error?: string;
+  }>;
 }) {
   const { token } = await params;
   const sp = await searchParams;
@@ -112,13 +123,22 @@ async function AccesoContenido({
     return <LandingPage />;
   }
 
-  return <Bienvenida token={token} acceso={acceso} />;
+  return <Bienvenida token={token} acceso={acceso} error={sp.error} />;
 }
 
-function Bienvenida({ token, acceso }: { token: string; acceso: Acceso }) {
+function Bienvenida({
+  token,
+  acceso,
+  error,
+}: {
+  token: string;
+  acceso: Acceso;
+  error?: string;
+}) {
   const { card, school } = acceso;
   const perfil = leerPerfil(card.id);
   const nombre = perfil?.displayName ?? card.holder;
+  const protegida = tieneClaveEstudiante(card.id);
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden">
@@ -167,9 +187,22 @@ function Bienvenida({ token, acceso }: { token: string; acceso: Acceso }) {
             </h1>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-zinc-400">
               {perfil
-                ? "Tu perfil ya está creado. Entra para revisar tu vibe, tus intereses y la instalación de la app."
-                : "Esta tarjeta abrió un acceso único a la comunidad VibeMatch de tu establecimiento. Al entrar podrás crear tu perfil y, si quieres, instalar la app."}
+                ? "Tu perfil ya está creado. Entra para revisar tu vibe, tus intereses, tus chats y los muros de tu comunidad."
+                : "Esta tarjeta abrió un acceso único a la comunidad VibeMatch de tu establecimiento. Al entrar podrás crear tu perfil y, si quieres, protegerlo con una clave."}
             </p>
+
+            {protegida && (
+              <div className="mt-5 flex items-center gap-2 rounded-2xl border border-sky-400/25 bg-sky-400/10 px-4 py-3 text-xs text-sky-200">
+                <span className="text-base" aria-hidden="true">🔒</span>
+                <span>Esta cuenta tiene una clave adicional. Ingrésala para continuar.</span>
+              </div>
+            )}
+
+            {error === "clave" && (
+              <p className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm text-rose-200">
+                La clave no es correcta. Inténtalo nuevamente.
+              </p>
+            )}
 
             <dl className="mt-8 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -188,8 +221,24 @@ function Bienvenida({ token, acceso }: { token: string; acceso: Acceso }) {
               </div>
             </dl>
 
-            <form action={entrarAction} className="mt-8">
+            <form action={entrarAction} className="mt-8 space-y-3">
               <input type="hidden" name="token" value={token} />
+              {protegida && (
+                <label className="block">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                    Clave de la cuenta
+                  </span>
+                  <input
+                    name="password"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    maxLength={64}
+                    placeholder="••••••"
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60 focus:ring-2 focus:ring-brand-strong/20"
+                  />
+                </label>
+              )}
               <button
                 type="submit"
                 className="w-full rounded-full bg-brand-strong px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-brand-strong/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-strong"

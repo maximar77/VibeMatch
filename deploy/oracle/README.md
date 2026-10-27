@@ -110,6 +110,10 @@ Completa obligatoriamente:
 - `VIBEMATCH_PUBLIC_URL`: `https://` + dominio.
 - `VIBEMATCH_COOKIE_SECURE=1`.
 
+El código de demo `VIBEMATCH-PROFE-DEMO` es público: cámbialo antes del piloto real. Los
+docentes se registran con ese código y reciben un código personal; el código institucional
+no sirve para iniciar sesión.
+
 `deploy/oracle/.env` está ignorado por Git. No subas secretos.
 
 No definas `VIBEMATCH_DATA_DIR` en Oracle: la app debe usar `/app/data`, que es el
@@ -143,8 +147,10 @@ revisa que el DNS ya apunte a la IP y que `80/443` estén abiertos.
 
 - Los datos viven en el volumen `vibematch_data`, montado en `/app/data`.
 - `data/cards.json` (solo hashes) se copia como semilla.
-- `profiles.json`, asistencia, permisos, anotaciones y docentes se crean en el
-  volumen y sobreviven a reinicios y actualizaciones.
+- `profiles.json`, asistencia, permisos, anotaciones, docentes, chats, muros y claves
+  opcionales se crean en el volumen y sobreviven a reinicios y actualizaciones.
+- Los CSV exportados por curso viven en `data/archivos-profesor/` y se reconstruyen desde
+  los registros del volumen.
 - El contenedor corre como usuario `nextjs` (UID 1001). No cambies el volumen a
   otro usuario sin ajustar permisos.
 
@@ -179,12 +185,13 @@ imágenes huérfanas. Programa un cron semanal para backups:
 
 ## 9. APK apuntando a Oracle
 
-La APK 1.0.0 trae `https://vibematch.cl` como URL de fábrica, pero **el dominio se puede
-configurar en el dispositivo** sin recompilar: primer arranque, atajo “Configurar
-servidor” o enlace `vibematch://config`. La URL elegida se guarda en
-`SharedPreferences` y tiene prioridad sobre la de fábrica.
+La APK 1.1.0 trae `https://vibematch-demo.vercel.app` como URL de fábrica para que los
+beta testers puedan entrar sin configurar nada. **El dominio se puede configurar en el
+dispositivo** sin recompilar: primer arranque, atajo “Configurar servidor” o enlace
+`vibematch://config`. La URL elegida se guarda en `SharedPreferences` y tiene prioridad
+sobre la de fábrica. Para el piloto, cambia la URL al dominio de Oracle en cada tablet.
 
-Para dejar otro dominio grabado de fábrica:
+Para dejar el dominio del colegio grabado de fábrica:
 
 ```powershell
 # Windows PowerShell, en la raíz del proyecto
@@ -206,8 +213,9 @@ Si el dominio final no es `vibematch.cl`, además del diálogo de la app convien
 
 ## 10. App Links (deep links HTTPS)
 
-El manifiesto Android declara `https://vibematch.cl/a/…`, el host de demo de Vercel y
-`vibematch://a/…`. Para que Android verifique los enlaces HTTPS, publica
+El manifiesto Android declara `https://vibematch.cl/a/…`,
+`https://vibematch-demo.vercel.app/a/…`, el alias anterior de Vercel y `vibematch://a/…`.
+Para que Android verifique los enlaces HTTPS, publica
 `https://TU_DOMINIO/.well-known/assetlinks.json` con la huella SHA-256 del keystore de
 firma. El archivo ya está en `public/.well-known/assetlinks.json` con la huella del
 keystore de release:
@@ -238,8 +246,10 @@ funcionando.
 - [ ] DNS `A` apunta a la IP reservada.
 - [ ] Security List y `ufw` permiten solo 22/80/443.
 - [ ] `VIBEMATCH_SECRET` distinto del valor de demo.
+- [ ] `VIBEMATCH_TEACHER_CODE` distinto de `VIBEMATCH-PROFE-DEMO`.
 - [ ] `VIBEMATCH_COOKIE_SECURE=1` y HTTPS válido.
-- [ ] `/api/health` responde `ok: true`.
+- [ ] `/api/health` responde `ok: true` y `dataPersistent: true`.
+- [ ] Probar login docente, escaneo y descarga CSV en el servidor persistente.
 - [ ] Backup programado y restauración probada.
 - [ ] APK firmada con la URL de Oracle y `assetlinks.json` publicado.
 - [ ] APK probada en la tablet/lector del piloto (NFC + QR + deep link).

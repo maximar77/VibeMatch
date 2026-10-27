@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { leerSesion } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
-import { listarMensajes, guardarMensaje } from "@/lib/chat";
+import {
+  esCanalChat,
+  guardarMensaje,
+  listarMensajes,
+} from "@/lib/chat";
 import { validarMensaje, evaluarMensaje } from "@/lib/moderacion";
 
 export async function GET(
@@ -14,6 +18,10 @@ export async function GET(
   }
 
   const { canal } = await params;
+  if (!esCanalChat(canal)) {
+    return NextResponse.json({ error: "canal_invalido" }, { status: 404 });
+  }
+
   const { searchParams } = new URL(request.url);
   const vibeFilter = searchParams.get("vibe");
 
@@ -37,6 +45,10 @@ export async function POST(
   }
 
   const { canal } = await params;
+  if (!esCanalChat(canal)) {
+    return NextResponse.json({ error: "canal_invalido" }, { status: 404 });
+  }
+
   let cuerpo: Record<string, unknown>;
   try {
     cuerpo = (await request.json()) as Record<string, unknown>;
@@ -57,7 +69,11 @@ export async function POST(
   const mensaje = guardarMensaje({
     canal,
     usuarioId: acceso.card.id,
-    usuarioNombre: acceso.card.holder ?? "Alumno",
+    usuarioNombre:
+      perfil?.displayName ??
+      acceso.card.fullName ??
+      acceso.card.holder ??
+      "Alumno",
     usuarioVibe: vibe,
     texto: evaluacion.textoFiltrado,
     timestamp: new Date().toISOString(),

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { formatearCodigo } from "@/lib/teacher-schema";
+import { LimpiarCodigoRegistro } from "@/components/limpiar-codigo-registro";
 
 export const instant = false;
 
@@ -19,11 +20,9 @@ export default async function ProfesorRegistroExitoPage() {
     redirect("/profesor/registro");
   }
 
-  // Borrar cookie para mostrar solo una vez
-  cookieStore.delete("vm_profe_registro");
-
   return (
     <div className="bg-ink text-zinc-50 min-h-screen flex items-center justify-center">
+      <LimpiarCodigoRegistro />
       <div className="glass rounded-[2rem] border border-white/10 p-8 sm:p-12 max-w-md w-full mx-5 text-center">
         <div className="flex items-center justify-center gap-2 mb-6">
           <span className="h-10 w-auto" />

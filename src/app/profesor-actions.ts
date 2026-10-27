@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
@@ -16,11 +17,13 @@ import {
   listarPermisos,
   listarAnotaciones,
   guardarAmigo,
+  actualizarArchivoAnotaciones,
   actualizarArchivoPermisos,
   actualizarArchivoAmigos,
   actualizarArchivoProfesor,
 } from "@/lib/school";
 import { buscarTarjetaPorToken, listarTarjetas } from "@/lib/cards";
+import { leerPerfil } from "@/lib/profiles";
 import {
   esEstadoAsistencia,
   type EstadoAsistencia,
@@ -53,132 +56,239 @@ export async function salirProfesorAction() {
 
 import { leerProfesorSesion } from "@/lib/teachers";
 
-export async function registrarAsistenciaAction(formData: FormData): Promise<void> {
+export type ResultadoAccionProfesor = {
+  ok: boolean;
+  mensaje: string;
+  nombre?: string;
+};
+
+type EstudianteResuelto = {
+  id: string;
+  nombre: string;
+  cursoTarjeta: string | null;
+  numeroLista: number | null;
+};
+
+function resolverEstudiante(cardIdRaw: string): EstudianteResuelto | null {
+  const cardId = cardIdRaw.trim();
+  if (!cardId) return null;
+
+  const tarjeta =
+    buscarTarjetaPorToken(cardId) ??
+    listarTarjetas().find((item) => item.id === cardId);
+  if (!tarjeta) return null;
+
+  const perfil = leerPerfil(tarjeta.id);
+  return {
+    id: tarjeta.id,
+    nombre:
+      tarjeta.fullName ??
+      perfil?.displayName ??
+      tarjeta.holder ??
+      "Alumno",
+    cursoTarjeta: tarjeta.course ?? tarjeta.level ?? null,
+    numeroLista: tarjeta.listNumber ?? null,
+  };
+}
+
+async function profesorActual() {
   const profesor = await leerProfesorSesion();
-  if (!profesor) {
-    redirect("/profesor/login");
+  if (!profesor) redirect("/profesor/login");
+  return profesor;
+}
+
+/**
+ * El número de lista viene de la tarjeta o lo escribe el docente en el momento
+ * de confirmar. Devolvemos `null` y marcamos `invalido` si el valor ingresado
+ * no es válido, para no guardar basura en los archivos del curso.
+ */
+function leerNumeroLista(formData: FormData): {
+  valor: number | null;
+  invalido: boolean;
+} {
+  const raw = String(formData.get("numeroLista") ?? "").trim();
+  if (!raw) return { valor: null, invalido: false };
+  const numero = Number(raw);
+  if (!Number.isInteger(numero) || numero < 1 || numero > 999) {
+    return { valor: null, invalido: true };
   }
+  return { valor: numero, invalido: false };
+}
+
+function aMinutos(hora: string): number {
+  const [hh, mm] = hora.split(":").map((valor) => Number(valor));
+  return (hh || 0) * 60 + (mm || 0);
+}
+
+async function registrarAsistenciaInterno(
+  formData: FormData,
+): Promise<ResultadoAccionProfesor> {
+  const profesor = await profesorActual();
 
   const cardId = String(formData.get("cardId") ?? "").trim();
   const estadoRaw = String(formData.get("estado") ?? "presente");
   const curso = String(formData.get("curso") ?? profesor.curso).trim();
-  const fecha = String(formData.get("fecha") ?? "");
-  const hora = String(formData.get("hora") ?? "");
+  const fecha = String(formData.get("fecha") ?? "").trim();
+  const hora = String(formData.get("hora") ?? "").trim();
+  const metodoRaw = String(formData.get("metodo") ?? "nfc");
 
-  if (!esEstadoAsistencia(estadoRaw) || !cardId || !fecha || !hora) {
-    return;
+  if (!esEstadoAsistencia(estadoRaw)) {
+    return { ok: false, mensaje: "El estado de asistencia no es válido." };
+  }
+  if (!cardId || !fecha || !hora) {
+    return { ok: false, mensaje: "Falta la tarjeta, la fecha o la hora." };
   }
 
-  let tarjetaId = cardId;
-  let nombre = "";
-  let numeroLista: number | null = null;
-
-  // Si es un token, obtener la tarjeta real
-  const tarjetaPorToken = buscarTarjetaPorToken(cardId);
-  if (tarjetaPorToken) {
-    tarjetaId = tarjetaPorToken.id;
-    nombre = tarjetaPorToken.fullName ?? tarjetaPorToken.holder ?? "";
-    numeroLista = tarjetaPorToken.listNumber ?? null;
-  } else {
-    // Buscar por ID de tarjeta
-    const tarjeta = listarTarjetas().find((t) => t.id === cardId);
-    if (tarjeta) {
-      tarjetaId = tarjeta.id;
-      nombre = tarjeta.fullName ?? tarjeta.holder ?? "";
-      numeroLista = tarjeta.listNumber ?? null;
-    }
+  const estudiante = resolverEstudiante(cardId);
+  if (!estudiante) {
+    return { ok: false, mensaje: "Esa tarjeta no existe o está revocada." };
   }
+  const numeroLista = leerNumeroLista(formData);
+  if (numeroLista.invalido) {
+    return { ok: false, mensaje: "El número de lista debe estar entre 1 y 999." };
+  }
+
+  const cursoFinal = curso || profesor.curso || estudiante.cursoTarjeta || "Sin asignar";
+  const metodo: "nfc" | "qr" | "manual" =
+    metodoRaw === "qr" ? "qr" : metodoRaw === "manual" ? "manual" : "nfc";
 
   guardarAsistencia({
-    cardId: tarjetaId,
-    curso: curso || profesor.curso,
-    nombre,
-    numeroLista,
+    cardId: estudiante.id,
+    curso: cursoFinal,
+    nombre: estudiante.nombre,
+    numeroLista: numeroLista.valor ?? estudiante.numeroLista,
     fecha,
     hora,
     estado: estadoRaw as EstadoAsistencia,
     registradoPor: profesor.id,
-    metodo: "nfc",
+    metodo,
   });
+
+  return {
+    ok: true,
+    nombre: estudiante.nombre,
+    mensaje: `${estudiante.nombre} quedó como ${estadoRaw} en ${cursoFinal} a las ${hora}.`,
+  };
 }
 
-export async function registrarPermisoBanoAction(formData: FormData): Promise<void> {
-  const profesor = await leerProfesorSesion();
-  if (!profesor) {
-    redirect("/profesor/login");
+export async function registrarAsistenciaAction(formData: FormData): Promise<void> {
+  const resultado = await registrarAsistenciaInterno(formData);
+  if (resultado.ok) {
+    revalidatePath("/profesor/asistencia");
+    revalidatePath("/profesor/escanear");
   }
+}
+
+export async function registrarAsistenciaProfesorAction(
+  formData: FormData,
+): Promise<ResultadoAccionProfesor> {
+  return registrarAsistenciaInterno(formData);
+}
+
+async function registrarPermisoInterno(
+  formData: FormData,
+): Promise<ResultadoAccionProfesor> {
+  const profesor = await profesorActual();
 
   const cardId = String(formData.get("cardId") ?? "").trim();
   const accion = String(formData.get("accion") ?? "salida");
   const curso = String(formData.get("curso") ?? profesor.curso).trim();
-  const fecha = String(formData.get("fecha") ?? "");
-  const hora = String(formData.get("hora") ?? "");
+  const fecha = String(formData.get("fecha") ?? "").trim();
+  const hora = String(formData.get("hora") ?? "").trim();
 
   if (!cardId || !fecha || !hora) {
-    return;
+    return { ok: false, mensaje: "Falta la tarjeta, la fecha o la hora." };
   }
 
-  let tarjetaId = cardId;
-  const tarjetaPorToken = buscarTarjetaPorToken(cardId);
-  if (tarjetaPorToken) {
-    tarjetaId = tarjetaPorToken.id;
-  } else {
-    const tarjeta = listarTarjetas().find((t) => t.id === cardId);
-    if (tarjeta) {
-      tarjetaId = tarjeta.id;
-    }
+  const estudiante = resolverEstudiante(cardId);
+  if (!estudiante) {
+    return { ok: false, mensaje: "Esa tarjeta no existe o está revocada." };
+  }
+  const numeroLista = leerNumeroLista(formData);
+  if (numeroLista.invalido) {
+    return { ok: false, mensaje: "El número de lista debe estar entre 1 y 999." };
   }
 
-  const permisosDelDia = listarPermisos({ cardId: tarjetaId, fecha });
-  const abiertos = permisosDelDia.find((p) => p.fin === null);
+  const permisosDelDia = listarPermisos({ cardId: estudiante.id, fecha });
+  const abierto = permisosDelDia.find((permiso) => permiso.fin === null);
 
   if (accion === "salida") {
-    if (abiertos) {
-      return;
+    if (abierto) {
+      return {
+        ok: false,
+        mensaje: `${estudiante.nombre} ya tiene un permiso de baño abierto.`,
+      };
     }
-    const LIMITE_BANO_POR_DIA = 3;
-    const permiso = {
+
+    const cursoFinal = curso || profesor.curso || estudiante.cursoTarjeta || "Sin asignar";
+    guardarPermiso({
       id: `bano_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-      cardId: tarjetaId,
-      curso: curso || profesor.curso,
+      cardId: estudiante.id,
+      nombre: estudiante.nombre,
+      numeroLista: numeroLista.valor ?? estudiante.numeroLista,
+      curso: cursoFinal,
       fecha,
       inicio: hora,
       fin: null,
       duracionMin: null,
-      excedeLimite: permisosDelDia.length >= LIMITE_BANO_POR_DIA,
+      excedeLimite: permisosDelDia.length >= 3,
       registradoPor: profesor.id,
       createdAt: new Date().toISOString(),
+    });
+
+    return {
+      ok: true,
+      nombre: estudiante.nombre,
+      mensaje: `${estudiante.nombre} salió al baño a las ${hora}.`,
     };
-    guardarPermiso(permiso as any);
-    return;
   }
 
   if (accion === "regreso") {
-    if (!abiertos) {
-      return;
+    if (!abierto) {
+      return {
+        ok: false,
+        mensaje: `${estudiante.nombre} no tiene un permiso de baño abierto.`,
+      };
     }
-    const LIMITE_BANO_MINUTOS = 10;
-    const aMinutos = (h: string) => {
-      const [hh, mm] = h.split(":").map((v) => Number(v));
-      return hh * 60 + mm;
-    };
-    const duracion = Math.max(0, aMinutos(hora) - aMinutos(abiertos.inicio));
-    const cerrado = {
-      ...abiertos,
+
+    const duracion = Math.max(0, aMinutos(hora) - aMinutos(abierto.inicio));
+    guardarPermiso({
+      ...abierto,
+      nombre: abierto.nombre || estudiante.nombre,
+      numeroLista: numeroLista.valor ?? abierto.numeroLista ?? estudiante.numeroLista,
       fin: hora,
       duracionMin: duracion,
-      excedeLimite: abiertos.excedeLimite || duracion > LIMITE_BANO_MINUTOS,
+      excedeLimite: abierto.excedeLimite || duracion > 10,
+    });
+
+    return {
+      ok: true,
+      nombre: estudiante.nombre,
+      mensaje: `${estudiante.nombre} regresó a las ${hora} (${duracion} min fuera).`,
     };
-    guardarPermiso(cerrado as any);
-    return;
+  }
+
+  return { ok: false, mensaje: "La acción de baño no es válida." };
+}
+
+export async function registrarPermisoBanoAction(formData: FormData): Promise<void> {
+  const resultado = await registrarPermisoInterno(formData);
+  if (resultado.ok) {
+    revalidatePath("/profesor/banio");
+    revalidatePath("/profesor/escanear");
   }
 }
 
-export async function registrarAnotacionAction(formData: FormData): Promise<void> {
-  const profesor = await leerProfesorSesion();
-  if (!profesor) {
-    redirect("/profesor/login");
-  }
+export async function registrarPermisoBanoProfesorAction(
+  formData: FormData,
+): Promise<ResultadoAccionProfesor> {
+  return registrarPermisoInterno(formData);
+}
+
+async function registrarAnotacionInterno(
+  formData: FormData,
+): Promise<ResultadoAccionProfesor> {
+  const profesor = await profesorActual();
 
   const cardId = String(formData.get("cardId") ?? "").trim();
   const tipoRaw = String(formData.get("tipo") ?? "positiva");
@@ -188,39 +298,37 @@ export async function registrarAnotacionAction(formData: FormData): Promise<void
     .replace(/\s+/g, " ")
     .slice(0, 300);
   const curso = String(formData.get("curso") ?? profesor.curso).trim();
-  const fecha = String(formData.get("fecha") ?? "");
-  const hora = String(formData.get("hora") ?? "");
+  const fecha = String(formData.get("fecha") ?? "").trim();
+  const hora = String(formData.get("hora") ?? "").trim();
 
   if (tipoRaw !== "positiva" && tipoRaw !== "negativa") {
-    return;
+    return { ok: false, mensaje: "El tipo de anotación no es válido." };
   }
-
   if (!esCategoriaAnotacion(categoriaRaw)) {
-    return;
+    return { ok: false, mensaje: "Elige una categoría válida." };
   }
-
   if (comentario.length < 3) {
-    return;
+    return { ok: false, mensaje: "Escribe un comentario de al menos 3 caracteres." };
   }
-
   if (!cardId || !fecha || !hora) {
-    return;
+    return { ok: false, mensaje: "Falta la tarjeta, la fecha o la hora." };
   }
 
-  let tarjetaId = cardId;
-  const tarjetaPorToken = buscarTarjetaPorToken(cardId);
-  if (tarjetaPorToken) {
-    tarjetaId = tarjetaPorToken.id;
-  } else {
-    const tarjeta = listarTarjetas().find((t) => t.id === cardId);
-    if (tarjeta) {
-      tarjetaId = tarjeta.id;
-    }
+  const estudiante = resolverEstudiante(cardId);
+  if (!estudiante) {
+    return { ok: false, mensaje: "Esa tarjeta no existe o está revocada." };
+  }
+  const numeroLista = leerNumeroLista(formData);
+  if (numeroLista.invalido) {
+    return { ok: false, mensaje: "El número de lista debe estar entre 1 y 999." };
   }
 
+  const cursoFinal = curso || profesor.curso || estudiante.cursoTarjeta || "Sin asignar";
   guardarAnotacion({
-    cardId: tarjetaId,
-    curso: curso || profesor.curso,
+    cardId: estudiante.id,
+    nombre: estudiante.nombre,
+    numeroLista: numeroLista.valor ?? estudiante.numeroLista,
+    curso: cursoFinal,
     tipo: tipoRaw,
     categoria: categoriaRaw as CategoriaAnotacion,
     comentario,
@@ -228,6 +336,26 @@ export async function registrarAnotacionAction(formData: FormData): Promise<void
     hora,
     registradoPor: profesor.id,
   });
+
+  return {
+    ok: true,
+    nombre: estudiante.nombre,
+    mensaje: `Anotación ${tipoRaw} guardada para ${estudiante.nombre} (${cursoFinal}).`,
+  };
+}
+
+export async function registrarAnotacionAction(formData: FormData): Promise<void> {
+  const resultado = await registrarAnotacionInterno(formData);
+  if (resultado.ok) {
+    revalidatePath("/profesor/anotaciones");
+    revalidatePath("/profesor/escanear");
+  }
+}
+
+export async function registrarAnotacionProfesorAction(
+  formData: FormData,
+): Promise<ResultadoAccionProfesor> {
+  return registrarAnotacionInterno(formData);
 }
 
 export async function obtenerAsistencia(filtro: {
@@ -238,11 +366,11 @@ export async function obtenerAsistencia(filtro: {
   if (!profesor) {
     redirect("/profesor/login");
   }
-  const cursoFiltro = filtro.curso ?? profesor.curso;
-  return listarAsistencia({ ...filtro, curso: cursoFiltro });
+  return listarAsistencia({ ...filtro, curso: profesor.curso });
 }
 
 export async function obtenerPermisos(filtro: {
+  curso?: string;
   fecha?: string;
   abiertos?: boolean;
 }) {
@@ -250,7 +378,7 @@ export async function obtenerPermisos(filtro: {
   if (!profesor) {
     redirect("/profesor/login");
   }
-  return listarPermisos({ ...filtro });
+  return listarPermisos({ ...filtro, curso: profesor.curso });
 }
 
 export async function registrarAmigoAction(formData: FormData): Promise<void> {
@@ -279,6 +407,7 @@ export async function exportarArchivosProfesorAction(): Promise<void> {
   if (!profesor) redirect("/profesor/login");
   actualizarArchivoProfesor(profesor.id);
   actualizarArchivoPermisos(profesor.id);
+  actualizarArchivoAnotaciones(profesor.id);
   actualizarArchivoAmigos(profesor.id);
 }
 
@@ -293,9 +422,10 @@ export async function resolverTarjetaAction(cardIdRaw: string): Promise<{
   const tarjetaPorToken = buscarTarjetaPorToken(cardIdRaw);
   const tarjeta = tarjetaPorToken ?? listarTarjetas().find((t) => t.id === cardIdRaw);
   if (!tarjeta) return null;
+  const perfil = leerPerfil(tarjeta.id);
   return {
     id: tarjeta.id,
-    nombre: tarjeta.fullName ?? tarjeta.holder ?? "Alumno",
+    nombre: tarjeta.fullName ?? perfil?.displayName ?? tarjeta.holder ?? "Alumno",
     curso: tarjeta.course ?? tarjeta.level ?? profesor.curso,
     numeroLista: tarjeta.listNumber ?? null,
   };
@@ -308,8 +438,7 @@ export async function obtenerAnotaciones(filtro: {
   if (!profesor) {
     redirect("/profesor/login");
   }
-  const cursoFiltro = filtro.curso ?? profesor.curso;
-  return listarAnotaciones({ ...filtro, curso: cursoFiltro });
+  return listarAnotaciones({ ...filtro, curso: profesor.curso });
 }
 
 import {

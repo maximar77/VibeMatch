@@ -31,7 +31,7 @@ function readStore(): ProfileStore {
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8"));
+    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8").replace(/^\uFEFF/, ""));
   } catch (error) {
     throw new Error("No se pudo leer data/profiles.json.", { cause: error });
   }

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 function Cargando() {
   return (
-    <AppShell active="instalar">
+    <AppShell active="app">
       <main className="relative z-10 flex flex-1 items-center justify-center px-5">
         <div className="glass w-full max-w-md rounded-[2rem] p-8 text-center">
           <p className="text-sm text-zinc-400">Preparando la instalación…</p>
@@ -50,7 +50,7 @@ async function ContenidoInstalar() {
   const platform = detectPlatformFromUserAgent(userAgent);
 
   return (
-    <AppShell active="instalar">
+    <AppShell active="app">
       <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-5 py-12">
         <Link
           href="/app"

@@ -17,12 +17,12 @@ import { DATA_DIR } from "@/lib/data-dir";
 
 const STORE_PATH = path.join(DATA_DIR, "chat.json");
 
-type MensajeChat = {
+export type MensajeChat = {
   id: string;
   canal: string;
   usuarioId: string; // cardId del alumno
   usuarioNombre: string;
-  usuarioVibe?: string; // "verde" | "amarillo" | "rojo"
+  usuarioVibe?: string; // "busco-equipo" | "conversar" | ...
   texto: string;
   timestamp: string;
   editado: boolean;
@@ -41,7 +41,7 @@ function readStore(): ChatStore {
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8"));
+    parsed = JSON.parse(readFileSync(STORE_PATH, "utf8").replace(/^\uFEFF/, ""));
   } catch (error) {
     throw new Error("No se pudo leer data/chat.json.", { cause: error });
   }
@@ -81,6 +81,12 @@ export function guardarMensaje(mensaje: Omit<MensajeChat, "id">): MensajeChat {
     id: `msg_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
   };
   store.mensajes = [...store.mensajes, guardado];
+
+  // Límite defensivo para que el JSON no crezca sin control en la demo.
+  if (store.mensajes.length > 2000) {
+    store.mensajes = store.mensajes.slice(-2000);
+  }
+
   escribirStore(store);
   return guardado;
 }
@@ -94,3 +100,7 @@ export const CANALES_CHAT = [
 ] as const;
 
 export type CanalChat = (typeof CANALES_CHAT)[number]["id"];
+
+export function esCanalChat(value: string): value is CanalChat {
+  return CANALES_CHAT.some((canal) => canal.id === value);
+}

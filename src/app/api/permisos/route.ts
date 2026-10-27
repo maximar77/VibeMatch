@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from "next/server";
-import { leerSesion } from "@/lib/cards";
+import { buscarTarjetaPorToken, listarTarjetas } from "@/lib/cards";
+import { leerPerfil } from "@/lib/profiles";
 import { guardarPermiso, listarPermisos } from "@/lib/school";
 import {
   LIMITE_BANO_MINUTOS,
@@ -7,35 +8,27 @@ import {
   nuevoId,
   type PermisoBano,
 } from "@/lib/school-schema";
+import { fechaEnZona, horaEnZona } from "@/lib/fecha";
+import { leerProfesorSesion } from "@/lib/teachers";
 
 /**
- * Permisos de baÃ±o por tarjeta NFC.
+ * Permisos de baño para la app docente.
  *
  * GET  /api/permisos?fecha=AAAA-MM-DD&abiertos=1
- * POST /api/permisos  { cardId, accion: "salida" | "regreso", curso?, fecha?, hora? }
+ * POST /api/permisos  { cardId, accion: "salida" | "regreso", fecha?, hora? }
  *
- * El primer POST abre el permiso (salida) y el segundo lo cierra (regreso),
- * calculando la duraciÃ³n y marcando alerta si supera el lÃ­mite.
+ * Solo docentes autenticados. El curso y el autor se toman de la sesión para
+ * evitar que un docente lea o escriba permisos de otro curso.
  */
 
-function sinSesion() {
+function sinSesionProfesor() {
   return NextResponse.json(
-    { error: "sin_sesion", mensaje: "Abre VibeMatch con tu tarjeta para continuar." },
+    {
+      error: "sin_sesion_profesor",
+      mensaje: "Inicia sesión en el panel docente para continuar.",
+    },
     { status: 401 },
   );
-}
-
-function fechaLocal(): string {
-  const ahora = new Date();
-  const offset = ahora.getTimezoneOffset();
-  return new Date(ahora.getTime() - offset * 60_000).toISOString().slice(0, 10);
-}
-
-function horaLocal(): string {
-  const ahora = new Date();
-  return `${String(ahora.getHours()).padStart(2, "0")}:${String(
-    ahora.getMinutes(),
-  ).padStart(2, "0")}`;
 }
 
 function aMinutos(hora: string): number {
@@ -44,51 +37,86 @@ function aMinutos(hora: string): number {
 }
 
 export async function GET(request: Request) {
-  const acceso = await leerSesion();
-  if (!acceso || acceso.card.kind === "public") return sinSesion();
+  const profesor = await leerProfesorSesion();
+  if (!profesor) return sinSesionProfesor();
 
   const url = new URL(request.url);
-  const fecha = url.searchParams.get("fecha") ?? fechaLocal();
+  const fecha = url.searchParams.get("fecha") ?? fechaEnZona();
   const soloAbiertos = url.searchParams.get("abiertos") === "1";
 
   return NextResponse.json(
     {
       fecha,
+      curso: profesor.curso,
       limiteMinutos: LIMITE_BANO_MINUTOS,
       limitePorDia: LIMITE_BANO_POR_DIA,
-      permisos: listarPermisos({ fecha, abiertos: soloAbiertos }),
+      permisos: listarPermisos({
+        fecha,
+        curso: profesor.curso,
+        abiertos: soloAbiertos,
+      }),
     },
     { headers: { "cache-control": "no-store" } },
   );
 }
 
 export async function POST(request: Request) {
-  const acceso = await leerSesion();
-  if (!acceso || acceso.card.kind === "public") return sinSesion();
+  const profesor = await leerProfesorSesion();
+  if (!profesor) return sinSesionProfesor();
 
   let cuerpo: Record<string, unknown>;
   try {
     cuerpo = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json(
-      { error: "json_invalido", mensaje: "El cuerpo no es JSON vÃ¡lido." },
+      { error: "json_invalido", mensaje: "El cuerpo no es JSON válido." },
       { status: 400 },
     );
   }
 
-  const cardIdRaw = String(cuerpo.cardId ?? acceso.card.id);
+  const cardIdRaw = String(cuerpo.cardId ?? "").trim();
   const accion = String(cuerpo.accion ?? "salida");
-  const curso = String(cuerpo.curso ?? acceso.card.level ?? "Sin asignar");
-  const fecha = String(cuerpo.fecha ?? fechaLocal());
-  const hora = String(cuerpo.hora ?? horaLocal());
-  const registradoPor = String(cuerpo.registradoPor ?? acceso.card.id);
+  const fecha = String(cuerpo.fecha ?? fechaEnZona());
+  const hora = String(cuerpo.hora ?? horaEnZona());
 
-  const { buscarTarjetaPorToken, listarTarjetas } = await import("@/lib/cards");
-  const tarjetaPorToken = buscarTarjetaPorToken(cardIdRaw);
-  const tarjeta = tarjetaPorToken ?? listarTarjetas().find((t) => t.id === cardIdRaw) ?? null;
-  const cardId = tarjeta?.id ?? acceso.card.id;
+  if (!cardIdRaw) {
+    return NextResponse.json(
+      { error: "tarjeta_requerida", mensaje: "Falta la tarjeta del alumno." },
+      { status: 400 },
+    );
+  }
 
-  const activos = listarPermisos({ cardId, fecha, abiertos: true });
+  if (accion !== "salida" && accion !== "regreso") {
+    return NextResponse.json(
+      { error: "accion_invalida", mensaje: "La acción debe ser salida o regreso." },
+      { status: 400 },
+    );
+  }
+
+  const tarjeta =
+    buscarTarjetaPorToken(cardIdRaw) ??
+    listarTarjetas().find((item) => item.id === cardIdRaw) ??
+    null;
+
+  if (!tarjeta) {
+    return NextResponse.json(
+      { error: "tarjeta_invalida", mensaje: "Esa tarjeta no existe o está revocada." },
+      { status: 404 },
+    );
+  }
+
+  const perfil = leerPerfil(tarjeta.id);
+  const nombre =
+    perfil?.displayName ??
+    tarjeta.fullName ??
+    tarjeta.holder ??
+    "Alumno";
+
+  const activos = listarPermisos({
+    cardId: tarjeta.id,
+    fecha,
+    abiertos: true,
+  });
   const abierto = activos[0];
 
   if (accion === "salida") {
@@ -96,24 +124,26 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: "permiso_ya_abierto",
-          mensaje: "Ya hay un permiso de baÃ±o en curso para esta tarjeta.",
+          mensaje: "Ya hay un permiso de baño en curso para esta tarjeta.",
           permiso: abierto,
         },
         { status: 409 },
       );
     }
 
-    const permisosDelDia = listarPermisos({ cardId, fecha });
+    const permisosDelDia = listarPermisos({ cardId: tarjeta.id, fecha });
     const permiso: PermisoBano = {
       id: nuevoId("bano"),
-      cardId,
-      curso,
+      cardId: tarjeta.id,
+      nombre,
+      numeroLista: tarjeta.listNumber ?? null,
+      curso: profesor.curso,
       fecha,
       inicio: hora,
       fin: null,
       duracionMin: null,
       excedeLimite: permisosDelDia.length >= LIMITE_BANO_POR_DIA,
-      registradoPor,
+      registradoPor: profesor.id,
       createdAt: new Date().toISOString(),
     };
 
@@ -123,12 +153,11 @@ export async function POST(request: Request) {
     );
   }
 
-  // accion === "regreso"
   if (!abierto) {
     return NextResponse.json(
       {
         error: "sin_permiso_abierto",
-        mensaje: "No hay un permiso de baÃ±o en curso para esta tarjeta.",
+        mensaje: "No hay un permiso de baño en curso para esta tarjeta.",
       },
       { status: 409 },
     );

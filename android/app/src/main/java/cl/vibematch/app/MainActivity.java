@@ -2,11 +2,15 @@ package cl.vibematch.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.util.Patterns;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.widget.EditText;
 import androidx.appcompat.app.AlertDialog;
 import com.getcapacitor.BridgeActivity;
@@ -37,7 +41,7 @@ public class MainActivity extends BridgeActivity {
 
     private static final String PREFS = "vibematch";
     private static final String KEY_SERVER = "vibematch_server_url";
-    private static final String DEFAULT_SERVER = "https://vibematch.cl";
+    private static final String DEFAULT_SERVER = "https://vibematch-demo.vercel.app";
     private static final String TAG = "VibeMatch";
     private boolean dialogoServidorVisible = false;
 
@@ -45,6 +49,7 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         prepararConfiguracion();
         super.onCreate(savedInstanceState);
+        configurarPuenteWeb();
 
         // BridgeActivity.load() ya despacha el intent inicial a onNewIntent, así
         // que el arranque en frío desde una tarjeta o vibematch://config se
@@ -99,6 +104,79 @@ public class MainActivity extends BridgeActivity {
         return texto.toString();
     }
 
+    /**
+     * Expone la versión nativa a la web y la agrega al user agent. La web usa
+     * estos datos para avisar cuando hay un APK nuevo, sin depender de que el
+     * WebView incluya una cadena personalizada de fábrica.
+     */
+    private void configurarPuenteWeb() {
+        try {
+            if (getBridge() == null || getBridge().getWebView() == null) {
+                return;
+            }
+
+            WebView webView = getBridge().getWebView();
+            String userAgent = webView.getSettings().getUserAgentString();
+            if (userAgent != null && !userAgent.contains("VibeMatch/")) {
+                webView.getSettings().setUserAgentString(
+                    userAgent + " VibeMatch/" + versionName() + " (" + versionCode() + ")"
+                );
+            }
+            webView.addJavascriptInterface(new NativeBridge(), "VibeMatchNative");
+        } catch (Exception error) {
+            Log.w(TAG, "No se pudo configurar el puente nativo.", error);
+        }
+    }
+
+    private String versionName() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return info.versionName == null ? "1.0.0" : info.versionName;
+        } catch (Exception error) {
+            return "1.0.0";
+        }
+    }
+
+    private long versionCode() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                return info.getLongVersionCode();
+            }
+            return info.versionCode;
+        } catch (Exception error) {
+            return 0L;
+        }
+    }
+
+    private final class NativeBridge {
+        @JavascriptInterface
+        public String getVersion() {
+            return versionName();
+        }
+
+        @JavascriptInterface
+        public int getVersionCode() {
+            return (int) versionCode();
+        }
+
+        @JavascriptInterface
+        public void openUrl(String url) {
+            if (url == null) return;
+            final String destino = url.trim();
+            if (!destino.startsWith("https://") && !destino.startsWith("http://")) {
+                return;
+            }
+            runOnUiThread(() -> {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(destino)));
+                } catch (Exception error) {
+                    Log.w(TAG, "No se pudo abrir el enlace de actualización.", error);
+                }
+            });
+        }
+    }
+
     private void mostrarDialogoServidor() {
         if (dialogoServidorVisible || isFinishing()) {
             return;
@@ -118,13 +196,13 @@ public class MainActivity extends BridgeActivity {
             .setTitle("Servidor de VibeMatch")
             .setMessage(
                 "Escribe la dirección HTTPS de tu colegio (por ejemplo, https://vibematch.cl). " +
-                "Si aún no está desplegado, usa el servidor de demostración."
+                "Si aún no está desplegado, usa la demo pública de VibeMatch."
             )
             .setView(entrada)
             .setCancelable(false)
             .setPositiveButton("Guardar", (dialog, which) -> guardarServidor(entrada.getText().toString()))
             .setNegativeButton("Usar demostración", (dialog, which) ->
-                guardarServidor("https://vibe-match-zeta.vercel.app")
+                guardarServidor("https://vibematch-demo.vercel.app")
             )
             .setOnDismissListener(dialog -> dialogoServidorVisible = false)
             .show();

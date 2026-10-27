@@ -1,98 +1,104 @@
 ﻿import { NextResponse } from "next/server";
-import { leerSesion, buscarTarjetaPorToken } from "@/lib/cards";
+import { buscarTarjetaPorToken, listarTarjetas } from "@/lib/cards";
 import { guardarAsistencia, listarAsistencia } from "@/lib/school";
 import { esEstadoAsistencia, type EstadoAsistencia } from "@/lib/school-schema";
+import { fechaEnZona, horaEnZona } from "@/lib/fecha";
+import { leerProfesorSesion } from "@/lib/teachers";
 
 /**
- * Asistencia (pasar lista) por tarjeta NFC.
+ * Asistencia del curso para la app docente.
  *
- * GET  /api/asistencia?fecha=AAAA-MM-DD&curso=2Â° Medio
- * POST /api/asistencia  { cardId, curso, estado, fecha?, hora?, registradoPor? }
+ * GET  /api/asistencia?fecha=AAAA-MM-DD
+ * POST /api/asistencia  { cardId, estado, fecha?, hora? }
  *
- * El registro se identifica por la tarjeta leÃ­da: no se teclea ningÃºn nombre.
+ * Solo docentes autenticados. El curso y el autor se toman de la sesión para
+ * que un docente no pueda leer ni escribir registros de otro curso.
  */
 
-function sinSesion() {
+function sinSesionProfesor() {
   return NextResponse.json(
-    { error: "sin_sesion", mensaje: "Abre VibeMatch con tu tarjeta para continuar." },
+    {
+      error: "sin_sesion_profesor",
+      mensaje: "Inicia sesión en el panel docente para continuar.",
+    },
     { status: 401 },
   );
 }
 
-function fechaLocal(): string {
-  const ahora = new Date();
-  const offset = ahora.getTimezoneOffset();
-  return new Date(ahora.getTime() - offset * 60_000).toISOString().slice(0, 10);
-}
-
-function horaLocal(): string {
-  const ahora = new Date();
-  return `${String(ahora.getHours()).padStart(2, "0")}:${String(
-    ahora.getMinutes(),
-  ).padStart(2, "0")}`;
-}
-
 export async function GET(request: Request) {
-  const acceso = await leerSesion();
-  if (!acceso || acceso.card.kind === "public") return sinSesion();
+  const profesor = await leerProfesorSesion();
+  if (!profesor) return sinSesionProfesor();
 
   const url = new URL(request.url);
-  const fecha = url.searchParams.get("fecha") ?? fechaLocal();
-  const curso = url.searchParams.get("curso") ?? undefined;
+  const fecha = url.searchParams.get("fecha") ?? fechaEnZona();
 
   return NextResponse.json(
-    { fecha, registros: listarAsistencia({ fecha, curso }) },
+    {
+      fecha,
+      curso: profesor.curso,
+      registros: listarAsistencia({ fecha, curso: profesor.curso }),
+    },
     { headers: { "cache-control": "no-store" } },
   );
 }
 
 export async function POST(request: Request) {
-  const acceso = await leerSesion();
-  if (!acceso || acceso.card.kind === "public") return sinSesion();
+  const profesor = await leerProfesorSesion();
+  if (!profesor) return sinSesionProfesor();
 
   let cuerpo: Record<string, unknown>;
   try {
     cuerpo = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json(
-      { error: "json_invalido", mensaje: "El cuerpo no es JSON vÃ¡lido." },
+      { error: "json_invalido", mensaje: "El cuerpo no es JSON válido." },
       { status: 400 },
     );
   }
 
-  const cardId = String(cuerpo.cardId ?? acceso.card.id);
+  const cardIdRaw = String(cuerpo.cardId ?? "").trim();
   const estadoRaw = String(cuerpo.estado ?? "presente");
-  const curso = String(cuerpo.curso ?? acceso.card.level ?? "Sin asignar");
-  const fecha = String(cuerpo.fecha ?? fechaLocal());
-  const hora = String(cuerpo.hora ?? horaLocal());
-  const registradoPor = String(cuerpo.registradoPor ?? acceso.card.id);
+  const fecha = String(cuerpo.fecha ?? fechaEnZona());
+  const hora = String(cuerpo.hora ?? horaEnZona());
+
+  if (!cardIdRaw) {
+    return NextResponse.json(
+      { error: "tarjeta_requerida", mensaje: "Falta la tarjeta del alumno." },
+      { status: 400 },
+    );
+  }
 
   if (!esEstadoAsistencia(estadoRaw)) {
     return NextResponse.json(
-      { error: "estado_invalido", mensaje: "El estado debe ser presente, atrasado o ausente." },
+      {
+        error: "estado_invalido",
+        mensaje: "El estado debe ser presente, atrasado o ausente.",
+      },
       { status: 400 },
     );
   }
 
-  // Obtener nombre y número de lista de la tarjeta si está disponible.
-  const tarjetaPorToken = buscarTarjetaPorToken(cardId);
-  const tarjeta = tarjetaPorToken ?? 
-    (await import("@/lib/cards")).listarTarjetas().find((t) => t.id === cardId) ?? 
+  const tarjeta =
+    buscarTarjetaPorToken(cardIdRaw) ??
+    listarTarjetas().find((item) => item.id === cardIdRaw) ??
     null;
-  
-  const tarjetaId = tarjeta?.id ?? acceso.card.id;
-  const nombre = tarjeta?.fullName ?? tarjeta?.holder ?? acceso.card.holder ?? "Sin nombre";
-  const numeroLista = tarjeta?.listNumber ?? null;
+
+  if (!tarjeta) {
+    return NextResponse.json(
+      { error: "tarjeta_invalida", mensaje: "Esa tarjeta no existe o está revocada." },
+      { status: 404 },
+    );
+  }
 
   const registro = guardarAsistencia({
-    cardId: tarjetaId,
-    curso,
-    nombre,
-    numeroLista,
+    cardId: tarjeta.id,
+    curso: profesor.curso,
+    nombre: tarjeta.fullName ?? tarjeta.holder ?? "Alumno",
+    numeroLista: tarjeta.listNumber ?? null,
     fecha,
     hora,
     estado: estadoRaw as EstadoAsistencia,
-    registradoPor,
+    registradoPor: profesor.id,
     metodo: "nfc",
   });
 

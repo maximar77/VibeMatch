@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
+import { UpdatePrompt } from "@/components/update-prompt";
 
 type Props = {
-  active?: "app" | "perfil" | "instalar";
+  active?: "app" | "perfil" | "chat" | "muros" | "seguridad";
   children: ReactNode;
 };
 
@@ -15,6 +16,7 @@ export function AppShell({ active, children }: Props) {
         aria-hidden="true"
       />
       <AppHeader active={active} />
+      <UpdatePrompt />
       {children}
       <footer className="relative z-10 border-t border-white/5">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-zinc-600 sm:flex-row">

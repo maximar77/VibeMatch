@@ -1,0 +1,34 @@
+node_modules
+.next
+.git
+.vercel
+
+# El despliegue web no necesita Android ni binarios de escritorio.
+android
+dist
+
+# Datos locales: solo las tarjetas semilla (hashes) y el archivo base de docentes.
+data/*
+!data/cards.json
+!data/teachers.json
+
+# Secretos y archivos de entorno.
+.env
+.env.*
+!.env.example
+vercel.env
+deploy/oracle/.env
+deploy/oracle/backups
+
+# Archivos personales, temporales o de trabajo.
+*.log
+contexto-IA.tx
+tarjetas-guest.txt
+bore.zip
+build-output.txt
+tsc_output.txt
+tsc_test.txt
+tsconfig.tsbuildinfo
+captura*.png
+presentacion-VibeMatch
+Referencia VibeMatch
