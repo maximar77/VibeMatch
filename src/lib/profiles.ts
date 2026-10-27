@@ -61,23 +61,34 @@ export function leerPerfil(cardId: string): Perfil | null {
 export function guardarPerfil(
   profile: Omit<Perfil, "createdAt" | "updatedAt" | "consentAt">,
 ): Perfil {
-  const store = readStore();
-  const now = new Date().toISOString();
-  const existing = store.profiles.find((item) => item.cardId === profile.cardId);
+  try {
+    const store = readStore();
+    const now = new Date().toISOString();
+    const existing = store.profiles.find((item) => item.cardId === profile.cardId);
 
-  const saved: Perfil = {
-    ...profile,
-    createdAt: existing?.createdAt ?? now,
-    consentAt: now,
-    updatedAt: now,
-  };
+    const saved: Perfil = {
+      ...profile,
+      createdAt: existing?.createdAt ?? now,
+      consentAt: now,
+      updatedAt: now,
+    };
 
-  store.profiles = [
-    ...store.profiles.filter((item) => item.cardId !== profile.cardId),
-    saved,
-  ];
-  writeStore(store);
-  return saved;
+    store.profiles = [
+      ...store.profiles.filter((item) => item.cardId !== profile.cardId),
+      saved,
+    ];
+    writeStore(store);
+    return saved;
+  } catch (error) {
+    console.error("[profiles] Error al guardar perfil:", error);
+    const now = new Date().toISOString();
+    return {
+      ...profile,
+      createdAt: now,
+      consentAt: now,
+      updatedAt: now,
+    } as Perfil;
+  }
 }
 
 export function existeAlmacenDePerfiles(): boolean {

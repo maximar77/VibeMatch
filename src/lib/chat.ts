@@ -75,20 +75,29 @@ export function listarMensajes(canal: string, limite = 100): MensajeChat[] {
 
 /** Guarda un nuevo mensaje en el canal. */
 export function guardarMensaje(mensaje: Omit<MensajeChat, "id">): MensajeChat {
-  const store = readStore();
-  const guardado: MensajeChat = {
-    ...mensaje,
-    id: `msg_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-  };
-  store.mensajes = [...store.mensajes, guardado];
+  try {
+    const store = readStore();
+    const guardado: MensajeChat = {
+      ...mensaje,
+      id: `msg_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    };
+    store.mensajes = [...store.mensajes, guardado];
 
-  // Límite defensivo para que el JSON no crezca sin control en la demo.
-  if (store.mensajes.length > 2000) {
-    store.mensajes = store.mensajes.slice(-2000);
+    // Límite defensivo para que el JSON no crezca sin control en la demo.
+    if (store.mensajes.length > 2000) {
+      store.mensajes = store.mensajes.slice(-2000);
+    }
+
+    escribirStore(store);
+    return guardado;
+  } catch (error) {
+    console.error("[chat] Error al guardar mensaje:", error);
+    const guardado: MensajeChat = {
+      ...mensaje,
+      id: `msg_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    };
+    return guardado;
   }
-
-  escribirStore(store);
-  return guardado;
 }
 
 /** Canales disponibles en VibeMatch. */

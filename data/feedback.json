@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "feedback": [
+    {
+      "tipo": "bug",
+      "mensaje": "prueba",
+      "email": null,
+      "url": null,
+      "userAgent": null,
+      "plataforma": null,
+      "cardId": null,
+      "dispositivo": null,
+      "modelo": "test",
+      "sistema": null,
+      "versionApp": null,
+      "id": "fb_mvqss98xyrvxzb",
+      "createdAt": "2026-10-27T14:45:30.705Z"
+    }
+  ]
+}
