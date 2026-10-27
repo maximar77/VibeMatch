@@ -3,7 +3,8 @@ node_modules
 .git
 .vercel
 
-# El despliegue web no necesita Android ni binarios de escritorio.
+# El despliegue web no necesita Android ni la carpeta dist. El APK público
+# que consume /api/app-version vive en public/descargas y sí se despliega.
 android
 dist
 

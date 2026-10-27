@@ -110,10 +110,14 @@ con cámara y deep links.
   dominio. Está pensada para desplegar Oracle sin volver a firmar.
 - La web remota se actualiza sola al desplegar. `/api/app-version` avisa cuando hay un
   APK nuevo y el usuario puede abrir la descarga publicada.
-- Artefactos `VibeMatch-1.1.0.apk` y `VibeMatch-1.1.0.aab` adjuntos en la
-  [release de GitHub](https://github.com/maximar77/VibeMatch/releases/latest).
-  SHA-256 y tamaño están en `dist/SHA256SUMS.txt`; instrucciones, huella de firma y
-  límites en [`docs/apk.md`](docs/apk.md).
+- Descarga pública del APK:
+  <https://vibematch-demo.vercel.app/descargas/VibeMatch-1.1.0.apk>. El repositorio es
+  privado, así que los adjuntos de la release de GitHub requieren sesión; el espejo en
+  `public/descargas/` es el que usa la app.
+- Artefactos `VibeMatch-1.1.0.apk` y `VibeMatch-1.1.0.aab` también adjuntos en la
+  [release de GitHub](https://github.com/maximar77/VibeMatch/releases/latest) para el
+  equipo. SHA-256 y tamaño están en `dist/SHA256SUMS.txt`; instrucciones, huella de firma
+  y límites en [`docs/apk.md`](docs/apk.md).
 
 ```bash
 # Compilar (Windows PowerShell)
@@ -175,7 +179,7 @@ Variables relevantes:
 | `VIBEMATCH_DATA_DIR` | Opcional. Directorio de datos alternativo (por ejemplo `/tmp/vibematch-data` en una demo sin disco persistente). En Oracle se omite para usar `./data`. |
 | `VIBEMATCH_APP_VERSION` | Versión nativa publicada, por ejemplo `1.1.0`. |
 | `VIBEMATCH_APP_VERSION_CODE` | `versionCode` publicado, por ejemplo `2`. |
-| `VIBEMATCH_APP_APK_URL` | URL directa del APK; si falta se usa la release de GitHub. |
+| `VIBEMATCH_APP_APK_URL` | URL directa del APK; si falta se usa `/descargas/VibeMatch-<versión>.apk` del sitio público. |
 | `VIBEMATCH_APP_NOTES` | Texto de la novedad que muestra la app al actualizar. |
 
 Copia `.env.example` a `.env.local` y completa `VIBEMATCH_SECRET` antes de un despliegue real.

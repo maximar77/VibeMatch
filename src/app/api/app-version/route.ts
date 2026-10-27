@@ -10,10 +10,13 @@ import { NextResponse } from "next/server";
 export function GET() {
   const version = process.env.VIBEMATCH_APP_VERSION?.trim() || "1.1.0";
   const versionCode = Number(process.env.VIBEMATCH_APP_VERSION_CODE ?? "2") || 2;
+  const publicBase =
+    process.env.VIBEMATCH_PUBLIC_URL?.trim().replace(/\/+$/, "") ||
+    "https://vibematch-demo.vercel.app";
   const apkUrl =
     process.env.VIBEMATCH_APP_APK_URL?.trim() ||
     process.env.VIBEMATCH_APK_URL?.trim() ||
-    `https://github.com/maximar77/VibeMatch/releases/latest/download/VibeMatch-${version}.apk`;
+    `${publicBase}/descargas/VibeMatch-${version}.apk`;
 
   return NextResponse.json(
     {

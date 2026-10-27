@@ -29,8 +29,13 @@ y deep links.
 | SHA-256 AAB | `0BD838F2146293BE067F57E67FA7CE6FB3A0CE782652E66BEF9F892E2C3E5597` |
 
 El AAB es el formato recomendado para Play Store. Para instalación directa en tablets del
-colegio se usa el APK. Descarga: [release v1.1.0](https://github.com/maximar77/VibeMatch/releases/tag/v1.1.0).
-Los checksums también están en `dist/SHA256SUMS.txt`.
+colegio se usa el APK. Descarga pública:
+<https://vibematch-demo.vercel.app/descargas/VibeMatch-1.1.0.apk>. El repositorio es
+privado, por lo que los adjuntos de la
+[release v1.1.0](https://github.com/maximar77/VibeMatch/releases/tag/v1.1.0) requieren
+sesión de GitHub; el espejo público en `public/descargas/` es el que consume la app.
+Los checksums también están en `dist/SHA256SUMS.txt` y en
+<https://vibematch-demo.vercel.app/descargas/SHA256SUMS.txt>.
 
 ## Instalación
 
@@ -105,7 +110,7 @@ Variables de Vercel/Oracle para publicar una actualización:
 |---|---|
 | `VIBEMATCH_APP_VERSION` | `1.1.0` |
 | `VIBEMATCH_APP_VERSION_CODE` | `2` |
-| `VIBEMATCH_APP_APK_URL` | `https://github.com/maximar77/VibeMatch/releases/download/v1.1.0/VibeMatch-1.1.0.apk` |
+| `VIBEMATCH_APP_APK_URL` | `https://vibematch-demo.vercel.app/descargas/VibeMatch-1.1.0.apk` |
 | `VIBEMATCH_APP_NOTES` | Texto breve de novedades |
 
 El aviso compara `versionCode`; si el servidor informa un número mayor, ofrece abrir la
@@ -172,4 +177,5 @@ que recompilar para cambiar la URL de fábrica, los hosts de App Links o el cód
   archivos de tarjetas actuales.
 - Falta validar el lector NFC USB-C/OTG y el modelo exacto de tablet del piloto.
 - La APK no está publicada en Play Store; se entrega como artefacto firmado en la
-  release de GitHub.
+  release privada de GitHub y en el espejo público del sitio. Si el repositorio pasa a
+  ser público, la URL de la release también funcionará sin autenticación.
