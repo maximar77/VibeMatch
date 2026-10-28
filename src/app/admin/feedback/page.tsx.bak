@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { listarFeedback } from "@/lib/feedback";
 
 const TOKEN_SECRETO = process.env.VIBEMATCH_ADMIN_TOKEN || "admin-vibematch-2026";
@@ -14,6 +15,7 @@ export default async function AdminFeedbackPage({
 }: {
   searchParams: Promise<{ token?: string }>;
 }) {
+  await connection();
   return <Contenido searchParams={searchParams} />;
 }
 
@@ -22,6 +24,7 @@ async function Contenido({
 }: {
   searchParams: Promise<{ token?: string }>;
 }) {
+  await connection();
   const sp = await searchParams;
   if (sp.token !== TOKEN_SECRETO) {
     notFound();
