@@ -17,7 +17,7 @@ export async function GET() {
 
   let dataWritable = false;
   try {
-    accessSync(DATA_DIR, constants.W_OK);
+    accessSync(/* turbopackIgnore: true */ DATA_DIR, constants.W_OK);
     dataWritable = true;
   } catch {
     dataWritable = false;

@@ -20,9 +20,9 @@ equipos del establecimiento (Puntos Vibe, laboratorio y, más adelante, la app d
 - React 19 + TypeScript
 - Tailwind CSS 4
 - PWA instalable (manifest + service worker)
-- Android nativo con [Capacitor 8](https://capacitorjs.com/) (APK 1.1.0 firmada)
+- Android nativo con [Capacitor 8](https://capacitorjs.com/) (APK 1.2.0 firmada)
 - NFC (`@capgo/capacitor-nfc`) y QR (`jsqr` + `BarcodeDetector`)
-- Producción persistente con Docker + Caddy en Oracle Cloud; demo pública en Vercel
+- Producción persistente en AlwaysData; demo pública en Vercel
 - ESLint
 
 ## Puesta en marcha
@@ -98,35 +98,30 @@ La web app es instalable (PWA): manifiesto, service worker e iconos están en
 
 ### App Android (APK)
 
-La versión **1.1.0** está compilada y firmada. La app envuelve la misma web con Capacitor
+La versión **1.2.0** está compilada y firmada. La app envuelve la misma web con Capacitor
 para reutilizar la sesión, las Server Actions y el perfil, y añade lectura NFC nativa, QR
 con cámara y deep links.
 
-- Paquete `cl.vibematch.app`, `minSdk 24`, `targetSdk 36`.
-- Servidor de fábrica: `https://vibematch-demo.vercel.app`. En el primer arranque se
-  puede cambiar por el dominio real del colegio; también con el atajo **Configurar
-  servidor** o `vibematch://config`.
+- Paquete `cl.vibematch.app`, `versionCode 3`, `minSdk 24`, `targetSdk 36`.
+- Servidor de fábrica: `https://xam.alwaysdata.net`. En el primer arranque se puede cambiar
+  por otro dominio; también con el atajo **Configurar servidor** o `vibematch://config`.
 - La URL se guarda en el dispositivo: **no hay que recompilar** para apuntar a otro
-  dominio. Está pensada para desplegar Oracle sin volver a firmar.
+  dominio.
 - La web remota se actualiza sola al desplegar. `/api/app-version` avisa cuando hay un
   APK nuevo y el usuario puede abrir la descarga publicada.
 - Descarga pública del APK:
-  <https://vibematch-demo.vercel.app/descargas/VibeMatch-1.1.0.apk>. El repositorio es
-  privado, así que los adjuntos de la release de GitHub requieren sesión; el espejo en
+  <https://xam.alwaysdata.net/descargas/VibeMatch-1.2.0.apk>. El repositorio es privado,
+  así que los adjuntos de la release de GitHub requieren sesión; el espejo en
   `public/descargas/` es el que usa la app.
-- Artefactos `VibeMatch-1.1.0.apk` y `VibeMatch-1.1.0.aab` también adjuntos en la
-  [release de GitHub](https://github.com/maximar77/VibeMatch/releases/latest) para el
-  equipo. SHA-256 y tamaño están en `dist/SHA256SUMS.txt`; instrucciones, huella de firma
-  y límites en [`docs/apk.md`](docs/apk.md).
+- Artefactos `VibeMatch-1.2.0.apk` y `VibeMatch-1.2.0.aab` en `dist/`, con SHA-256 en
+  `dist/SHA256SUMS.txt`; instrucciones, huella de firma y límites en
+  [`docs/apk.md`](docs/apk.md).
 
 ```bash
-# Compilar (Windows PowerShell)
-$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"
-$env:ANDROID_HOME="$env:LOCALAPPDATA\Android\Sdk"
-$env:VIBEMATCH_APP_URL="https://vibematch-demo.vercel.app"
-npx cap sync android
+# Compilar (Linux/macOS)
+VIBEMATCH_APP_URL=https://xam.alwaysdata.net npx cap sync android
 cd android
-.\gradlew.bat assembleRelease bundleRelease
+./gradlew assembleRelease bundleRelease
 ```
 
 La compilación requiere JDK 21; Java 27 falla al compilar Capacitor.
@@ -143,15 +138,33 @@ compartido: los datos viven en `/tmp` por instancia y se pierden en cada redeplo
 start. Por eso la demo sirve para probar la interfaz, no para guardar datos reales ni
 para validar la exportación docente entre rutas.
 
-La producción persistente es Oracle Cloud. La demo se mantiene activa mientras se
-aprovisiona la instancia; el APK apunta a la demo de fábrica y se puede cambiar al dominio
-del colegio sin recompilar.
+La producción del piloto es **AlwaysData**: <https://xam.alwaysdata.net>. La demo de Vercel
+se mantiene como respaldo de interfaz; el APK 1.2.0 apunta a AlwaysData de fábrica.
 
-## Producción en Oracle Cloud
+## Producción en AlwaysData
+
+Guía completa: [`deploy/alwaysdata/README.md`](deploy/alwaysdata/README.md).
+
+- Sitio Node.js en `https://xam.alwaysdata.net`, con build precompilado y `next start`.
+- Datos persistentes en `/home/xam/vibematch-data`, fuera de la carpeta del sitio, para que
+  un redeploy no los sobrescriba. `VIBEMATCH_DATA_DIR` y `VIBEMATCH_DATA_PERSISTENT=1` se
+  cargan desde `.env.production`.
+- El plan limita la RAM del proceso (~256 MB): `npm install`/`next build` no caben en el
+  servidor. Por eso se compila en local con `deploy/alwaysdata/package.sh` y se sube el
+  paquete ya compilado.
+- Verificación:
+
+```bash
+curl -fsS https://xam.alwaysdata.net/api/health
+# {"ok":true,"service":"vibematch","checks":{"dataWritable":true,"dataPersistent":true,"secretConfigured":true}}
+```
+
+## Producción en Oracle Cloud (alternativa)
 
 La guía completa está en [`deploy/oracle/README.md`](deploy/oracle/README.md): creación de
 la instancia, Security List y `ufw`, DNS, Caddy con HTTPS automático, Docker Compose,
-volumen persistente, backups, restauración, actualización y checklist.
+volumen persistente, backups, restauración, actualización y checklist. Se mantiene como
+opción para migrar a un servidor propio cuando el piloto crezca.
 
 ```bash
 # En la instancia, después de clonar y configurar deploy/oracle/.env
@@ -173,12 +186,12 @@ Variables relevantes:
 | `VIBEMATCH_SECRET` | Secreto HMAC de la cookie de sesión. Obligatorio en producción. |
 | `VIBEMATCH_COOKIE_SECURE=1` | Activa `Secure` cuando el sitio se sirve por HTTPS. |
 | `VIBEMATCH_TEACHER_CODE` | Código institucional para registrar cuentas docentes. Cámbialo antes del piloto real. |
-| `VIBEMATCH_PUBLIC_URL` | URL pública usada por cookies y enlaces, por ejemplo `https://vibematch-demo.vercel.app`. |
+| `VIBEMATCH_PUBLIC_URL` | URL pública usada por cookies y enlaces, por ejemplo `https://xam.alwaysdata.net`. |
 | `BASE_URL` | Dominio impreso por el generador (por defecto `http://localhost:3100`). |
 | `SCHOOL_NAME` | Nombre del establecimiento en las tarjetas generadas. |
-| `VIBEMATCH_DATA_DIR` | Opcional. Directorio de datos alternativo (por ejemplo `/tmp/vibematch-data` en una demo sin disco persistente). En Oracle se omite para usar `./data`. |
-| `VIBEMATCH_APP_VERSION` | Versión nativa publicada, por ejemplo `1.1.0`. |
-| `VIBEMATCH_APP_VERSION_CODE` | `versionCode` publicado, por ejemplo `2`. |
+| `VIBEMATCH_DATA_DIR` | Opcional. Directorio de datos alternativo. En AlwaysData se usa `/home/xam/vibematch-data`; en Oracle se omite para usar `./data`. |
+| `VIBEMATCH_APP_VERSION` | Versión nativa publicada, por ejemplo `1.2.0`. |
+| `VIBEMATCH_APP_VERSION_CODE` | `versionCode` publicado, por ejemplo `3`. |
 | `VIBEMATCH_APP_APK_URL` | URL directa del APK; si falta se usa `/descargas/VibeMatch-<versión>.apk` del sitio público. |
 | `VIBEMATCH_APP_NOTES` | Texto de la novedad que muestra la app al actualizar. |
 

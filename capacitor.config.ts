@@ -10,11 +10,34 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * La URL se fija al compilar:
  *   VIBEMATCH_APP_URL=https://tu-dominio.cl npx cap sync android
  *
- * En producción debe ser el dominio HTTPS de Oracle Cloud (Caddy). No uses una
- * URL de túnel temporal (trycloudflare, ngrok) para una APK distribuida.
+ * En producción es el dominio HTTPS de AlwaysData. No uses una URL de túnel temporal
+ * (trycloudflare, ngrok) para una APK distribuida.
  */
 const servidorRemoto =
-  process.env.VIBEMATCH_APP_URL ?? "https://vibematch-demo.vercel.app";
+  process.env.VIBEMATCH_APP_URL ?? "https://xam.alwaysdata.net";
+
+const hostServidor = (() => {
+  try {
+    return new URL(servidorRemoto).host;
+  } catch {
+    return "";
+  }
+})();
+
+const hostsPermitidos = Array.from(
+  new Set(
+    [
+      hostServidor,
+      "xam.alwaysdata.net",
+      // Alias de demostración mientras se valida el dominio definitivo.
+      "vibematch-demo.vercel.app",
+      "vibe-match-zeta.vercel.app",
+      // Dominio institucional de respaldo.
+      "vibematch.cl",
+      "www.vibematch.cl",
+    ].filter(Boolean),
+  ),
+);
 
 const config: CapacitorConfig = {
   appId: "cl.vibematch.app",
@@ -29,14 +52,7 @@ const config: CapacitorConfig = {
     url: servidorRemoto,
     cleartext: servidorRemoto.startsWith("http://"),
     androidScheme: "https",
-    allowNavigation: [
-      // Demo pública mientras Oracle no está aprovisionado.
-      "vibematch-demo.vercel.app",
-      "vibe-match-zeta.vercel.app",
-      // Dominio definitivo del colegio.
-      "vibematch.cl",
-      "www.vibematch.cl",
-    ],
+    allowNavigation: hostsPermitidos,
   },
   plugins: {
     SplashScreen: {

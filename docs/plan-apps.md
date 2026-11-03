@@ -1,9 +1,10 @@
 # Plan de apps: PWA, APK (Android) y EXE (Windows)
 
 > Estado: web con tarjeta, onboarding, chats, muros, clave opcional, panel docente y PWA
-> implementados. APK Android **1.1.0 compilada y firmada** con NFC, QR, deep links,
-> servidor configurable y aviso de actualización. El EXE sigue en planificación.
-> Última actualización: 26 de octubre de 2026.
+> implementados. APK Android **1.2.0 compilada y firmada** con NFC, QR, deep links,
+> servidor configurable y aviso de actualización. Producción persistente en AlwaysData.
+> El EXE sigue en planificación.
+> Última actualización: 3 de noviembre de 2026.
 
 ## 1. Restricción que ordena el plan
 
@@ -29,7 +30,7 @@ Web Next.js (UI + Server Actions + PWA + API)
       │  valida token → cookie de sesión
       ├── PWA instalable (misma UI, iPhone/Mac/Android/Windows)
       ▼
-APK (Capacitor 1.1.0)  EXE (Tauri 2)
+APK (Capacitor 1.2.0)  EXE (Tauri 2)
 Android / tablet       Windows 10/11 + WebView2
 ```
 
@@ -66,11 +67,11 @@ validación de origen y logs sin tokens ni PII.
 
 > La demo de Vercel usa `/tmp` por instancia. Sirve para revisar la UI y el APK, pero no
 > comparte datos entre páginas, APIs y cold starts. El panel docente y la exportación CSV
-> deben probarse en Oracle o en un servidor con disco persistente.
+> deben probarse en AlwaysData o en un servidor con disco persistente.
 
 ## 3. APK con Capacitor
 
-Estado: **1.1.0 compilada y firmada** (`versionCode 2`), lista para instalar y probar.
+Estado: **1.2.0 compilada y firmada** (`versionCode 3`), lista para instalar y probar.
 La app usa la web remota para no duplicar la lógica de negocio ni la sesión. La URL de
 fábrica es `https://vibematch-demo.vercel.app`; el dominio del colegio se cambia en el
 dispositivo sin recompilar.
@@ -161,7 +162,7 @@ certificado de firma de código (recomendado).
 | 1 | Web + tarjeta + onboarding + PWA | Token válido entra; token inválido no; perfil persiste; instalación protegida; build pasa. |
 | 2 | Punto Vibe piloto | Tablet/PC + lector abre la bienvenida, crea perfil y cierra sesión sola. |
 | 3 | API de apps y perfiles | `/api/perfil` GET/PUT y healthcheck listos; canje de token para clientes nativos y cierre de sesión pendientes. |
-| 4 | APK beta | APK 1.1.0 firmada con NFC, QR, deep links, servidor configurable y aviso de actualización. Falta validarla en tablet física y definir distribución. |
+| 4 | APK beta | APK 1.2.0 firmada con NFC, QR, deep links, servidor configurable y aviso de actualización. Falta validarla en tablet física y definir distribución. |
 | 5 | EXE beta | Lector USB abre la bienvenida en Windows y el modo kiosco resiste uso real. |
 | 6 | Piloto y endurecimiento | Rate limiting, base de datos, panel de revocación, retención y auditoría. |
 

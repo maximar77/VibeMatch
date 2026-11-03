@@ -6,6 +6,13 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// URL de fábrica de la app. Se puede cambiar al compilar sin tocar el código:
+//   VIBEMATCH_APP_URL=https://mi-dominio.cl ./gradlew assembleRelease
+def appUrl = (System.getenv("VIBEMATCH_APP_URL")
+    ?: (project.findProperty("vibematchAppUrl") as String)
+    ?: "https://xam.alwaysdata.net").trim().replaceAll('/+$', '')
+def appHost = appUrl.replaceFirst("^https?://", "").split("/")[0]
+
 android {
     namespace = "cl.vibematch.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -13,14 +20,19 @@ android {
         applicationId "cl.vibematch.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.1.0"
+        versionCode 3
+        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "VIBEMATCH_SERVER_URL", "\"${appUrl}\""
+        manifestPlaceholders = [appLinkHost: appHost]
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
+    }
+    buildFeatures {
+        buildConfig true
     }
     signingConfigs {
         release {

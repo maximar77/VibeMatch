@@ -8,8 +8,8 @@ import { NextResponse } from "next/server";
  * cambia capacidades nativas (NFC, cámara, enlaces profundos, etc.).
  */
 export function GET() {
-  const version = process.env.VIBEMATCH_APP_VERSION?.trim() || "1.1.0";
-  const versionCode = Number(process.env.VIBEMATCH_APP_VERSION_CODE ?? "2") || 2;
+  const version = process.env.VIBEMATCH_APP_VERSION?.trim() || "1.2.0";
+  const versionCode = Number(process.env.VIBEMATCH_APP_VERSION_CODE ?? "3") || 3;
   const publicBase =
     process.env.VIBEMATCH_PUBLIC_URL?.trim().replace(/\/+$/, "") ||
     "https://vibematch-demo.vercel.app";

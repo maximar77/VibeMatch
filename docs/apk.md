@@ -1,4 +1,4 @@
-# APK Android de VibeMatch 1.1.0
+# APK Android de VibeMatch 1.2.0
 
 Aplicación Android firmada que envuelve la web de VibeMatch con Capacitor. Reutiliza la
 misma sesión, Server Actions y perfil que la web, y añade lectura NFC nativa, escaneo QR
@@ -9,41 +9,39 @@ y deep links.
 > había tablets conectadas; antes del piloto hay que validar NFC, cámara y deep links en el
 > hardware real.
 >
-> La versión 1.1.0 incluye el puente de versión, el aviso de actualización nativa desde
-> `/api/app-version`, el servidor de fábrica `https://vibematch-demo.vercel.app` y el App
-> Link del alias de demo. La web se actualiza sola al desplegar; solo se necesita un APK
+> La versión 1.2.0 incluye el puente de versión, el aviso de actualización nativa desde
+> `/api/app-version`, el servidor de fábrica `https://xam.alwaysdata.net` y el App Link del
+> dominio de producción. La web se actualiza sola al desplegar; solo se necesita un APK
 > nuevo cuando cambian capacidades nativas o permisos.
 
 ## Datos del artefacto
 
 | Campo | Valor |
 |---|---|
-| Nombre | `VibeMatch-1.1.0.apk` |
+| Nombre | `VibeMatch-1.2.0.apk` |
 | Paquete | `cl.vibematch.app` |
-| Versión | `1.1.0` (`versionCode 2`) |
+| Versión | `1.2.0` (`versionCode 3`) |
 | `minSdk` | 24 (Android 7.0) |
 | `targetSdk` / `compileSdk` | 36 (Android 16) |
-| Tamaño | 6.264.788 bytes (~6,0 MB) |
-| SHA-256 APK | `DBD7F0DF3B648C76D6B4812C609B773A67A5C9EE8E6E1A3C3D2056AB93916F8E` |
-| AAB | `VibeMatch-1.1.0.aab` (6.106.932 bytes) |
-| SHA-256 AAB | `0BD838F2146293BE067F57E67FA7CE6FB3A0CE782652E66BEF9F892E2C3E5597` |
+| Tamaño | 12.199.493 bytes (~11,6 MB) |
+| SHA-256 APK | `CB41CE4E1804318FCF6926C82316399422046848D6B9AE15A150847A2FABF6EE` |
+| AAB | `VibeMatch-1.2.0.aab` (12.041.877 bytes) |
+| SHA-256 AAB | `87172B1003F2C393E043D8A16DD67A741AE6B567D0601DD689026CA86C38AEDD` |
 
 El AAB es el formato recomendado para Play Store. Para instalación directa en tablets del
 colegio se usa el APK. Descarga pública:
-<https://vibematch-demo.vercel.app/descargas/VibeMatch-1.1.0.apk>. El repositorio es
-privado, por lo que los adjuntos de la
-[release v1.1.0](https://github.com/maximar77/VibeMatch/releases/tag/v1.1.0) requieren
-sesión de GitHub; el espejo público en `public/descargas/` es el que consume la app.
-Los checksums también están en `dist/SHA256SUMS.txt` y en
-<https://vibematch-demo.vercel.app/descargas/SHA256SUMS.txt>.
+<https://xam.alwaysdata.net/descargas/VibeMatch-1.2.0.apk>. El repositorio es privado, así
+que los adjuntos de la release de GitHub requieren sesión; el espejo público en
+`public/descargas/` es el que consume la app. Los checksums también están en
+`dist/SHA256SUMS.txt` y en
+<https://xam.alwaysdata.net/descargas/SHA256SUMS.txt>.
 
 ## Instalación
 
 ### Por cable (recomendado para pruebas)
 
-```powershell
-$env:ANDROID_HOME="$env:LOCALAPPDATA\Android\Sdk"
-& "$env:ANDROID_HOME\platform-tools\adb.exe" install -r VibeMatch-1.1.0.apk
+```bash
+adb install -r VibeMatch-1.2.0.apk
 ```
 
 Si Android bloquea la instalación por proveniencia desconocida, habilita la instalación
@@ -57,7 +55,8 @@ privada, no el envío por mensajería.
 
 ## Primer arranque: servidor
 
-La app no está atada a un dominio fijo. Al primer arranque muestra un diálogo:
+La app viene configurada de fábrica con `https://xam.alwaysdata.net`. En el primer
+arranque ya no muestra un diálogo obligatorio; si hace falta cambiar de servidor:
 
 - **Guardar**: usa la URL HTTPS escrita (por ejemplo `https://vibematch.cl`).
 - **Usar demostración**: apunta a `https://vibematch-demo.vercel.app`.
@@ -75,9 +74,9 @@ adb shell am start -a android.intent.action.VIEW -d "vibematch://config" cl.vibe
 - Borra los datos de la app (Ajustes → Apps → VibeMatch → Almacenamiento → Borrar datos)
   para volver al diálogo inicial.
 
-Usa siempre HTTPS en producción. La demo de Vercel guarda datos en `/tmp`, así que sirve
-para probar la interfaz y el flujo, **no para datos reales**: las instancias no comparten
-almacenamiento y los perfiles pueden desaparecer.
+Usa siempre HTTPS en producción. AlwaysData guarda los datos en
+`/home/xam/vibematch-data`, así que el piloto sí persiste entre despliegues. La demo de
+Vercel guarda datos en `/tmp` y sirve solo para probar la interfaz.
 
 ## NFC, QR y deep links
 
@@ -85,17 +84,17 @@ almacenamiento y los perfiles pueden desaparecer.
   token. Si la etiqueta no trae NDEF, intenta el UID como respaldo. Requiere NFC activo.
 - **QR:** usa la cámara y `BarcodeDetector`; si el WebView no lo soporta, cae a `jsqr`.
   También acepta el token escrito a mano.
-- **Deep links HTTPS:** `https://vibematch.cl/a/<token>`,
-  `https://vibematch-demo.vercel.app/a/<token>` y `https://vibe-match-zeta.vercel.app/a/<token>`
-  (App Links verificados con `public/.well-known/assetlinks.json` en los hosts donde se
-  publica ese archivo).
+- **Deep links HTTPS:** `https://xam.alwaysdata.net/a/<token>` (App Link verificado con
+  `public/.well-known/assetlinks.json`). También se aceptan los hosts de respaldo
+  `vibematch.cl` y `vibematch-demo.vercel.app` cuando publican ese archivo.
 - **Esquema propio:** `vibematch://a/<token>` funciona aunque el dominio HTTPS no esté
   verificado.
 - **Configuración:** `vibematch://config`.
 
-Si el dominio final no es `vibematch.cl`, edita el host de los App Links en
-`android/app/src/main/AndroidManifest.xml` y `allowNavigation` en `capacitor.config.ts`
-antes de recompilar, o usa el esquema `vibematch://` y la configuración manual.
+El host de los App Links se inyecta al compilar desde `VIBEMATCH_APP_URL`
+(`manifestPlaceholders.appLinkHost`) y `allowNavigation` se calcula en
+`capacitor.config.ts`. Para otro dominio, recompila con esa variable o usa el esquema
+`vibematch://` y la configuración manual.
 
 ## Actualizaciones
 
@@ -104,13 +103,13 @@ consulta `/api/app-version` y muestra un aviso con la versión publicada y el en
 descarga. El APK nuevo se instala sobre el anterior si mantiene el mismo `applicationId`
 y está firmado con el mismo keystore.
 
-Variables de Vercel/Oracle para publicar una actualización:
+Variables de producción para publicar una actualización:
 
 | Variable | Ejemplo |
 |---|---|
-| `VIBEMATCH_APP_VERSION` | `1.1.0` |
-| `VIBEMATCH_APP_VERSION_CODE` | `2` |
-| `VIBEMATCH_APP_APK_URL` | `https://vibematch-demo.vercel.app/descargas/VibeMatch-1.1.0.apk` |
+| `VIBEMATCH_APP_VERSION` | `1.2.0` |
+| `VIBEMATCH_APP_VERSION_CODE` | `3` |
+| `VIBEMATCH_APP_APK_URL` | `https://xam.alwaysdata.net/descargas/VibeMatch-1.2.0.apk` |
 | `VIBEMATCH_APP_NOTES` | Texto breve de novedades |
 
 El aviso compara `versionCode`; si el servidor informa un número mayor, ofrece abrir la
@@ -127,7 +126,7 @@ Store privada).
 | SHA-1 | `14:64:89:8A:30:A7:A0:1A:2E:26:E0:9C:A6:93:4C:A2:2A:8A:56:53` |
 
 El keystore **no está en el repositorio**. Está en
-`C:\Users\idk\Documents\VibeMatch-keys\vibematch-release.jks` y sus credenciales en
+`/home/xam/Documentos/VibeMatch-keys/vibematch-release.jks` y sus credenciales en
 `CREDENCIALES-KEYSTORE.txt`, junto a él, con permisos restringidos. Respalda ambos
 archivos en un lugar seguro: sin el keystore no se pueden publicar actualizaciones de la
 misma app en Play Store.
@@ -141,19 +140,18 @@ Requisitos: JDK 21, Android SDK con `platforms;android-36` y `build-tools;36.0.0
 Java 27 no sirve para esta compilación: Gradle falla con `Unsupported class file major
 version 71`. Usa JDK 21 para `cap sync` y Gradle.
 
-```powershell
-$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"
-$env:ANDROID_HOME="$env:LOCALAPPDATA\Android\Sdk"
-$env:ANDROID_SDK_ROOT=$env:ANDROID_HOME
-$env:VIBEMATCH_APP_URL="https://vibematch-demo.vercel.app"   # opcional, URL de fábrica
+```bash
+export JAVA_HOME="$HOME/.local/share/java/jdk-21.0.13+9"
+export ANDROID_HOME="$HOME/Android/Sdk"
+export VIBEMATCH_APP_URL="https://xam.alwaysdata.net"
 npx cap sync android
 cd android
-.\gradlew.bat assembleRelease bundleRelease
+./gradlew assembleRelease bundleRelease
 
 # Verificación
-$bt="$env:ANDROID_HOME\build-tools\36.0.0"
-& "$bt\apksigner.bat" verify --print-certs .\app\build\outputs\apk\release\app-release.apk
-& "$bt\aapt2.exe" dump badging .\app\build\outputs\apk\release\app-release.apk
+bt="$ANDROID_HOME/build-tools/36.0.0"
+"$bt/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk
+"$bt/aapt2" dump badging app/build/outputs/apk/release/app-release.apk
 ```
 
 Salidas:
@@ -168,9 +166,10 @@ que recompilar para cambiar la URL de fábrica, los hosts de App Links o el cód
 
 - La app depende de que el servidor HTTPS esté disponible; no incluye la web offline.
   El perfil se cachea en el dispositivo para consulta, pero las acciones requieren red.
-- La demo de Vercel no tiene almacenamiento persistente y sus funciones serverless no
-  comparten `/tmp`. Los perfiles, chats, muros y docentes pueden desaparecer o no verse
-  entre rutas; usa Oracle para el piloto real.
+- AlwaysData tiene un límite de RAM de ~256 MB por proceso: el sitio corre con un build
+  precompilado y `next start`, no compila en el servidor. Para cambios de código hay que
+  subir un paquete nuevo (ver `deploy/alwaysdata/README.md`).
+- La demo de Vercel no tiene almacenamiento persistente; úsala solo para probar interfaz.
 - La sesión es la cookie del WebView. Para un piloto grande conviene evaluar una
   credencial de dispositivo de corta duración y revocación.
 - La autenticación docente usa código institucional; no hay tokens docentes en los

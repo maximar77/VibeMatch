@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -41,7 +42,7 @@ public class MainActivity extends BridgeActivity {
 
     private static final String PREFS = "vibematch";
     private static final String KEY_SERVER = "vibematch_server_url";
-    private static final String DEFAULT_SERVER = "https://vibematch-demo.vercel.app";
+    private static final String DEFAULT_SERVER = BuildConfig.VIBEMATCH_SERVER_URL;
     private static final String TAG = "VibeMatch";
     private boolean dialogoServidorVisible = false;
 
@@ -51,11 +52,11 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         configurarPuenteWeb();
 
-        // BridgeActivity.load() ya despacha el intent inicial a onNewIntent, así
-        // que el arranque en frío desde una tarjeta o vibematch://config se
-        // procesa allí. Aquí solo queda el diálogo del primer arranque.
+        // La build de producción ya trae un servidor de fábrica: no interrumpimos
+        // el primer arranque con un diálogo. La URL se puede cambiar desde el
+        // atajo "Configurar servidor" o vibematch://config.
         SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
-        if (!prefs.contains(KEY_SERVER)) {
+        if (BuildConfig.DEBUG && !prefs.contains(KEY_SERVER)) {
             if (getBridge() != null) {
                 getBridge().getWebView().post(this::mostrarDialogoServidor);
             } else {
@@ -86,9 +87,38 @@ public class MainActivity extends BridgeActivity {
             }
             server.put("url", url);
             server.put("cleartext", url.startsWith("http://"));
+            agregarHostPermitido(server, url);
             config = new CapConfig(getAssets(), json);
         } catch (Exception error) {
             Log.w(TAG, "No se pudo aplicar la URL guardada; se usa la de fábrica.", error);
+        }
+    }
+
+    /**
+     * Si el usuario cambia el servidor, el host nuevo también debe permanecer
+     * dentro del WebView. Sin esto, Capacitor podría abrir sus enlaces en el
+     * navegador externo y romper la sesión de la app.
+     */
+    private void agregarHostPermitido(JSONObject server, String url) {
+        try {
+            String host = Uri.parse(url).getHost();
+            if (host == null || host.isEmpty()) {
+                return;
+            }
+
+            JSONArray actuales = server.optJSONArray("allowNavigation");
+            if (actuales == null) {
+                actuales = new JSONArray();
+            }
+            for (int i = 0; i < actuales.length(); i++) {
+                if (host.equalsIgnoreCase(actuales.optString(i))) {
+                    return;
+                }
+            }
+            actuales.put(host);
+            server.put("allowNavigation", actuales);
+        } catch (Exception error) {
+            Log.w(TAG, "No se pudo ampliar allowNavigation.", error);
         }
     }
 
@@ -195,14 +225,14 @@ public class MainActivity extends BridgeActivity {
         new AlertDialog.Builder(this)
             .setTitle("Servidor de VibeMatch")
             .setMessage(
-                "Escribe la dirección HTTPS de tu colegio (por ejemplo, https://vibematch.cl). " +
-                "Si aún no está desplegado, usa la demo pública de VibeMatch."
+                "Escribe la dirección HTTPS de tu colegio (por ejemplo, " + DEFAULT_SERVER + "). " +
+                "Puedes volver al servidor de fábrica en cualquier momento."
             )
             .setView(entrada)
             .setCancelable(false)
             .setPositiveButton("Guardar", (dialog, which) -> guardarServidor(entrada.getText().toString()))
-            .setNegativeButton("Usar demostración", (dialog, which) ->
-                guardarServidor("https://vibematch-demo.vercel.app")
+            .setNegativeButton("Usar servidor de fábrica", (dialog, which) ->
+                guardarServidor(DEFAULT_SERVER)
             )
             .setOnDismissListener(dialog -> dialogoServidorVisible = false)
             .show();
