@@ -54,6 +54,7 @@ export type Perfil = {
   consentAt: string;
   createdAt: string;
   updatedAt: string;
+  amigos?: string[]; // IDs de amigos conectados
 };
 
 export type ProfileFormState = {

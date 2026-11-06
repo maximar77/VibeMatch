@@ -107,9 +107,19 @@ async function ContenidoInstalar() {
                 <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                   <div>
                     <p className="text-sm font-medium text-white">Android · APK</p>
-                    <p className="mt-1 text-xs text-zinc-400">
-                      NFC y QR en tablets del colegio; requiere conexión al servidor
-                    </p>
+                    <div className="mt-2">
+                      <a
+                        href="https://xam.alwaysdata.net/descargas/VibeMatch-1.2.0.apk"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 hover:bg-emerald-400/20 transition"
+                      >
+                        Descargar APK 1.2.0
+                      </a>
+                      <p className="mt-1 text-xs text-zinc-400">
+                        NFC y QR en tablets del colegio; requiere conexión al servidor
+                      </p>
+                    </div>
                   </div>
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-200">
                     Disponible

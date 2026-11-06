@@ -71,6 +71,7 @@ export function guardarPerfil(
       createdAt: existing?.createdAt ?? now,
       consentAt: now,
       updatedAt: now,
+      amigos: profile.amigos ?? existing?.amigos,
     };
 
     store.profiles = [
@@ -87,6 +88,7 @@ export function guardarPerfil(
       createdAt: now,
       consentAt: now,
       updatedAt: now,
+      amigos: profile.amigos,
     } as Perfil;
   }
 }

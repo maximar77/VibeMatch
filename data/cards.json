@@ -1,7 +1,7 @@
 {
   "version": 1,
   "school": "Colegio Superior del Maipo",
-  "updatedAt": "2026-10-25T16:49:49.268Z",
+  "updatedAt": "2026-11-05T00:26:36.316Z",
   "cards": [
     {
       "id": "VM-0001",
@@ -1253,6 +1253,126 @@
       "kind": "personal",
       "status": "active",
       "createdAt": "2026-10-25T16:49:49.267Z"
+    },
+    {
+      "id": "VM-0131",
+      "tokenHash": "6be3f4c91739fca50d6ba03ce5f359d3795bd0bb0474907281f9b68a897920a2",
+      "holder": "Maximo",
+      "level": "1° Medio",
+      "course": "1° Medio",
+      "fullName": "Maximo",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-03T23:13:44.928Z"
+    },
+    {
+      "id": "VM-0132",
+      "tokenHash": "69f307ec724d7a8ffc70e211c12ea32321a3738f891c7e6f5ea1901b22d36c3f",
+      "holder": "Martina",
+      "level": "2° Medio",
+      "course": "2° Medio",
+      "fullName": "Martina",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-03T23:13:45.020Z"
+    },
+    {
+      "id": "VM-0133",
+      "tokenHash": "e89795a957bfd25c6b1016e2324ede2b1c9914b968be6f313f2d6e7007d897ec",
+      "holder": "Benjamín",
+      "level": "1° Medio",
+      "course": "1° Medio",
+      "fullName": "Benjamín",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-04T17:12:33.898Z"
+    },
+    {
+      "id": "VM-0134",
+      "tokenHash": "372d518c5a543b24b1a8492ce60666f7752c37df58914c3b65cdbc22ab3eb387",
+      "holder": "Sofía",
+      "level": "3° Medio",
+      "course": "3° Medio",
+      "fullName": "Sofía",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-04T17:13:52.228Z"
+    },
+    {
+      "id": "VM-0135",
+      "tokenHash": "3edb3ebffdaca8d2e4d4f28015e05eb205d9b7578c148fcb6734fec475676117",
+      "holder": "Tomás",
+      "level": "2° Medio",
+      "course": "2° Medio",
+      "fullName": "Tomás",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-05T00:19:34.321Z"
+    },
+    {
+      "id": "VM-0136",
+      "tokenHash": "c77aae54eff9518d809a7f3432192bc00c805485a910bc9fbb4005299c1af4f9",
+      "holder": "Maximo",
+      "level": "1° Medio",
+      "course": "1° Medio",
+      "fullName": "Maximo",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-05T00:26:35.876Z"
+    },
+    {
+      "id": "VM-0137",
+      "tokenHash": "20d48742d22764188238111b085370346c7cb75be4ae28b8633d735350433244",
+      "holder": "Martina",
+      "level": "2° Medio",
+      "course": "2° Medio",
+      "fullName": "Martina",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-05T00:26:35.978Z"
+    },
+    {
+      "id": "VM-0138",
+      "tokenHash": "666daa77e9c5f49f933c69f71fc24a6693ca9cf851602a793ae114b64e826d0f",
+      "holder": "Benjamín",
+      "level": "1° Medio",
+      "course": "1° Medio",
+      "fullName": "Benjamín",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-05T00:26:36.080Z"
+    },
+    {
+      "id": "VM-0139",
+      "tokenHash": "c9423bb19aa551060e193b17dcf303c1d22c6ba486df87e001900c1c0ba39eb8",
+      "holder": "Sofía",
+      "level": "3° Medio",
+      "course": "3° Medio",
+      "fullName": "Sofía",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-05T00:26:36.194Z"
+    },
+    {
+      "id": "VM-0140",
+      "tokenHash": "95d01aad2d500bd62818eee635ca4498392fb32666f090b7ae02db18572928dd",
+      "holder": "Tomás",
+      "level": "2° Medio",
+      "course": "2° Medio",
+      "fullName": "Tomás",
+      "listNumber": null,
+      "kind": "personal",
+      "status": "active",
+      "createdAt": "2026-11-05T00:26:36.316Z"
     }
   ]
 }

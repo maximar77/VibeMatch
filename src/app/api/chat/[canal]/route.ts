@@ -7,6 +7,7 @@ import {
   listarMensajes,
 } from "@/lib/chat";
 import { validarMensaje, evaluarMensaje } from "@/lib/moderacion";
+import { filtrarInsultos } from "@/lib/filter-words";
 
 export async function GET(
   request: Request,
@@ -56,13 +57,18 @@ export async function POST(
     return NextResponse.json({ error: "json_invalido" }, { status: 400 });
   }
 
-  const texto = String(cuerpo.texto ?? "").trim();
-  const validacion = validarMensaje(texto);
+  const textoRaw = String(cuerpo.texto ?? "").trim();
+
+  // Aplicar filtro de insultos antes de guardar
+  const textoFiltrado = filtrarInsultos(textoRaw);
+  const hayFiltroInsulto = textoRaw !== textoFiltrado;
+
+  const validacion = validarMensaje(textoRaw);
   if (!validacion.valido) {
     return NextResponse.json({ error: validacion.error }, { status: 400 });
   }
 
-  const evaluacion = evaluarMensaje(texto);
+  const evaluacion = evaluarMensaje(textoRaw);
   const perfil = leerPerfil(acceso.card.id);
   const vibe = perfil?.vibe ?? "conversar";
 
@@ -75,14 +81,19 @@ export async function POST(
       acceso.card.holder ??
       "Alumno",
     usuarioVibe: vibe,
-    texto: evaluacion.textoFiltrado,
+    texto: textoFiltrado,
     timestamp: new Date().toISOString(),
     editado: false,
-    filtrado: !evaluacion.apto,
+    filtrado: hayFiltroInsulto || !evaluacion.apto,
   });
 
   return NextResponse.json(
-    { mensaje, filtrado: !evaluacion.apto, motivo: evaluacion.motivo, vibe },
+    {
+      mensaje,
+      filtrado: hayFiltroInsulto || !evaluacion.apto,
+      motivo: evaluacion.motivo,
+      vibe,
+    },
     { headers: { "cache-control": "no-store" } },
   );
 }

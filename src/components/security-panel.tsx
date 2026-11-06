@@ -6,6 +6,7 @@ import {
   quitarClaveAction,
   type SecurityFormState,
 } from "@/app/actions";
+import * as React from "react";
 
 const inputClass =
   "mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60 focus:ring-2 focus:ring-brand-strong/20";
@@ -33,6 +34,66 @@ function Mensaje({ state }: { state: SecurityFormState }) {
   return null;
 }
 
+function useBiometricSupport() {
+  const [supported, setSupported] = React.useState(false);
+  const [enrolled, setEnrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!("credentials" in navigator)) {
+      setSupported(false);
+      return;
+    }
+
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isiOS = /iPhone|iPad/i.test(navigator.userAgent);
+
+    if (isiOS) {
+      setSupported(!!(window as any).WebKitPlaybackTargetAvailability);
+      return;
+    }
+
+    if (isAndroid) {
+      setSupported(
+        "credentials" in navigator && "BiometricManager" in window,
+      );
+      return;
+    }
+
+    setSupported(
+      "credentials" in navigator &&
+        "PublicKeyCredential" in window &&
+        "BiometricCredential" in window,
+    );
+  }, []);
+
+  const authenticate = async () => {
+    if (!supported) return false;
+
+    try {
+      const credential = await navigator.credentials.get({
+        publicKey: {
+          challenge: new Uint8Array(64),
+          rpId: location.host,
+          allowCredentials: [],
+          userVerification: "required",
+        },
+      });
+
+      if (credential && credential.type === "public-key") {
+        setEnrolled(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Biometric authentication failed:", error);
+      setEnrolled(false);
+      return false;
+    }
+  };
+
+  return { supported, enrolled, authenticate };
+}
+
 type Props = {
   protegida: boolean;
   actualizadaEn: string | null;
@@ -48,6 +109,8 @@ export function SecurityPanel({ protegida, actualizadaEn, nombre }: Props) {
     SecurityFormState,
     FormData
   >(quitarClaveAction, {});
+
+  const { supported, enrolled, authenticate } = useBiometricSupport();
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -87,6 +150,32 @@ export function SecurityPanel({ protegida, actualizadaEn, nombre }: Props) {
             })}
           </p>
         )}
+
+        <div className="mt-4 rounded-2xl border border-zinc-500/20 bg-zinc-500/05 p-4">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
+            Seguridad biométrica
+          </p>
+          <p className="mt-1 text-sm text-zinc-300">
+            {enrolled ? "Huella registrada" : "Configurar huella"}
+          </p>
+          <button
+            onClick={authenticate}
+            disabled={enrolled}
+            className="mt-2 rounded-full bg-brand-strong px-4 py-2 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
+          >
+            {enrolled ? "Usar huella" : "Registrar huella"}
+          </button>
+          {enrolled && (
+            <p className="mt-2 text-xs text-zinc-400">
+              La huella se usará para validar el acceso a tu cuenta.
+            </p>
+          )}
+          {!supported && (
+            <p className="mt-2 text-xs text-zinc-400">
+              Tu navegador no admite autenticación biométrica.
+            </p>
+          )}
+        </div>
 
         <form action={guardar} className="mt-6 space-y-4">
           {protegida && (
@@ -180,7 +269,7 @@ export function SecurityPanel({ protegida, actualizadaEn, nombre }: Props) {
               <button
                 type="submit"
                 disabled={quitando}
-                className="w-full rounded-full border border-rose-400/40 bg-rose-400/10 px-6 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-400/20 disabled:opacity-50"
+                className="w-full rounded-full border border-rose-400/40 bg-rose-400/10 px-6 py-3 text-sm font-semibold text-rose-200 transition:hover:bg-rose-400/20 disabled:opacity-50"
               >
                 {quitando ? "Quitando…" : "Quitar clave"}
               </button>
