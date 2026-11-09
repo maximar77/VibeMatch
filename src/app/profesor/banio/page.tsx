@@ -40,6 +40,9 @@ export default async function BanioPage() {
             <Link href="/profesor/asistencia" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
               Asistencia
             </Link>
+            <Link href="/profesor/salidas" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
+              Salidas
+            </Link>
             <Link href="/profesor/anotaciones" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
               Anotaciones
             </Link>

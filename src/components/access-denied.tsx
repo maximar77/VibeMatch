@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand-logo";
+import Link from "next/link";
 
 type Props = {
   badge?: string;
@@ -69,7 +70,15 @@ export function AccessDenied({
       <footer className="relative z-10 border-t border-white/5">
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-zinc-600 sm:flex-row">
           <p>VibeMatch · acceso por tarjeta única</p>
-          <p>Colegio Superior del Maipo · Chile</p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/profesor/login"
+              className="text-zinc-500 transition hover:text-zinc-300"
+            >
+              Acceso docente
+            </Link>
+            <p>Colegio Superior del Maipo · Chile</p>
+          </div>
         </div>
       </footer>
     </div>

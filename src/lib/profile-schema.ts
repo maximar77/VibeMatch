@@ -48,6 +48,8 @@ export type Perfil = {
   displayName: string;
   pronouns: string;
   level: string;
+  /** Número de lista del alumno dentro de su curso (1 a 999). */
+  numeroLista?: number | null;
   vibe: Vibe;
   interests: Interest[];
   bio: string;
@@ -56,6 +58,15 @@ export type Perfil = {
   updatedAt: string;
   amigos?: string[]; // IDs de amigos conectados
 };
+
+/** Valida y normaliza el número de lista que escribe el alumno o el docente. */
+export function normalizarNumeroLista(value: unknown): number | null {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  const numero = Number(raw);
+  if (!Number.isInteger(numero) || numero < 1 || numero > 999) return null;
+  return numero;
+}
 
 export type ProfileFormState = {
   error?: string;

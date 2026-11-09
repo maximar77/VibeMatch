@@ -44,6 +44,8 @@ export function OfflineProfileForm({ perfil, onGuardado }: Props) {
       .replace(/\s+/g, " ");
     const pronouns = String(datos.get("pronouns") ?? "");
     const level = String(datos.get("level") ?? "").trim();
+    const numeroListaRaw = String(datos.get("numeroLista") ?? "").trim();
+    const numeroLista = numeroListaRaw ? Number(numeroListaRaw) : null;
     const vibeRaw = String(datos.get("vibe") ?? "");
     const bio = String(datos.get("bio") ?? "")
       .trim()
@@ -54,6 +56,15 @@ export function OfflineProfileForm({ perfil, onGuardado }: Props) {
 
     if (displayName.length < 2 || displayName.length > 32) {
       setError("Escribe un nombre preferido de entre 2 y 32 caracteres.");
+      return;
+    }
+    if (
+      numeroLista === null ||
+      !Number.isInteger(numeroLista) ||
+      numeroLista < 1 ||
+      numeroLista > 999
+    ) {
+      setError("Escribe tu número de lista del curso (entre 1 y 999).");
       return;
     }
     if (interests.length < 1) {
@@ -70,6 +81,7 @@ export function OfflineProfileForm({ perfil, onGuardado }: Props) {
       displayName,
       pronouns,
       level: level || perfil.level,
+      numeroLista,
       vibe: vibeRaw as Vibe,
       interests,
       bio,
@@ -134,6 +146,24 @@ export function OfflineProfileForm({ perfil, onGuardado }: Props) {
               </option>
             ))}
           </select>
+        </label>
+
+        <label>
+          <span className={labelClass}>Número de lista *</span>
+          <input
+            className={fieldClass}
+            name="numeroLista"
+            type="text"
+            inputMode="numeric"
+            required
+            pattern="[0-9]{1,3}"
+            maxLength={3}
+            defaultValue={perfil.numeroLista ?? ""}
+            placeholder="Ej: 12"
+          />
+          <span className="mt-1 block text-[10px] text-zinc-500">
+            El número con el que apareces en el libro de clases.
+          </span>
         </label>
       </div>
 

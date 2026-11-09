@@ -84,3 +84,15 @@ build-output.txt
 contexto-IA.tx
 deploy/oracle/backups/
 
+# Traspaso y respaldos locales (no publicar)
+TRASPASO-*.md
+CHAT-*.md
+CAMBIOS-*.patch
+ESTADO-GIT-*.txt
+VibeMatch-keys/
+Productos-VibeMatch/
+_archivo-anterior/
+
+# Datos de ejecución del panel docente
+data/eventos.json
+

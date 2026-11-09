@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from "next/server";
 import { buscarTarjetaPorToken, listarTarjetas } from "@/lib/cards";
+import { leerPerfil } from "@/lib/profiles";
 import { guardarAsistencia, listarAsistencia } from "@/lib/school";
 import { esEstadoAsistencia, type EstadoAsistencia } from "@/lib/school-schema";
 import { fechaEnZona, horaEnZona } from "@/lib/fecha";
@@ -90,11 +91,12 @@ export async function POST(request: Request) {
     );
   }
 
+  const perfil = leerPerfil(tarjeta.id);
   const registro = guardarAsistencia({
     cardId: tarjeta.id,
     curso: profesor.curso,
-    nombre: tarjeta.fullName ?? tarjeta.holder ?? "Alumno",
-    numeroLista: tarjeta.listNumber ?? null,
+    nombre: tarjeta.fullName ?? perfil?.displayName ?? tarjeta.holder ?? "Alumno",
+    numeroLista: tarjeta.listNumber ?? perfil?.numeroLista ?? null,
     fecha,
     hora,
     estado: estadoRaw as EstadoAsistencia,

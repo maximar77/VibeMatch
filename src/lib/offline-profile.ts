@@ -150,6 +150,7 @@ export async function sincronizar(
     displayName: pendiente.displayName,
     pronouns: pendiente.pronouns,
     level: pendiente.level,
+    numeroLista: pendiente.numeroLista ?? null,
     vibe: pendiente.vibe,
     interests: pendiente.interests,
     bio: pendiente.bio,

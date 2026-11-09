@@ -124,6 +124,7 @@ async function ContenidoApp({
   const seguridad = estadoSeguridad(acceso.card.id);
   const conteoMuros = contarTodas();
   const nombreVisible = perfil.displayName;
+  const numeroLista = perfil.numeroLista ?? acceso.card.listNumber ?? null;
 
   return (
     <AppShell active="app">
@@ -167,6 +168,11 @@ async function ContenidoApp({
                   {perfil.level && (
                     <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300">
                       {perfil.level}
+                    </span>
+                  )}
+                  {numeroLista !== null && (
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300">
+                      N° de lista {numeroLista}
                     </span>
                   )}
                   <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-zinc-500">

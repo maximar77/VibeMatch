@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
+  actualizarDatosTarjetaPorId,
   crearSesion,
   leerSesion,
   SESSION_COOKIE,
@@ -14,6 +15,7 @@ import { guardarPerfil as persistirPerfil } from "@/lib/profiles";
 import {
   esInteres,
   esVibe,
+  normalizarNumeroLista,
   type Interest,
   type ProfileFormState,
   type Vibe,
@@ -82,6 +84,7 @@ export async function guardarPerfilAction(
     .replace(/\s+/g, " ");
   const pronouns = String(formData.get("pronouns") ?? "");
   const level = String(formData.get("level") ?? "").trim();
+  const numeroLista = normalizarNumeroLista(formData.get("numeroLista"));
   const vibeRaw = String(formData.get("vibe") ?? "");
   const bio = String(formData.get("bio") ?? "").trim().replace(/\s+/g, " ");
   const consent = formData.get("consent");
@@ -91,6 +94,10 @@ export async function guardarPerfilAction(
 
   if (displayName.length < 2 || displayName.length > 32) {
     return { error: "Escribe un nombre preferido de entre 2 y 32 caracteres." };
+  }
+
+  if (numeroLista === null) {
+    return { error: "Escribe tu número de lista del curso (entre 1 y 999)." };
   }
 
   if (pronouns.length > 24) {
@@ -126,13 +133,19 @@ export async function guardarPerfilAction(
     displayName,
     pronouns,
     level: level || acceso.card.level || "",
+    numeroLista,
     vibe: vibeRaw as Vibe,
     interests,
     bio,
   });
 
+  // El número de lista también vive en la tarjeta para que el panel docente lo
+  // muestre al escanear, incluso si el perfil todavía no se ha sincronizado.
+  actualizarDatosTarjetaPorId(acceso.card.id, { nro: numeroLista });
+
   revalidatePath("/app");
   revalidatePath("/app/perfil");
+  revalidatePath("/app/escanear");
   revalidatePath("/app/instalar");
   redirect("/app?perfil=guardado");
 }

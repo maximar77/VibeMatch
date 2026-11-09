@@ -47,6 +47,47 @@ export type RegistroAsistencia = {
   createdAt: string;
 };
 
+/**
+ * Movimientos de un alumno durante la jornada.
+ *
+ * La asistencia (presente/atrasado/ausente) se guarda aparte porque es un
+ * estado del día. Estos eventos sí son acumulativos: un alumno puede salir y
+ * volver varias veces, y el retiro queda registrado con la hora exacta.
+ */
+export const TIPOS_EVENTO_SALA = ["salida", "entrada", "retiro"] as const;
+export type TipoEventoSala = (typeof TIPOS_EVENTO_SALA)[number];
+
+export type EventoSala = {
+  id: string;
+  cardId: string;
+  nombre: string;
+  numeroLista: number | null;
+  curso: string;
+  /** Fecha en formato AAAA-MM-DD (hora local del establecimiento). */
+  fecha: string;
+  /** Hora exacta del movimiento en formato HH:MM. */
+  hora: string;
+  tipo: TipoEventoSala;
+  /** Motivo de salida o nombre de quien retira al alumno. */
+  detalle: string;
+  registradoPor: string;
+  createdAt: string;
+};
+
+const ETIQUETAS_EVENTO: Record<TipoEventoSala, string> = {
+  salida: "Salida de sala",
+  entrada: "Entrada a sala",
+  retiro: "Retiro",
+};
+
+export function etiquetaEventoSala(tipo: TipoEventoSala): string {
+  return ETIQUETAS_EVENTO[tipo];
+}
+
+export function esTipoEventoSala(value: string): value is TipoEventoSala {
+  return (TIPOS_EVENTO_SALA as readonly string[]).includes(value);
+}
+
 export type PermisoBano = {
   id: string;
   cardId: string;

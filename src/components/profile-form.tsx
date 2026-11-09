@@ -55,6 +55,24 @@ export function ProfileForm({
         </label>
 
         <label>
+          <span className={labelClass}>Número de lista *</span>
+          <input
+            className={fieldClass}
+            name="numeroLista"
+            type="number"
+            required
+            min={1}
+            max={999}
+            inputMode="numeric"
+            placeholder="Ej: 12"
+            defaultValue={initial?.numeroLista ?? ""}
+          />
+          <span className="mt-1 block text-[10px] text-zinc-500">
+            El número que aparece junto a tu nombre en la lista del curso.
+          </span>
+        </label>
+
+        <label>
           <span className={labelClass}>Pronombres</span>
           <select
             className={fieldClass}

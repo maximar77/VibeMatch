@@ -126,7 +126,7 @@ export async function POST(request: Request) {
       tarjeta.fullName ??
       tarjeta.holder ??
       "Alumno",
-    numeroLista: tarjeta.listNumber ?? null,
+    numeroLista: tarjeta.listNumber ?? perfil?.numeroLista ?? null,
     curso: profesor.curso,
     tipo: tipoRaw,
     categoria: categoriaRaw as CategoriaAnotacion,

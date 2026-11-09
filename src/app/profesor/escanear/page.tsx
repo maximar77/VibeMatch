@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 const enlaces = [
   { href: "/profesor/asistencia", label: "Asistencia" },
   { href: "/profesor/banio", label: "Baño" },
+  { href: "/profesor/salidas", label: "Salidas" },
   { href: "/profesor/anotaciones", label: "Anotaciones" },
 ];
 

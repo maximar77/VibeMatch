@@ -40,6 +40,9 @@ export default async function AsistenciaPage() {
             <Link href="/profesor/banio" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
               Baño
             </Link>
+            <Link href="/profesor/salidas" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
+              Salidas
+            </Link>
             <Link href="/profesor/anotaciones" className="rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/5">
               Anotaciones
             </Link>

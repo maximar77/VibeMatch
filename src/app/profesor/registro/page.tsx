@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { leerProfesorSesion } from "@/lib/teachers";
-import { registrarProfesorAction } from "@/app/profesor-actions";
-import { ANIOS, LETRAS, NIVELES } from "@/lib/teacher-schema";
+import { ProfesorRegistroForm } from "@/components/profesor-registro-form";
 
 export const instant = false;
 
@@ -51,106 +50,7 @@ export default async function ProfesorRegistroPage({
             {errorMensaje[error] ?? "Ocurrió un error."}
           </p>
         )}
-        <form action={registrarProfesorAction} className="space-y-4">
-          <label className="flex flex-col gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              Código institucional
-            </span>
-            <input
-              name="codigoInstitucional"
-              type="text"
-              required
-              autoCapitalize="characters"
-              placeholder="VIBEMATCH-PROFE-..."
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
-            />
-          </label>
-          <label className="flex flex-col gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              Nombre completo
-            </span>
-            <input
-              name="nombre"
-              type="text"
-              required
-              minLength={3}
-              maxLength={48}
-              placeholder="Profesor/a Ejemplo"
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
-            />
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <label className="flex flex-col gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                Nivel
-              </span>
-              <select
-                name="nivel"
-                required
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
-              >
-                {NIVELES.map((nivel) => (
-                  <option key={nivel} value={nivel}>
-                    {nivel}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                Año
-              </span>
-              <select
-                name="anio"
-                required
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
-              >
-                {NIVELES.flatMap((nivel) =>
-                  ANIOS[nivel].map((anio) => (
-                    <option key={`${nivel}-${anio}`} value={anio}>
-                      {nivel} {anio}°
-                    </option>
-                  )),
-                )}
-              </select>
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                Letra
-              </span>
-              <select
-                name="letra"
-                required
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
-              >
-                {LETRAS.map((letra) => (
-                  <option key={letra} value={letra}>
-                    {letra}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <label className="flex flex-col gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              Contraseña de la cuenta (opcional, mín. 6)
-            </span>
-            <input
-              name="password"
-              type="password"
-              minLength={6}
-              maxLength={64}
-              placeholder="••••••"
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-brand-strong/60"
-            />
-          </label>
-          <button
-            type="submit"
-            className="w-full rounded-full bg-brand-strong px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
-          >
-            Generar código personal
-          </button>
-        </form>
+        <ProfesorRegistroForm />
         <div className="mt-6 flex flex-col gap-2 text-center text-xs text-zinc-500">
           <Link href="/profesor/login" className="text-brand-soft hover:text-brand-strong transition">
             Ya tengo mi código personal

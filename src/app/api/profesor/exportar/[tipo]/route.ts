@@ -1,17 +1,47 @@
 import { NextResponse } from "next/server";
 import { leerProfesorSesion } from "@/lib/teachers";
 import {
-  generarCsvAnotaciones,
-  generarCsvAsistencia,
-  generarCsvPermisos,
+  hojaExcelAnotaciones,
+  hojaExcelAsistencia,
+  hojaExcelEventos,
+  hojaExcelPermisos,
+  hojaExcelRegistroDiario,
   listarAnotaciones,
   listarAsistencia,
+  listarEventos,
   listarPermisos,
 } from "@/lib/school";
 import { fechaEnZona } from "@/lib/fecha";
+import { generarXlsx, type HojaExcel } from "@/lib/xlsx";
 
-const TIPOS = ["asistencia", "permisos", "anotaciones"] as const;
+/**
+ * Exportación Excel del curso para el panel docente.
+ *
+ * GET /api/profesor/exportar/[tipo]?fecha=AAAA-MM-DD
+ *
+ * Tipos: asistencia, eventos, registro, permisos, anotaciones y todo.
+ * El curso siempre sale de la sesión docente: manipular la URL no permite
+ * descargar datos de otro curso.
+ */
+
+const TIPOS = [
+  "asistencia",
+  "eventos",
+  "registro",
+  "permisos",
+  "anotaciones",
+  "todo",
+] as const;
 type Tipo = (typeof TIPOS)[number];
+
+const ETIQUETAS: Record<Tipo, string> = {
+  asistencia: "asistencia",
+  eventos: "salidas-retiros",
+  registro: "registro-diario",
+  permisos: "permisos-bano",
+  anotaciones: "anotaciones",
+  todo: "registro-completo",
+};
 
 function slugCurso(curso: string): string {
   return (
@@ -39,32 +69,55 @@ export async function GET(
   }
 
   const url = new URL(request.url);
-  // El curso se toma de la sesión docente para no exponer datos de otros
-  // cursos aunque se manipule la URL.
   const curso = profesor.curso;
   const fecha = url.searchParams.get("fecha")?.trim() || undefined;
 
-  let csv: string;
-  let etiqueta: string;
+  const asistencia = listarAsistencia({ curso, fecha });
+  const eventos = listarEventos({ curso, fecha });
+  const permisos = listarPermisos({ curso, fecha });
+  const anotaciones = listarAnotaciones({ curso }).filter(
+    (item) => !fecha || item.fecha === fecha,
+  );
 
-  if (tipo === "asistencia") {
-    csv = generarCsvAsistencia(listarAsistencia({ curso, fecha }));
-    etiqueta = "asistencia";
-  } else if (tipo === "permisos") {
-    csv = generarCsvPermisos(listarPermisos({ curso, fecha }));
-    etiqueta = "permisos-bano";
-  } else {
-    csv = generarCsvAnotaciones(listarAnotaciones({ curso }));
-    etiqueta = "anotaciones";
+  let hojas: HojaExcel[];
+  switch (tipo as Tipo) {
+    case "asistencia":
+      hojas = [hojaExcelAsistencia(asistencia)];
+      break;
+    case "eventos":
+      hojas = [hojaExcelEventos(eventos)];
+      break;
+    case "registro":
+      hojas = [hojaExcelRegistroDiario(asistencia, eventos)];
+      break;
+    case "permisos":
+      hojas = [hojaExcelPermisos(permisos)];
+      break;
+    case "anotaciones":
+      hojas = [hojaExcelAnotaciones(anotaciones)];
+      break;
+    default:
+      hojas = [
+        hojaExcelAsistencia(asistencia),
+        hojaExcelEventos(eventos),
+        hojaExcelRegistroDiario(asistencia, eventos),
+        hojaExcelPermisos(permisos),
+        hojaExcelAnotaciones(anotaciones),
+      ];
+      break;
   }
 
-  const fechaArchivo = fechaEnZona();
-  const nombre = `vibematch-${etiqueta}-${slugCurso(curso)}-${fechaArchivo}.csv`;
+  const archivo = generarXlsx(hojas);
+  const nombre = `vibematch-${ETIQUETAS[tipo as Tipo]}-${slugCurso(
+    curso,
+  )}-${fechaEnZona()}.xlsx`;
 
-  return new Response(csv, {
+  return new Response(new Uint8Array(archivo), {
     headers: {
-      "content-type": "text/csv; charset=utf-8",
+      "content-type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "content-disposition": `attachment; filename="${nombre}"`,
+      "content-length": String(archivo.length),
       "cache-control": "no-store",
     },
   });

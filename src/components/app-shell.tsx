@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { UpdatePrompt } from "@/components/update-prompt";
 import { FeedbackWidget } from "@/components/feedback-widget";
@@ -23,7 +24,15 @@ export function AppShell({ active, children }: Props) {
       <footer className="relative z-10 border-t border-white/5">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-zinc-600 sm:flex-row">
           <p>VibeMatch · acceso por tarjeta única</p>
-          <p>Perfil y preferencias bajo tu control</p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/profesor/login"
+              className="text-zinc-500 transition hover:text-zinc-300"
+            >
+              Acceso docente
+            </Link>
+            <p>Perfil y preferencias bajo tu control</p>
+          </div>
         </div>
       </footer>
     </div>

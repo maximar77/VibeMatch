@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { QRScanner } from "@/components/qr-scanner";
+import { NFCScanner } from "@/components/nfc-scanner";
 import {
   registrarAnotacionProfesorAction,
   registrarAsistenciaProfesorAction,
+  registrarEventoSalaProfesorAction,
   registrarPermisoBanoProfesorAction,
   resolverTarjetaAction,
   type ResultadoAccionProfesor,
@@ -23,8 +24,13 @@ type TarjetaInfo = {
   numeroLista: number | null;
 };
 
+type Metodo = "nfc" | "qr" | "manual";
+
 type Accion =
   | "asistencia"
+  | "salida"
+  | "entrada"
+  | "retiro"
   | "bano-salida"
   | "bano-regreso"
   | "positiva"
@@ -41,6 +47,24 @@ const ACCIONES: {
     icono: "✅",
     titulo: "Asistencia",
     descripcion: "Presente, atrasado o ausente.",
+  },
+  {
+    id: "salida",
+    icono: "🚪",
+    titulo: "Salida de sala",
+    descripcion: "El alumno sale de la sala de estudios.",
+  },
+  {
+    id: "entrada",
+    icono: "🔙",
+    titulo: "Entrada a sala",
+    descripcion: "El alumno regresa a la sala.",
+  },
+  {
+    id: "retiro",
+    icono: "🧑‍🤝‍🧑",
+    titulo: "Retiro",
+    descripcion: "Lo retiran de la sala de estudios.",
   },
   {
     id: "bano-salida",
@@ -94,8 +118,15 @@ function normalizarEntrada(raw: string): string {
   return valor;
 }
 
+function esEventoDeSala(accion: Accion): boolean {
+  return accion === "salida" || accion === "entrada" || accion === "retiro";
+}
+
 function etiquetaAccion(accion: Accion, estado: EstadoAsistencia): string {
   if (accion === "asistencia") return `Asistencia · ${estado}`;
+  if (accion === "salida") return "Salida de sala";
+  if (accion === "entrada") return "Entrada a sala";
+  if (accion === "retiro") return "Retiro del alumno";
   if (accion === "bano-salida") return "Permiso de baño · salida";
   if (accion === "bano-regreso") return "Permiso de baño · regreso";
   return accion === "positiva" ? "Anotación positiva" : "Anotación negativa";
@@ -106,26 +137,29 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
   const [estado, setEstado] = useState<EstadoAsistencia>("presente");
   const [categoria, setCategoria] = useState<CategoriaAnotacion>("Convivencia");
   const [comentario, setComentario] = useState("");
-  const [curso, setCurso] = useState(cursoProfesor);
+  const [detalle, setDetalle] = useState("");
   const [numeroLista, setNumeroLista] = useState("");
-  const [codigoManual, setCodigoManual] = useState("");
   const [tarjeta, setTarjeta] = useState<TarjetaInfo | null>(null);
-  const [metodo, setMetodo] = useState<"qr" | "manual">("qr");
+  const [metodo, setMetodo] = useState<Metodo>("nfc");
   const [resolviendo, setResolviendo] = useState(false);
   const [registrando, setRegistrando] = useState(false);
+  const [scanKey, setScanKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [resultado, setResultado] = useState<ResultadoAccionProfesor | null>(null);
 
   const esAnotacion = accion === "positiva" || accion === "negativa";
+  const esEvento = esEventoDeSala(accion);
   const comentarioValido = !esAnotacion || comentario.trim().length >= 3;
+  const detalleValido = accion !== "retiro" || detalle.trim().length >= 3;
 
   const cambiarAccion = (nueva: Accion) => {
     setAccion(nueva);
     setResultado(null);
     setError(null);
+    if (!esEventoDeSala(nueva)) setDetalle("");
   };
 
-  const resolver = async (raw: string, origen: "qr" | "manual") => {
+  const resolver = async (raw: string, origen: Metodo) => {
     const valor = normalizarEntrada(raw);
     if (!valor) return;
 
@@ -157,10 +191,14 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
       setError("Escribe un comentario de al menos 3 caracteres.");
       return;
     }
+    if (!detalleValido) {
+      setError("Escribe quién retira al alumno (nombre y parentesco o inspectoría).");
+      return;
+    }
 
     const formData = new FormData();
     formData.set("cardId", tarjeta.id);
-    formData.set("curso", curso.trim() || cursoProfesor);
+    formData.set("curso", cursoProfesor);
     formData.set("numeroLista", numeroLista.trim());
     formData.set("fecha", fechaLocal());
     formData.set("hora", horaLocal());
@@ -170,6 +208,9 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
       formData.set("estado", estado);
     } else if (accion === "bano-salida" || accion === "bano-regreso") {
       formData.set("accion", accion === "bano-salida" ? "salida" : "regreso");
+    } else if (esEvento) {
+      formData.set("tipo", accion);
+      formData.set("detalle", detalle.trim());
     } else {
       formData.set("tipo", accion);
       formData.set("categoria", categoria);
@@ -184,8 +225,10 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
         accion === "asistencia"
           ? await registrarAsistenciaProfesorAction(formData)
           : accion === "bano-salida" || accion === "bano-regreso"
-          ? await registrarPermisoBanoProfesorAction(formData)
-          : await registrarAnotacionProfesorAction(formData);
+            ? await registrarPermisoBanoProfesorAction(formData)
+            : esEvento
+              ? await registrarEventoSalaProfesorAction(formData)
+              : await registrarAnotacionProfesorAction(formData);
 
       setResultado(respuesta);
       if (!respuesta.ok) setError(respuesta.mensaje);
@@ -198,10 +241,11 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
 
   const limpiarTarjeta = () => {
     setTarjeta(null);
-    setCodigoManual("");
     setNumeroLista("");
     setResultado(null);
     setError(null);
+    setDetalle("");
+    setScanKey((valor) => valor + 1);
     if (esAnotacion) setComentario("");
   };
 
@@ -259,8 +303,8 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
                         ? item.id === "presente"
                           ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-200"
                           : item.id === "atrasado"
-                          ? "border-amber-300/40 bg-amber-300/15 text-amber-200"
-                          : "border-rose-400/40 bg-rose-400/15 text-rose-200"
+                            ? "border-amber-300/40 bg-amber-300/15 text-amber-200"
+                            : "border-rose-400/40 bg-rose-400/15 text-rose-200"
                         : "border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/5"
                     }`}
                   >
@@ -268,6 +312,39 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {esEvento && (
+            <div className="mt-5">
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                  {accion === "retiro"
+                    ? "¿Quién retira al alumno? *"
+                    : accion === "salida"
+                      ? "Motivo de la salida (opcional)"
+                      : "Observación del regreso (opcional)"}
+                </span>
+                <input
+                  value={detalle}
+                  onChange={(event) => setDetalle(event.target.value)}
+                  type="text"
+                  maxLength={200}
+                  placeholder={
+                    accion === "retiro"
+                      ? "Ej: Apoderado Juan Pérez / Inspectoría"
+                      : accion === "salida"
+                        ? "Ej: Enfermería, dirección, baño…"
+                        : "Ej: Regresó con autorización"
+                  }
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60 focus:ring-2 focus:ring-brand-strong/20"
+                />
+                {accion === "retiro" && (
+                  <span className="mt-1 block text-[10px] text-zinc-500">
+                    Obligatorio para dejar registro de quién retira al alumno.
+                  </span>
+                )}
+              </label>
             </div>
           )}
 
@@ -311,18 +388,16 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
             </div>
           )}
 
-          <label className="mt-5 block">
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-              Curso para guardar el registro
-            </span>
-            <input
-              value={curso}
-              onChange={(event) => setCurso(event.target.value)}
-              type="text"
-              maxLength={40}
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none focus:border-brand-strong/60"
-            />
-          </label>
+          <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+              Curso del registro
+            </p>
+            <p className="mt-1 text-sm font-semibold text-white">{cursoProfesor}</p>
+            <p className="mt-1 text-[10px] text-zinc-500">
+              Los movimientos quedan asociados a tu curso para que aparezcan en
+              el Excel.
+            </p>
+          </div>
         </section>
 
         <section className="glass rounded-[2rem] p-6">
@@ -333,38 +408,28 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
             Escanea la tarjeta
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
-            Cámara o código manual. Si el QR trae una URL, extraemos el token
-            automáticamente.
+            Acerca la tarjeta NFC al teléfono o usa la cámara QR. Si nada
+            funciona, pega el código de la tarjeta abajo.
           </p>
 
-          <div className="mt-5">
-            <QRScanner
-              label="Abrir cámara y escanear"
-              onDetect={(valor) => void resolver(valor, "qr")}
-            />
-          </div>
-
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              void resolver(codigoManual, "manual");
+          <NFCScanner
+            key={scanKey}
+            autoRedirect={false}
+            label="Leer tarjeta NFC"
+            manualPlaceholder="VM-0001 o enlace/token de la tarjeta"
+            manualLabel="Buscar tarjeta"
+            onTarjetaLeida={(cardId, _acceso, origen) => {
+              const metodoLectura: Metodo =
+                origen === "NFC" ? "nfc" : origen === "QR" ? "qr" : "manual";
+              void resolver(cardId, metodoLectura);
             }}
-            className="mt-4 flex gap-2"
-          >
-            <input
-              value={codigoManual}
-              onChange={(event) => setCodigoManual(event.target.value)}
-              placeholder="VM-0001 o token de la tarjeta"
-              className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-brand-strong/60"
-            />
-            <button
-              type="submit"
-              disabled={resolviendo || !codigoManual.trim()}
-              className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/5 disabled:opacity-50"
-            >
-              {resolviendo ? "Buscando…" : "Buscar"}
-            </button>
-          </form>
+          />
+
+          {resolviendo && (
+            <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-brand-soft">
+              Buscando al alumno…
+            </p>
+          )}
 
           {error && (
             <p className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">
@@ -433,7 +498,7 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
                     className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-brand-strong/60"
                   />
                   <span className="mt-1 block text-[10px] text-zinc-500">
-                    Puedes corregirlo antes de confirmar. Queda en el CSV del curso.
+                    Puedes corregirlo antes de confirmar. Queda en el Excel del curso.
                   </span>
                 </label>
               </div>
@@ -444,9 +509,13 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
                   {etiquetaAccion(accion, estado)}
                 </p>
                 <p className="mt-1 text-xs text-zinc-400">
-                  Curso: {curso.trim() || cursoProfesor} · Fecha: {fechaLocal()} ·
-                  Hora: {horaLocal()}
+                  Curso: {cursoProfesor} · Fecha: {fechaLocal()} · Hora: {horaLocal()}
                 </p>
+                {esEvento && detalle.trim() && (
+                  <p className="mt-2 rounded-xl bg-black/20 px-3 py-2 text-xs text-zinc-300">
+                    {detalle.trim()}
+                  </p>
+                )}
                 {esAnotacion && (
                   <p className="mt-2 rounded-xl bg-black/20 px-3 py-2 text-xs text-zinc-300">
                     {categoria}: {comentario.trim() || "Sin comentario todavía"}
@@ -464,7 +533,7 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
                 <button
                   type="button"
                   onClick={() => void registrar()}
-                  disabled={registrando || !comentarioValido}
+                  disabled={registrando || !comentarioValido || !detalleValido}
                   className="rounded-full bg-brand-strong px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-brand-strong/85 disabled:opacity-50"
                 >
                   {registrando ? "Guardando…" : `Registrar ${etiquetaAccion(accion, estado)}`}
@@ -490,8 +559,9 @@ export function ProfesorScanPanel({ cursoProfesor }: { cursoProfesor: string }) 
             <strong className="text-zinc-200">N° de lista</strong>,{" "}
             <strong className="text-zinc-200">curso</strong>,{" "}
             <strong className="text-zinc-200">fecha</strong> y{" "}
-            <strong className="text-zinc-200">hora</strong>. Desde los botones de
-            exportar puedes descargar el CSV de tu curso para abrirlo en Excel.
+            <strong className="text-zinc-200">hora exacta</strong>. Las salidas,
+            entradas y retiros quedan en la hoja{" "}
+            <strong className="text-zinc-200">Salidas y retiros</strong> del Excel.
           </p>
         </section>
       </aside>

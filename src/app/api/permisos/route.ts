@@ -136,7 +136,7 @@ export async function POST(request: Request) {
       id: nuevoId("bano"),
       cardId: tarjeta.id,
       nombre,
-      numeroLista: tarjeta.listNumber ?? null,
+      numeroLista: tarjeta.listNumber ?? perfil?.numeroLista ?? null,
       curso: profesor.curso,
       fecha,
       inicio: hora,

@@ -1,9 +1,14 @@
 ﻿import { NextResponse } from "next/server";
-import { leerSesion, SESSION_MAX_AGE_SECONDS } from "@/lib/cards";
+import {
+  actualizarDatosTarjetaPorId,
+  leerSesion,
+  SESSION_MAX_AGE_SECONDS,
+} from "@/lib/cards";
 import { guardarPerfil, leerPerfil } from "@/lib/profiles";
 import {
   esInteres,
   esVibe,
+  normalizarNumeroLista,
   type Interest,
   type Perfil,
   type Vibe,
@@ -23,6 +28,7 @@ type PerfilPayload = {
   displayName?: unknown;
   pronouns?: unknown;
   level?: unknown;
+  numeroLista?: unknown;
   vibe?: unknown;
   interests?: unknown;
   bio?: unknown;
@@ -57,7 +63,9 @@ export async function GET() {
       card: {
         id: acceso.card.id,
         level: acceso.card.level ?? "",
+        course: acceso.card.course ?? acceso.card.level ?? "",
         holder: acceso.card.holder ?? "",
+        numeroLista: acceso.card.listNumber ?? perfil?.numeroLista ?? null,
       },
       school: acceso.school,
       perfil,
@@ -89,6 +97,11 @@ export async function PUT(request: Request) {
   const level = normalizarTexto(payload.level, 32);
   const bio = normalizarTexto(payload.bio, 180);
   const vibeRaw = String(payload.vibe ?? "");
+  const numeroListaRaw =
+    payload.numeroLista === null || payload.numeroLista === undefined
+      ? ""
+      : String(payload.numeroLista).trim();
+  const numeroLista = normalizarNumeroLista(numeroListaRaw);
   const interests = Array.from(
     new Set(
       (Array.isArray(payload.interests) ? payload.interests : [])
@@ -118,15 +131,34 @@ export async function PUT(request: Request) {
     );
   }
 
+  if (numeroListaRaw && numeroLista === null) {
+    return NextResponse.json(
+      {
+        error: "numero_lista_invalido",
+        mensaje: "El número de lista debe ser un entero entre 1 y 999.",
+      },
+      { status: 400 },
+    );
+  }
+
+  const perfilAnterior = leerPerfil(acceso.card.id);
+  const numeroListaFinal =
+    numeroLista ?? perfilAnterior?.numeroLista ?? null;
+
   const guardado: Perfil = guardarPerfil({
     cardId: acceso.card.id,
     displayName,
     pronouns,
     level: level || acceso.card.level || "",
+    numeroLista: numeroListaFinal,
     vibe: vibeRaw as Vibe,
     interests,
     bio,
   });
+
+  if (numeroListaFinal !== null) {
+    actualizarDatosTarjetaPorId(acceso.card.id, { nro: numeroListaFinal });
+  }
 
   return NextResponse.json(
     { perfil: guardado, sincronizadoEn: new Date().toISOString() },

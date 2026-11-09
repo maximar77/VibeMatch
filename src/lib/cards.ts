@@ -294,3 +294,54 @@ export function aplicarDatosTarjeta(
   }
   return true;
 }
+
+/**
+ * Actualiza los datos visibles de una tarjeta ya registrada usando su id
+ * (por ejemplo, cuando el alumno completa su perfil y agrega su número de
+ * lista). No toca el token ni el hash de la tarjeta.
+ */
+export function actualizarDatosTarjetaPorId(
+  cardId: string,
+  datos: { nombre?: string | null; curso?: string | null; nro?: number | null },
+): boolean {
+  const clean = cardId.trim();
+  if (!clean) return false;
+
+  let parsed: CardStore;
+  try {
+    parsed = JSON.parse(
+      readFileSync(STORE_PATH, "utf8").replace(/^\uFEFF/, ""),
+    ) as CardStore;
+  } catch {
+    return false;
+  }
+  if (!parsed || !Array.isArray(parsed.cards)) return false;
+
+  const idx = parsed.cards.findIndex((card) => card.id === clean);
+  if (idx === -1) return false;
+
+  const card = parsed.cards[idx];
+  if (datos.nombre && datos.nombre.trim()) {
+    card.holder = datos.nombre.trim();
+    card.fullName = datos.nombre.trim();
+  }
+  if (datos.curso && datos.curso.trim()) {
+    card.level = datos.curso.trim();
+    card.course = datos.curso.trim();
+  }
+  if (datos.nro !== null && datos.nro !== undefined && !Number.isNaN(datos.nro)) {
+    card.listNumber = Number(datos.nro);
+  }
+
+  parsed.updatedAt = new Date().toISOString();
+
+  try {
+    mkdirSync(path.dirname(STORE_PATH), { recursive: true });
+    const temporary = `${STORE_PATH}.${process.pid}.tmp`;
+    writeFileSync(temporary, `${JSON.stringify(parsed, null, 2)}\n`, "utf8");
+    renameSync(temporary, STORE_PATH);
+  } catch {
+    return false;
+  }
+  return true;
+}

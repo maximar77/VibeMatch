@@ -69,6 +69,10 @@ async function ContenidoPerfil() {
               Estos datos se guardan con tu tarjeta {acceso.card.id} y se cargarán
               cuando entres a la app desde otro dispositivo.
             </p>
+            <p className="mt-2 text-xs text-zinc-500">
+              Curso: {perfil.level || acceso.card.course || "Sin especificar"} · N°
+              de lista: {perfil.numeroLista ?? acceso.card.listNumber ?? "Sin registrar"}
+            </p>
           </div>
         </div>
 

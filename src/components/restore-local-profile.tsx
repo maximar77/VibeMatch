@@ -47,6 +47,7 @@ export function RestoreLocalProfile({ cardId }: { cardId: string }) {
             displayName: local.perfil.displayName,
             pronouns: local.perfil.pronouns,
             level: local.perfil.level,
+            numeroLista: local.perfil.numeroLista ?? null,
             vibe: local.perfil.vibe,
             interests: local.perfil.interests,
             bio: local.perfil.bio,

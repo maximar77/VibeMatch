@@ -12,8 +12,16 @@ import { QRScanner } from "@/components/qr-scanner";
 
 type Props = {
   autoRedirect?: boolean;
-  onTarjetaLeida?: (cardId: string, acceso: any) => void;
+  onTarjetaLeida?: (
+    cardId: string,
+    acceso: any,
+    origen: "NFC" | "QR" | "manual",
+  ) => void;
   label?: string;
+  /** Muestra el formulario para pegar el código manualmente. */
+  mostrarManual?: boolean;
+  manualPlaceholder?: string;
+  manualLabel?: string;
 };
 
 type Estado = "idle" | "leyendo" | "exito" | "error";
@@ -22,6 +30,9 @@ export function NFCScanner({
   autoRedirect = true,
   onTarjetaLeida,
   label = "Escanear tarjeta NFC",
+  mostrarManual = true,
+  manualPlaceholder = "O pega el enlace/código de tu tarjeta",
+  manualLabel = "Abrir tarjeta",
 }: Props) {
   const [estado, setEstado] = useState<Estado>("idle");
   const [mensaje, setMensaje] = useState<string>("");
@@ -56,9 +67,9 @@ export function NFCScanner({
       }
 
       setEstado("exito");
-      setMensaje(`Tarjeta leída: ${token}`);
+      setMensaje("Tarjeta leída correctamente.");
       setMostrarQr(false);
-      onTarjetaLeida?.(token, null);
+      onTarjetaLeida?.(token, null, origen);
 
       if (autoRedirect) {
         window.location.href = `/a/${encodeURIComponent(token)}`;
@@ -210,34 +221,36 @@ export function NFCScanner({
         </div>
       )}
 
-      <form
-        className="grid gap-3 sm:grid-cols-[1fr_auto]"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!manual.trim()) return;
-          procesarValor(manual, "manual");
-        }}
-      >
-        <label className="sr-only" htmlFor="vibematch-token-manual">
-          Código de tarjeta
-        </label>
-        <input
-          id="vibematch-token-manual"
-          value={manual}
-          onChange={(event) => setManual(event.target.value)}
-          placeholder="O pega el enlace/código de tu tarjeta"
-          autoComplete="off"
-          spellCheck={false}
-          className="w-full rounded-full border border-white/10 bg-white/[0.04] px-5 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60"
-        />
-        <button
-          type="submit"
-          disabled={!manual.trim()}
-          className="rounded-full border border-white/10 px-6 py-3.5 text-sm font-semibold text-zinc-200 transition hover:bg-white/5 disabled:opacity-40"
+      {mostrarManual && (
+        <form
+          className="grid gap-3 sm:grid-cols-[1fr_auto]"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!manual.trim()) return;
+            procesarValor(manual, "manual");
+          }}
         >
-          Abrir tarjeta
-        </button>
-      </form>
+          <label className="sr-only" htmlFor="vibematch-token-manual">
+            Código de tarjeta
+          </label>
+          <input
+            id="vibematch-token-manual"
+            value={manual}
+            onChange={(event) => setManual(event.target.value)}
+            placeholder={manualPlaceholder}
+            autoComplete="off"
+            spellCheck={false}
+            className="w-full rounded-full border border-white/10 bg-white/[0.04] px-5 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60"
+          />
+          <button
+            type="submit"
+            disabled={!manual.trim()}
+            className="rounded-full border border-white/10 px-6 py-3.5 text-sm font-semibold text-zinc-200 transition hover:bg-white/5 disabled:opacity-40"
+          >
+            {manualLabel}
+          </button>
+        </form>
+      )}
     </section>
   );
 }
