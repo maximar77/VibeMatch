@@ -14,6 +14,7 @@ export async function GET() {
   await connection();
 
   const secretConfigured = Boolean(process.env.VIBEMATCH_SECRET);
+  const teacherCodeConfigured = Boolean(process.env.VIBEMATCH_TEACHER_CODE);
 
   let dataWritable = false;
   try {
@@ -33,6 +34,7 @@ export async function GET() {
         dataWritable,
         dataPersistent: DATA_IS_PERSISTENT,
         secretConfigured,
+        teacherCodeConfigured,
       },
       timestamp: new Date().toISOString(),
     },

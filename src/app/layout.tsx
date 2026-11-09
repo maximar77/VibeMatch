@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { BiometricGate } from "@/components/biometric-gate";
 import { PwaRegister } from "@/components/pwa-register";
+import { UpdatePrompt } from "@/components/update-prompt";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,6 +44,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-zinc-50">
+        <UpdatePrompt />
+        <BiometricGate />
         {children}
         <PwaRegister />
       </body>

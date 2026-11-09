@@ -7,6 +7,14 @@ import {
   type SecurityFormState,
 } from "@/app/actions";
 import * as React from "react";
+import {
+  authenticateBiometric,
+  biometricAvailability,
+  biometricEnabled,
+  marcarSesionBiometricaDesbloqueada,
+  setBiometricEnabled,
+  type BiometricAvailability,
+} from "@/lib/biometric";
 
 const inputClass =
   "mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-brand-strong/60 focus:ring-2 focus:ring-brand-strong/20";
@@ -34,73 +42,58 @@ function Mensaje({ state }: { state: SecurityFormState }) {
   return null;
 }
 
-function useBiometricSupport() {
-  const [supported, setSupported] = React.useState(false);
-  const [enrolled, setEnrolled] = React.useState(false);
+function useBiometricSupport(cardId: string) {
+  const [disponibilidad, setDisponibilidad] =
+    React.useState<BiometricAvailability>("unsupported");
+  const [activa, setActiva] = React.useState(false);
+  const [mensaje, setMensaje] = React.useState<string | null>(null);
+  const [ocupada, setOcupada] = React.useState(false);
 
   React.useEffect(() => {
-    if (!("credentials" in navigator)) {
-      setSupported(false);
-      return;
-    }
-
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const isiOS = /iPhone|iPad/i.test(navigator.userAgent);
-
-    if (isiOS) {
-      setSupported(!!(window as any).WebKitPlaybackTargetAvailability);
-      return;
-    }
-
-    if (isAndroid) {
-      setSupported(
-        "credentials" in navigator && "BiometricManager" in window,
-      );
-      return;
-    }
-
-    setSupported(
-      "credentials" in navigator &&
-        "PublicKeyCredential" in window &&
-        "BiometricCredential" in window,
-    );
+    setDisponibilidad(biometricAvailability());
+    setActiva(biometricEnabled());
   }, []);
 
-  const authenticate = async () => {
-    if (!supported) return false;
+  const activar = async () => {
+    setOcupada(true);
+    setMensaje(null);
 
-    try {
-      const credential = await navigator.credentials.get({
-        publicKey: {
-          challenge: new Uint8Array(64),
-          rpId: location.host,
-          allowCredentials: [],
-          userVerification: "required",
-        },
-      });
+    const ok = await authenticateBiometric();
+    setOcupada(false);
 
-      if (credential && credential.type === "public-key") {
-        setEnrolled(true);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Biometric authentication failed:", error);
-      setEnrolled(false);
-      return false;
+    if (!ok) {
+      setMensaje("No se pudo confirmar la huella. Intenta nuevamente.");
+      return;
     }
+
+    setBiometricEnabled(cardId, true);
+    marcarSesionBiometricaDesbloqueada();
+    setActiva(true);
+    setMensaje("Huella activada en este dispositivo.");
   };
 
-  return { supported, enrolled, authenticate };
+  const desactivar = () => {
+    setBiometricEnabled(null, false);
+    setActiva(false);
+    setMensaje("Huella desactivada en este dispositivo.");
+  };
+
+  return { disponibilidad, activa, mensaje, ocupada, activar, desactivar };
 }
 
 type Props = {
+  cardId: string;
   protegida: boolean;
   actualizadaEn: string | null;
   nombre: string;
 };
 
-export function SecurityPanel({ protegida, actualizadaEn, nombre }: Props) {
+export function SecurityPanel({
+  cardId,
+  protegida,
+  actualizadaEn,
+  nombre,
+}: Props) {
   const [guardarState, guardar, guardando] = useActionState<
     SecurityFormState,
     FormData
@@ -110,7 +103,14 @@ export function SecurityPanel({ protegida, actualizadaEn, nombre }: Props) {
     FormData
   >(quitarClaveAction, {});
 
-  const { supported, enrolled, authenticate } = useBiometricSupport();
+  const {
+    disponibilidad,
+    activa,
+    mensaje: mensajeHuella,
+    ocupada,
+    activar,
+    desactivar,
+  } = useBiometricSupport(cardId);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -153,28 +153,59 @@ export function SecurityPanel({ protegida, actualizadaEn, nombre }: Props) {
 
         <div className="mt-4 rounded-2xl border border-zinc-500/20 bg-zinc-500/05 p-4">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
-            Seguridad biométrica
+            Huella en la app
           </p>
           <p className="mt-1 text-sm text-zinc-300">
-            {enrolled ? "Huella registrada" : "Configurar huella"}
+            {activa
+              ? "Huella activa en este dispositivo"
+              : disponibilidad === "none"
+                ? "Sin huella registrada en el dispositivo"
+                : disponibilidad === "available"
+                  ? "Puedes activar la huella"
+                  : "Disponible dentro de la app Android"}
           </p>
-          <button
-            onClick={authenticate}
-            disabled={enrolled}
-            className="mt-2 rounded-full bg-brand-strong px-4 py-2 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
-          >
-            {enrolled ? "Usar huella" : "Registrar huella"}
-          </button>
-          {enrolled && (
-            <p className="mt-2 text-xs text-zinc-400">
-              La huella se usará para validar el acceso a tu cuenta.
+
+          {disponibilidad === "available" && (
+            <button
+              type="button"
+              onClick={() => (activa ? desactivar() : void activar())}
+              disabled={ocupada}
+              className={`mt-3 rounded-full px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${
+                activa
+                  ? "border border-white/15 text-white hover:border-white/35 hover:bg-white/5"
+                  : "bg-brand-strong text-ink hover:bg-brand-strong/85"
+              }`}
+            >
+              {ocupada
+                ? "Esperando huella…"
+                : activa
+                  ? "Desactivar huella"
+                  : "Activar huella"}
+            </button>
+          )}
+
+          {mensajeHuella && (
+            <p className="mt-2 text-xs text-zinc-300">{mensajeHuella}</p>
+          )}
+
+          {disponibilidad === "none" && (
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              Registra una huella en Ajustes de Android y vuelve a esta pantalla.
             </p>
           )}
-          {!supported && (
-            <p className="mt-2 text-xs text-zinc-400">
-              Tu navegador no admite autenticación biométrica.
+
+          {(disponibilidad === "unsupported" ||
+            disponibilidad === "unavailable") && (
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              Abre VibeMatch desde la app Android para usar la huella. En el
+              navegador puedes proteger tu cuenta con la clave de abajo.
             </p>
           )}
+
+          <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">
+            La huella se guarda solo en este dispositivo y protege la apertura
+            de la app. No reemplaza la clave de tu cuenta.
+          </p>
         </div>
 
         <form action={guardar} className="mt-6 space-y-4">

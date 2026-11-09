@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { VibeMatchNativeBridge } from "@/lib/native-bridge";
 
 type VersionInfo = {
   version: string;
@@ -9,20 +10,10 @@ type VersionInfo = {
   notes?: string;
 };
 
-declare global {
-  interface Window {
-    VibeMatchNative?: {
-      getVersion?: () => string;
-      getVersionCode?: () => number;
-      openUrl?: (url: string) => void;
-    };
-  }
-}
-
 function versionActual(): { version: string; codigo: number } | null {
   if (typeof window === "undefined") return null;
 
-  const nativo = window.VibeMatchNative;
+  const nativo: VibeMatchNativeBridge | undefined = window.VibeMatchNative;
   if (nativo?.getVersion) {
     try {
       const version = nativo.getVersion();

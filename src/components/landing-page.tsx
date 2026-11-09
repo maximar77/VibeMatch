@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { BrandLogo } from "@/components/brand-logo";
+import { DescargarApkButton } from "@/components/descargar-apk-button";
+import { APP_APK_PATH } from "@/lib/app-version";
 
 const iconClass = "h-6 w-6";
 
@@ -81,12 +83,20 @@ export function LandingPage() {
             <a className="transition hover:text-white" href="#pack">El pack</a>
             <a className="transition hover:text-white" href="#seguridad">Seguridad</a>
           </nav>
-          <a
-            href="#pack"
-            className="rounded-full bg-brand-strong px-4 py-2 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
-          >
-            Quiero mi pack
-          </a>
+          <div className="flex items-center gap-2">
+            <DescargarApkButton
+              href={APP_APK_PATH}
+              className="hidden rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/35 hover:bg-white/5 sm:inline-flex"
+            >
+              Descargar APK
+            </DescargarApkButton>
+            <a
+              href="#pack"
+              className="rounded-full bg-brand-strong px-4 py-2 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
+            >
+              Quiero mi pack
+            </a>
+          </div>
         </div>
       </header>
 
@@ -125,6 +135,12 @@ export function LandingPage() {
                 >
                   Explorar zonas
                 </a>
+                <DescargarApkButton
+                  href={APP_APK_PATH}
+                  className="rounded-full border border-brand-strong/40 bg-brand-strong/10 px-6 py-3 text-sm font-semibold text-brand-soft transition hover:bg-brand-strong/20"
+                >
+                  Descargar APK Android
+                </DescargarApkButton>
               </div>
               <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-white/10 pt-6">
                 {[
@@ -546,7 +562,15 @@ export function LandingPage() {
             <span className="font-mono tracking-widest">VIBEMATCH</span>
           </div>
           <p>Proyecto escolar · Colegio Superior del Maipo · Chile</p>
-          <p>© 2026 VibeMatch</p>
+          <div className="flex items-center gap-4">
+            <DescargarApkButton
+              href={APP_APK_PATH}
+              className="text-zinc-500 transition hover:text-zinc-300"
+            >
+              Descargar APK
+            </DescargarApkButton>
+            <p>© 2026 VibeMatch</p>
+          </div>
         </div>
       </footer>
     </div>

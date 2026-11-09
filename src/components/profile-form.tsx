@@ -22,6 +22,7 @@ type Props = {
   initial?: Perfil | null;
   fallbackName?: string | null;
   fallbackLevel?: string | null;
+  fallbackNumeroLista?: number | null;
   submitLabel?: string;
 };
 
@@ -29,6 +30,7 @@ export function ProfileForm({
   initial,
   fallbackName,
   fallbackLevel,
+  fallbackNumeroLista,
   submitLabel,
 }: Props) {
   const [state, formAction, pending] = useActionState<ProfileFormState, FormData>(
@@ -54,7 +56,7 @@ export function ProfileForm({
           />
         </label>
 
-        <label>
+        <label id="numero-lista" className="scroll-mt-28">
           <span className={labelClass}>Número de lista *</span>
           <input
             className={fieldClass}
@@ -65,7 +67,7 @@ export function ProfileForm({
             max={999}
             inputMode="numeric"
             placeholder="Ej: 12"
-            defaultValue={initial?.numeroLista ?? ""}
+            defaultValue={initial?.numeroLista ?? fallbackNumeroLista ?? ""}
           />
           <span className="mt-1 block text-[10px] text-zinc-500">
             El número que aparece junto a tu nombre en la lista del curso.

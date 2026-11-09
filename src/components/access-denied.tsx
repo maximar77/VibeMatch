@@ -1,4 +1,6 @@
 import { BrandLogo } from "@/components/brand-logo";
+import { DescargarApkButton } from "@/components/descargar-apk-button";
+import { APP_APK_PATH } from "@/lib/app-version";
 import Link from "next/link";
 
 type Props = {
@@ -48,6 +50,20 @@ export function AccessDenied({
               {detail}
             </p>
           ) : null}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <DescargarApkButton
+              href={APP_APK_PATH}
+              className="rounded-full bg-brand-strong px-5 py-3 text-sm font-semibold text-ink transition hover:bg-brand-strong/85"
+            >
+              Descargar APK Android
+            </DescargarApkButton>
+            <Link
+              href="/profesor/login"
+              className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/35 hover:bg-white/5"
+            >
+              Soy docente
+            </Link>
+          </div>
           <div className="mt-8 flex items-center gap-3 text-xs text-zinc-500">
             <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]">
               <svg
@@ -71,6 +87,12 @@ export function AccessDenied({
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-zinc-600 sm:flex-row">
           <p>VibeMatch · acceso por tarjeta única</p>
           <div className="flex items-center gap-4">
+            <DescargarApkButton
+              href={APP_APK_PATH}
+              className="text-zinc-500 transition hover:text-zinc-300"
+            >
+              Descargar APK
+            </DescargarApkButton>
             <Link
               href="/profesor/login"
               className="text-zinc-500 transition hover:text-zinc-300"

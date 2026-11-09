@@ -4,7 +4,9 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { DescargarApkButton } from "@/components/descargar-apk-button";
 import { InstallPanel } from "@/components/install-panel";
+import { APP_APK_PATH, APP_VERSION } from "@/lib/app-version";
 import { leerSesion } from "@/lib/cards";
 import { leerPerfil } from "@/lib/profiles";
 import { detectPlatformFromUserAgent } from "@/lib/platform";
@@ -108,16 +110,14 @@ async function ContenidoInstalar() {
                   <div>
                     <p className="text-sm font-medium text-white">Android · APK</p>
                     <div className="mt-2">
-                      <a
-                        href="https://xam.alwaysdata.net/descargas/VibeMatch-1.2.0.apk"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 hover:bg-emerald-400/20 transition"
+                      <DescargarApkButton
+                        href={APP_APK_PATH}
+                        className="inline-flex rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20"
                       >
-                        Descargar APK 1.2.0
-                      </a>
+                        Descargar APK {APP_VERSION}
+                      </DescargarApkButton>
                       <p className="mt-1 text-xs text-zinc-400">
-                        NFC y QR en tablets del colegio; requiere conexión al servidor
+                        NFC, QR y huella en tablets y teléfonos del colegio
                       </p>
                     </div>
                   </div>
@@ -138,10 +138,11 @@ async function ContenidoInstalar() {
                 </div>
               </div>
               <p className="mt-4 text-xs leading-relaxed text-zinc-400">
-                La APK 1.0.0 añade lectura NFC y QR para tablets institucionales y se
-                instala por MDM o por el equipo de VibeMatch; no hay un botón de descarga
-                pública. El perfil se cachea en el dispositivo, pero las acciones
-                escolares requieren conexión. El EXE de Windows sigue en preparación.
+                La APK incluye lectura NFC y QR, huella del dispositivo y aviso de
+                actualización. Se puede instalar directamente desde el botón o pedirla
+                al equipo de VibeMatch para instalarla por MDM. El perfil se cachea en
+                el dispositivo, pero las acciones escolares requieren conexión. El EXE
+                de Windows sigue en preparación.
               </p>
             </section>
 

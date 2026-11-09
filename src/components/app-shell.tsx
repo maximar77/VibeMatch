@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
-import { UpdatePrompt } from "@/components/update-prompt";
+import { DescargarApkButton } from "@/components/descargar-apk-button";
 import { FeedbackWidget } from "@/components/feedback-widget";
+import { APP_APK_PATH } from "@/lib/app-version";
 
 type Props = {
   active?: "app" | "perfil" | "chat" | "muros" | "seguridad";
@@ -18,13 +19,18 @@ export function AppShell({ active, children }: Props) {
         aria-hidden="true"
       />
       <AppHeader active={active} />
-      <UpdatePrompt />
       <FeedbackWidget />
       {children}
       <footer className="relative z-10 border-t border-white/5">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-5 py-6 text-xs text-zinc-600 sm:flex-row">
           <p>VibeMatch · acceso por tarjeta única</p>
           <div className="flex items-center gap-4">
+            <DescargarApkButton
+              href={APP_APK_PATH}
+              className="text-zinc-500 transition hover:text-zinc-300"
+            >
+              Descargar APK
+            </DescargarApkButton>
             <Link
               href="/profesor/login"
               className="text-zinc-500 transition hover:text-zinc-300"

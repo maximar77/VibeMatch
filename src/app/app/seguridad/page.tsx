@@ -62,6 +62,7 @@ async function ContenidoSeguridad() {
 
         <div className="mt-9">
           <SecurityPanel
+            cardId={acceso.card.id}
             protegida={estado.protegida}
             actualizadaEn={estado.actualizadaEn}
             nombre={perfil?.displayName ?? "tu cuenta"}

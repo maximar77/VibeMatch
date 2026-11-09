@@ -144,6 +144,21 @@ async function ContenidoApp({
           </div>
         )}
 
+        {numeroLista === null && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/25 bg-amber-300/[0.08] px-4 py-3 text-sm text-amber-100">
+            <span>
+              Tu cuenta todavía no tiene número de lista. Agrégalo para que tus
+              profesores puedan identificarte en asistencia y salidas.
+            </span>
+            <Link
+              href="/app/perfil#numero-lista"
+              className="rounded-full bg-amber-300 px-3 py-1.5 text-xs font-bold text-ink transition hover:bg-amber-200"
+            >
+              Agregar N° de lista
+            </Link>
+          </div>
+        )}
+
         <section className="relative mt-6 overflow-hidden rounded-[2.4rem] border border-white/10 bg-white/[0.035] p-6 sm:p-8">
           <div
             className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-brand/20 blur-[90px]"

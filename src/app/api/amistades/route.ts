@@ -47,10 +47,7 @@ function writeAmistadesStore(store: AmistadesStore) {
 }
 
 // GET: listar amigos del usuario actual
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ canal: string }> }
-) {
+export async function GET(request: Request) {
   const acceso = await leerSesion();
   if (!acceso || acceso.card.kind === "public") {
     return NextResponse.json({ error: "sin_sesion" }, { status: 401 });
@@ -72,10 +69,7 @@ export async function GET(
 }
 
 // POST: agregar un amigo
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ canal: string }> }
-) {
+export async function POST(request: Request) {
   const acceso = await leerSesion();
   if (!acceso || acceso.card.kind === "public") {
     return NextResponse.json({ error: "sin_sesion" }, { status: 401 });

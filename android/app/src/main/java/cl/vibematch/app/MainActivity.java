@@ -9,16 +9,21 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.util.Patterns;
+import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.EditText;
 import androidx.appcompat.app.AlertDialog;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.CapConfig;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -153,9 +158,34 @@ public class MainActivity extends BridgeActivity {
                 );
             }
             webView.addJavascriptInterface(new NativeBridge(), "VibeMatchNative");
+            webView.setDownloadListener((url, ua, contentDisposition, mimetype, contentLength) ->
+                abrirDescargaExterna(url)
+            );
         } catch (Exception error) {
             Log.w(TAG, "No se pudo configurar el puente nativo.", error);
         }
+    }
+
+    /**
+     * Los APK y otros archivos no se descargan bien dentro del WebView.
+     * Los enviamos al navegador del sistema para que Android muestre el
+     * instalador o el gestor de descargas habitual.
+     */
+    private void abrirDescargaExterna(String url) {
+        if (url == null) return;
+        final String destino = url.trim();
+        if (!destino.startsWith("https://") && !destino.startsWith("http://")) {
+            return;
+        }
+        runOnUiThread(() -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(destino));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception error) {
+                Log.w(TAG, "No se pudo abrir la descarga en el navegador.", error);
+            }
+        });
     }
 
     private String versionName() {
@@ -205,6 +235,95 @@ public class MainActivity extends BridgeActivity {
                 }
             });
         }
+
+        /**
+         * Devuelve "available", "none" (sin huella registrada), "unsupported"
+         * (sin hardware) o "unavailable" (otro problema).
+         */
+        @JavascriptInterface
+        public String getBiometricStatus() {
+            try {
+                int resultado = BiometricManager.from(MainActivity.this)
+                    .canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK);
+                if (resultado == BiometricManager.BIOMETRIC_SUCCESS) {
+                    return "available";
+                }
+                if (resultado == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
+                    return "none";
+                }
+                if (resultado == BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE) {
+                    return "unsupported";
+                }
+                return "unavailable";
+            } catch (Exception error) {
+                Log.w(TAG, "No se pudo consultar la huella.", error);
+                return "unavailable";
+            }
+        }
+
+        /**
+         * Abre el diálogo nativo de huella. El resultado se devuelve a la web
+         * llamando a window.__vibematchBiometric(true/false).
+         */
+        @JavascriptInterface
+        public void authenticateBiometric() {
+            runOnUiThread(() -> {
+                try {
+                    Executor executor = ContextCompat.getMainExecutor(MainActivity.this);
+                    BiometricPrompt prompt = new BiometricPrompt(
+                        MainActivity.this,
+                        executor,
+                        new BiometricPrompt.AuthenticationCallback() {
+                            @Override
+                            public void onAuthenticationSucceeded(
+                                BiometricPrompt.AuthenticationResult result
+                            ) {
+                                notificarBiometria(true);
+                            }
+
+                            @Override
+                            public void onAuthenticationError(
+                                int errorCode,
+                                CharSequence errString
+                            ) {
+                                notificarBiometria(false);
+                            }
+                        }
+                    );
+
+                    BiometricPrompt.PromptInfo info =
+                        new BiometricPrompt.PromptInfo.Builder()
+                            .setTitle("VibeMatch")
+                            .setSubtitle("Confirma tu huella para continuar")
+                            .setNegativeButtonText("Cancelar")
+                            .setAllowedAuthenticators(
+                                BiometricManager.Authenticators.BIOMETRIC_WEAK
+                            )
+                            .build();
+
+                    prompt.authenticate(info);
+                } catch (Exception error) {
+                    Log.w(TAG, "No se pudo abrir el diálogo de huella.", error);
+                    notificarBiometria(false);
+                }
+            });
+        }
+    }
+
+    private void notificarBiometria(boolean ok) {
+        runOnUiThread(() -> {
+            try {
+                if (getBridge() == null || getBridge().getWebView() == null) {
+                    return;
+                }
+                getBridge().getWebView().evaluateJavascript(
+                    "window.__vibematchBiometric && window.__vibematchBiometric(" + ok + ");",
+                    null
+                );
+            } catch (Exception error) {
+                Log.w(TAG, "No se pudo avisar el resultado de la huella.", error);
+            }
+        });
     }
 
     private void mostrarDialogoServidor() {

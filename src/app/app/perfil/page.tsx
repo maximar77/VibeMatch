@@ -77,9 +77,16 @@ async function ContenidoPerfil() {
         </div>
 
         <section className="glass mt-8 rounded-[2rem] p-6 sm:p-8">
+          {!perfil.numeroLista && !acceso.card.listNumber && (
+            <div className="mb-2 rounded-2xl border border-amber-300/25 bg-amber-300/[0.08] px-4 py-3 text-sm text-amber-100">
+              Tu cuenta es anterior al formulario con N° de lista. Agrégalo aquí
+              para que aparezca en las listas de tus profesores.
+            </div>
+          )}
           <ProfileForm
             initial={perfil}
             fallbackLevel={acceso.card.level}
+            fallbackNumeroLista={acceso.card.listNumber}
             submitLabel="Guardar cambios"
           />
         </section>
