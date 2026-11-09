@@ -11,7 +11,7 @@
 - [x] APK 1.3.0 compilada y firmada.
 - [x] APK y código subidos a GitHub (`91b39bc`).
 - [x] Estado inicial documentado (`ESTADO-2026-11-09.md`, `161e701`).
-- [ ] Paquete web mínimo regenerado sin los APK antiguos.
+- [x] Paquete web mínimo regenerado sin los APK antiguos.
 - [ ] Paquete subido a AlwaysData.
 - [ ] Respaldo de `~/www` en producción.
 - [ ] Build 1.3.0 extraído en `~/www`.
@@ -43,4 +43,14 @@
 - Se borraron tarballs viejos y `~/.npm` en el servidor.
 - Quedaron ~180 MB libres.
 - Se reanuda el despliegue sin tocar datos vivos.
+
+### 2026-11-09 09:01 — Paquete mínimo
+
+- Se regeneró el tarball sin `VibeMatch-1.2.0.apk` ni `VibeMatch-1.1.0.apk`
+  para no sobrescribir el APK 1.2.0 correcto de producción.
+- `SHA256SUMS.txt` ahora lista solo el APK 1.3.0.
+- Nuevo paquete: `/tmp/opencode/vibematch-1.3.0-deploy.tar.gz`
+  - Tamaño: 25 MB.
+  - SHA-256: `67bc1a8cfac77bf669f3afb31dabe4b93c2006a051749efeef11006e6a83e317`.
+- `BUILD_ID` empaquetado: `MvQuxVnVq3W2qMFsQkZZY`.
 
